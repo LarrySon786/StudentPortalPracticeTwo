@@ -1,0 +1,180 @@
+
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@inject StudentPortalPracticeTwo.Components.Services.Admin.ClassSessionService classSessionService;
+@inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService;
+
+@* Background for Dialog *@
+<div class="overlay"></div> 
+
+@* Dialog Container *@
+<div class="overlay-container">
+    <div class="standard-card standard-dialog">
+        <h1>Create Session</h1>
+        <EditForm Model="editableSession" OnValidSubmit="HandleAddSession" FormName="Add Class Session">
+            <DataAnnotationsValidator />
+            
+            @* Select Course to Assign Session to *@
+            <div class="form-group">
+                <label class="form-label" for="courseSelect">Select Course</label>
+                <InputSelect class="form-select" id="courseSelect" @bind-Value="@editableSession!.CourseId">
+                    @if (availableCourses == null) { <p>Loading Courses...</p> }
+                    else {
+                        @* First Option defaults to previously selected course if available | else it says 'select' *@
+                        <option class="mute" selected value="@(courseSelected != null ? courseSelected.Id : "")">
+                            @(courseSelected != null 
+                                ?  courseSelected.Code + " | " + courseSelected.Name 
+                                : "-- Select a Course --")
+                        </option>
+
+                        @* Iterate through all available courses (excepted pre-selected courses) *@
+                        @foreach (Course course in availableCourses!) {
+                            if (course.Code != courseSelected?.Code) {
+                                <option value="@course.Id">@course.Code | @course.Name</option>
+                            }
+                        }
+                    }
+                </InputSelect>
+                <ValidationMessage For="(() => editableSession!.Course)" />
+            </div>
+
+            @* Instructor *@
+            <div class="form-group">
+                <label class="form-label">Instructor</label>
+                <InputText class="form-control" @bind-Value="editableSession!.Instructor" />
+                <ValidationMessage For="(() => editableSession!.Instructor)"/>
+            </div>
+
+            @* Description *@
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <InputTextArea class="form-control" @bind-Value="editableSession!.Description" />
+                <ValidationMessage For="(() => editableSession!.Description)" />
+            </div>
+
+            @* Location *@
+            <div class="form-group">
+                <label class="form-label">Location</label>
+                <InputText class="form-control" @bind-Value="editableSession!.Location" />
+                <ValidationMessage For="(() => editableSession!.Location)" />
+            </div>
+
+            @* Term *@
+            <div class="form-group">
+                <label class="form-label">Term</label>
+                <InputText class="form-control" @bind-Value="editableSession!.Term" />
+                <ValidationMessage For="(() => editableSession!.Term)" />
+            </div>
+            
+            @* Start / End Dates *@
+            @* When I have semester models and start date creation set-up, then let the user select term.
+            Start dates will automatically be handled.*@
+            @* The TIME + DAYS of week will still need to be selected though. *@
+            <div class="form-group">
+                <label class="form-label">Start Date</label>
+                <InputDate class="form-control" @bind-Value="editableSession!.StartDate" />
+                <ValidationMessage For="(() => editableSession!.StartDate)" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">End Date</label>
+                <InputDate class="form-control" @bind-Value="editableSession!.EndDate" />
+                <ValidationMessage For="(() => editableSession!.EndDate)" />
+            </div>
+
+            @* Start / End Time *@
+            <div class="form-group">
+                <label class="form-label">Start Time</label>
+                <InputDate class="form-control" type="InputDateType.Time" @bind-Value="editableSession!.StartTime" />
+                <ValidationMessage For="(() => editableSession!.StartTime)" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">End Time</label>
+                <InputDate class="form-control" type="InputDateType.Time" @bind-Value="editableSession!.EndTime" />
+                <ValidationMessage For="(() => editableSession!.EndTime)" />
+            </div>
+
+
+            @* Session Capacity *@
+            <div class="form-group">
+                <label class="form-label">Session Maximum Capacity</label>
+                <InputNumber class="form-control" @bind-Value="editableSession!.Capacity" />
+                <ValidationMessage For="(() => editableSession!.Capacity)" />
+            </div>
+
+
+            <div class="dialog-buttons">
+                <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+                <button class="btn btn-primary" type="submit">Save and Add Session</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ClassSession session { get; set;} = new();
+    public ClassSession? editableSession { get; set; }
+    [Parameter] public EventCallback CloseDialog { get; set; }
+    [Parameter] public EventCallback<ClassSession> AddClassSession { get; set; }
+    [Parameter] public EventCallback OnSessionCreated { get; set; }
+    [Parameter] public Course courseSelected { get; set; } = null!; // This is the course the created Session is attached to. 
+    [Parameter] public bool isEdit { get; set; } = false;
+    public List<Course>? availableCourses { get; set; } 
+
+    protected override async Task OnInitializedAsync() {
+        @* Create and editable session for form *@
+        editableSession = new ClassSession
+        {
+            Id = session.Id,
+            CourseId = session.CourseId,
+            Instructor = session.Instructor,
+            Description = session.Description,
+            Location = session.Location,
+            Term = session.Term,
+            StartDate = session.StartDate,
+            StartTime = session.StartTime,
+            EndDate = session.EndDate,
+            EndTime = session.EndTime,
+            Capacity = session.Capacity,
+            CurrentCount = session.CurrentCount
+        };
+        
+        @* Populate all existing courses for form 'select' input field *@
+        try {
+            availableCourses = await courseService.GetAllCourses();
+        } 
+        catch (Exception ex) {
+            Console.WriteLine($"No existing courses could be obtained. Ex: {ex}");
+        }
+    }
+
+    public async Task HandleClose() {
+        await CloseDialog.InvokeAsync();
+    }
+
+    public async Task HandleAddSession() {
+        @* Create a new Session *@
+        if (isEdit) {
+            try {
+                await classSessionService.UpdateClassSession(editableSession!);
+            } 
+            catch (Exception ex) {
+                Console.WriteLine($"Could not edit existing session. Ex: {ex}");
+            }
+        }
+        else {
+            try {
+                await classSessionService.CreateClassSession(editableSession!);
+            } 
+            catch (Exception ex) {
+                Console.WriteLine($"Could not create new session. Ex: {ex}");
+            }
+        }
+        @* Add session to previous course *@
+        await OnSessionCreated.InvokeAsync(editableSession);
+
+        @* Close Dialog *@
+        await HandleClose();
+    }
+}

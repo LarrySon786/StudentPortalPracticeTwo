@@ -1,0 +1,88 @@
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@inject StudentPortalPracticeTwo.Components.Services.Admin.ClassSessionService sessionService
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<table class="table">
+    <thead>
+        <th>Session Course</th>
+        <th>Instructor</th>
+        <th>Start Date/Time</th>
+        <th>End Date/Time</th>
+        <th></th>
+    </thead>
+
+    @foreach (ClassSession session in sessions)
+    {
+        <tr>
+            <td>@session.Course.Name</td>
+            <td>@session.Instructor</td>
+            <td>@session.StartDate</td>
+            <td>@session.EndDate</td>
+            <div>
+                <td><button class="btn btn-primary" type="button" @onclick="() => ToggleEditSessionDialog(session)">Edit/View Session</button></td>
+                <td><button class="btn btn-danger" type="button" @onclick="() => HandleDelete(session.Id)">Delete</button></td>
+            </div>
+        </tr>
+    }
+</table>
+
+@* Edit Session Dialog *@
+@if (editSessionDialog == true) {
+    <CreateSessionDialog 
+        session="selectedSession" 
+        CloseDialog="() => ToggleEditSessionDialog(selectedSession!)" 
+        OnSessionCreated="SessionReload" 
+        isEdit="true"/>
+}
+
+
+@code {
+    public List<ClassSession> sessions = new();
+    public bool editSessionDialog = false;
+    public ClassSession? selectedSession { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SessionReload();
+    }
+
+    public async Task SessionReload() {
+        try
+        {
+            sessions = await sessionService.GetAllClassSessions();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An exception occurred while getting all sessions. Ex: {ex}");
+        }
+    }
+
+    public void ToggleEditSessionDialog(ClassSession sessionChosen) {
+        selectedSession = sessionChosen;
+        if (editSessionDialog == false) editSessionDialog = true;
+        else if (editSessionDialog == true) editSessionDialog = false;
+    }
+
+    public async Task HandleDelete(int id) {
+        try {
+            @* Pop-up alert confirming delete *@
+            bool confirmation = await JS.InvokeAsync<bool>
+                ("confirm", 
+                "Do you want to delete this class session? This cannot be undone. ");
+
+            @* Delete session or exit *@
+            if (confirmation) await sessionService.DeleteClassSession(id);
+            else return;
+
+            @* Reload page *@
+            await SessionReload();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not complete delete of class session. Ex: {ex}");
+        }
+    }
+
+
+}

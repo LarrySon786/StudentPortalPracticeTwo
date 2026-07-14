@@ -1,0 +1,20 @@
+@using StudentPortalPracticeTwo.Database.Models.Application
+
+<FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
+
+    <label class="form-label">Phone</label>
+    <InputText class="form-control" @bind-Value="Model.DraftStudentContact!.Phone" />
+    <ValidationMessage For="@(() => Model.DraftStudentContact.Phone)" />
+    
+
+</FormNavigation>
+
+
+@code {
+    [Parameter] public required DraftApplicationModel Model { get; set; }
+    [Parameter] public EventCallback Next { get; set; }
+    [Parameter] public EventCallback Prev { get; set; }
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+
+}

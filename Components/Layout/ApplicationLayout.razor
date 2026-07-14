@@ -1,0 +1,49 @@
+@inherits LayoutComponentBase
+
+
+
+<main>
+    <div class="top-bar">
+        <a class="return-home" href="/">⬅ Home</a>
+        <p>CSU University | Student Application</p>
+    </div>
+    <article class="content px-4 body-content">
+        @Body
+    </article>
+</main>
+
+
+<style>
+    main {
+        min-height: 7vh;
+    }
+
+    .top-bar {
+        width: 100%;
+        background: linear-gradient(90deg, #1B6F6A, #2A9D8F);
+        box-shadow: 0 1px 1px #667f97;
+
+        & p {
+            color: white;
+            text-align: center;
+        }
+    }
+
+    .return-home {
+        color: white;
+        text-decoration: none;
+        position: absolute;
+        left: 5px;
+    }
+
+    .body-content {
+        min-height: 93vh;
+        color: #1F2933;
+    }
+
+    @* HOVER STATE and HEADERS *@
+    @* #1B6F6A *@
+
+    @* FOCUS STTES and ACTIVE STEPS *@
+    @* #6FD3C8 *@
+</style>

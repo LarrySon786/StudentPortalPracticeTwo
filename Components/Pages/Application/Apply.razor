@@ -1,0 +1,106 @@
+@page "/apply/{ApplicationId:int}"
+@layout ApplicationLayout
+@using StudentPortalPracticeTwo.Components.Services.Application
+@using StudentPortalPracticeTwo.Components.Ui.Application
+@using StudentPortalPracticeTwo.Database.Models.Application
+@rendermode InteractiveServer
+@inject DraftApplicationDb data
+@inject NavigationManager navigationManager
+
+<div class="center-me">
+    <FormProgressBar CurrentPage="@currentPage" TotalPages="@totalPages" />
+    <div class="form-container">
+        <div class="header-container">
+            
+            <h1>Student Application</h1>
+        </div>
+
+        @if (@message != "") {
+            <p class="error-messages">@message</p>
+        }
+
+
+        @if (Application == null)
+        {
+            <p>Loading...</p>
+        }
+        else 
+        {
+            @if (currentPage == 0) {
+                <p>
+                    Welcome to your Student Application. Please complete the form to the best of your knowledge.
+                    Your form will save between each page. You may resume your form at any time by re-entering your email.
+                </p>
+                <div class="form-nav-buttons">
+                    <button class="btn btn-primary" type="button" @onclick="Next">Next</button>
+                </div>
+                
+            }
+            else if (currentPage == 1) {
+                <StudentInfoForm Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />
+
+            }
+            else if (currentPage == 2) {
+                <StudentContactForm Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />
+
+            }
+            else if (currentPage == 3) {
+                <SubmissionForm Model="@Application" Prev=@Prev />
+            }
+        }
+    </div>
+</div>
+@code {
+    [Parameter] public int ApplicationId { get; set; }
+    DraftApplicationModel? Application { get; set; }
+    int currentPage = 0;
+    int totalPages = 3;
+    private string message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Application = await data.GetById(ApplicationId);
+        if (Application == null)
+        {
+            navigationManager.NavigateTo("/preapply");
+            return;
+        }
+        currentPage = 0;
+    }
+
+    public async Task Next() {
+        try {
+            message = "";
+            await data.UpdateApplication(Application!);
+            if (currentPage < totalPages) {
+                currentPage = currentPage + 1;
+            }
+        }
+        catch (Exception ex) {
+            message = "Something went wrong. The application did not save.";
+            Console.WriteLine($"Application did not save. Error: {ex}");
+        }
+    }
+
+    public async Task Prev() {
+        try
+        {
+            message = "";
+            await data.UpdateApplication(Application!);
+            if (currentPage > 0)
+            {
+                currentPage = currentPage - 1;
+            }
+        }
+        catch (Exception ex)
+        {
+            message = "Something went wrong. The application did not save.";
+            Console.WriteLine($"Application did not save. Error: {ex}");
+        }
+    }
+}
+
+
+
+
+

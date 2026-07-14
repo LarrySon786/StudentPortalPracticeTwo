@@ -1,0 +1,82 @@
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@using StudentPortalPracticeTwo.Database.Models.Students
+@inject StudentPortalPracticeTwo.Components.Services.Students.UserService userServices;
+
+@* This component displays all demographics of a single student. Can be set to editable mode. *@
+<div>
+    <EditForm Model="EditableStudent" OnValidSubmit="HandleSubmit" FormName="Student Demographics">
+
+        @* First Name *@
+        <div class="form-group">
+            <label class="form-label">First Name</label>
+            <InputText class="form-control" @bind-Value="EditableStudent.FirstName" disabled=@(Mode == EditMode.Edit ?
+                                       false : true) />
+            <ValidationMessage For="@(() => EditableStudent.FirstName)" />
+        </div>
+
+        @* LAST NAME *@
+        <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <InputText class="form-control" @bind-Value="EditableStudent.LastName" disabled=@(Mode == EditMode.Edit ?
+                                       false : true) />
+            <ValidationMessage For="@(() => EditableStudent.LastName)" />
+        </div>
+
+        @* EMAIL *@
+        <div class="form-group">
+            <label class="form-label">Email</label>
+            <InputText type="email" class="form-control" @bind-Value="EditableStudent.Email" disabled=@(Mode == EditMode.Edit ?
+                                       false : true) />
+            <ValidationMessage For="@(() => EditableStudent.Email)" />
+        </div>
+
+        @* PHONE *@
+        <div class="form-group">
+            <label class="form-label">Phone</label>
+            <InputText type="phone" class="form-control" @bind-Value="EditableStudent.ContactDetails.Phone" disabled=@(Mode ==
+                                       EditMode.Edit ? false : true) />
+            <ValidationMessage For="@(() => EditableStudent.ContactDetails.Phone)" />
+        </div>
+
+        @* Submit button | One for Edit Mode and another for View *@
+        @if (Mode == EditMode.Edit) {
+            <button type="submit" 
+                class="btn btn-primary" 
+                disabled="@(Mode == EditMode.Edit ? false : true)">Save Changes</button>
+        }
+        <p class="mute">@AlertMessage</p>
+    </EditForm>
+
+
+</div>
+
+
+
+
+
+@code {
+    [Parameter] public EditMode Mode { get; set; } = EditMode.View;
+    [Parameter] required public UserModel Student { get; set; }
+    public UserModel EditableStudent { get; set; } = null!;
+    [Parameter] public EventCallback OnSavedEdits { get; set; }
+    public string AlertMessage { get; set; } = "";
+
+    protected override void OnInitialized() 
+    {
+        EditableStudent = Student;
+    }
+
+    public async Task HandleSubmit() {
+        @* Attempt to save the edited user *@
+        try {
+            if (Mode == EditMode.View) return;
+            await userServices.UpdateUser(EditableStudent);
+            AlertMessage = "Save Successful";
+            await OnSavedEdits.InvokeAsync();
+        } 
+        catch (Exception ex) {
+            Console.WriteLine($"Could not update the user. Ex: {ex}");
+            AlertMessage = "Save Failed. Please try again.";
+        }
+    }
+}

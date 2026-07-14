@@ -1,0 +1,28 @@
+@using StudentPortalPracticeTwo.Database.Models.Application
+
+<FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
+    <legend>Student Information</legend>
+
+    <label class="form-label">First Name</label>
+    <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.FirstName"/>
+    <ValidationMessage For="@(() => Model.DraftStudentInfo.FirstName)"/>
+    
+    <label class="form-label">Last Name</label>
+    <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.LastName" />
+    <ValidationMessage For="@(() => Model.DraftStudentInfo.LastName)" />
+
+</FormNavigation>
+
+
+
+
+@code {
+    [Parameter] public required DraftApplicationModel Model { get; set; }
+    [Parameter] public EventCallback Next { get; set; }
+    [Parameter] public EventCallback Prev { get; set; }
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+
+
+
+}

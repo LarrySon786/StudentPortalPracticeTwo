@@ -1,0 +1,77 @@
+@page "/preapply"
+@layout ApplicationLayout
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Components.Services.Application
+@using StudentPortalPracticeTwo.Database.Models.Application
+@inject NavigationManager NavigationManager
+@inject DraftApplicationDb data
+
+
+<div class="preapply-page">
+    <div>
+        <img src="/images/csu-logo-no-background.webp" alt="CSU Logo" class="logo-image"/>
+        
+    </div>
+
+    <div class="standard-card">
+        <h1 class="header-underline">Apply to Cascade Falls University</h1>
+        <p>
+            Enter an email to start your student application.
+            If you have already started an application with your email, you can resume
+            your application by inputing your email below.
+            Your progress will be saved and you can continue your form at any time
+        </p>
+        <p class="error-messages">@message</p>
+
+        <EditForm Model="preapply" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <label class="form-label">Email</label>
+            <InputText class="form-control" @bind-Value="preapply.Email" />
+            <ValidationMessage For="@(() => preapply.Email)"/>
+
+
+            @if (isSubmitting) {
+                <p style="color:green">Getting your application ready...</p>
+            }
+            else {
+                <button class="btn btn-primary" type="submit">Begin / Continue Application</button>
+            }
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    PreapplyModel preapply = new();    
+    private string message = "";
+    bool isSubmitting = false;
+
+
+
+    public async Task HandleSubmit() {
+
+        try {
+            isSubmitting = true;
+
+            DraftApplicationModel? existing = await data.GetByEmail(preapply.Email);
+            if (existing == null) {
+                DraftApplicationModel newApplication = await data.CreateApplication(preapply.Email);
+                NavigationManager.NavigateTo($"/apply/{newApplication.Id}");
+            }
+            else {
+                NavigationManager.NavigateTo($"/apply/{existing.Id}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Something went wrong. We could not find you application. Error code : {ex}");
+            message = "Something went wrong searching for your application. Please try again.";
+        }
+
+        isSubmitting = false;
+    }
+}
+
+

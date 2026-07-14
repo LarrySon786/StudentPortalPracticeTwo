@@ -1,0 +1,131 @@
+@using System.Diagnostics.Eventing.Reader
+@using Microsoft.AspNetCore.Mvc.RazorPages
+@using Microsoft.EntityFrameworkCore.Metadata.Conventions
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@rendermode InteractiveServer
+@inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService
+
+
+<div class="overlay"></div>
+
+<div class="overlay-container">
+    <div class="standard-card standard-dialog">
+        <h1>All Courses</h1>
+        <input class="form-control" placeholder="Search Course..." @oninput="SearchQuery" />
+        <table class="table">
+            <thead>
+                <th>Code</th>
+                <th>Name</th>
+                <th></th>
+            </thead>
+
+            @if (AddCourses) {
+                @if (pagedCourses == null) {<p>Loading...</p>}
+                else {
+                    @foreach(Course course in pagedCourses) {
+                    <tr>
+                        <td>@course.Code</td>
+                        <td class="name-data">@course.Name</td>
+                        @if (coursesInDegree.Contains(course) == false) {
+                            <button class="btn btn-primary" type="button" @onclick="() => HandleAdd(course)">Add</button>
+                        }
+                        else {
+                            <button class="btn btn-primary" type="button" disabled>Added</button>
+                        }
+                    </tr>
+                    }
+                    
+                }
+            }
+        </table>
+        <div class="page-iteration">
+            @for (int i = 1; i < totalPages + 1; i++) {
+                var page = i; 
+
+                <button class="btn btn-secondary" type="button" @onclick="() => HandlePageChange(page)">@(page)</button>
+            }
+        </div>
+        <button class="btn btn-secondary" type="button" @onclick="HandleClose">return</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool AddCourses { get; set; } = false;
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<Course> OnAdd { get; set; }
+    [Parameter] public List<Course> coursesInDegree { get; set; } = new();
+    List<Course> availableCourses = new();
+    List<Course>? displayCourses { get; set; }
+    public int currentPage { get; set; } = 1;
+    public int pageSize { get; set; } = 4;
+    public int totalPages { get; set; }
+    IEnumerable<Course>? pagedCourses;
+
+
+    protected async override Task OnInitializedAsync() {
+        availableCourses = await courseService.GetAllCourses();
+        displayCourses = availableCourses;
+        SetPage();
+    }
+
+    public async Task HandleAdd(Course course) {
+        await OnAdd.InvokeAsync(course);
+    }
+
+    public async Task HandleClose() {
+        await OnClose.InvokeAsync();
+    }
+
+    public async Task SearchQuery(ChangeEventArgs e) {
+        string? query = e.Value?.ToString()?.ToLower();
+        if (string.IsNullOrWhiteSpace(query)) {
+            displayCourses = availableCourses;
+        }
+        else {
+            displayCourses = availableCourses
+                .Where(c => 
+                    c.Name.Contains(query, StringComparison.OrdinalIgnoreCase) || 
+                    c.Code.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        SetPage(); //Return to page 1.
+    }
+
+    public void SetPage() {
+        int count = displayCourses!.Count();
+        double unrounded = (double)count / pageSize; // 10 is the page size
+        totalPages = (int)Math.Ceiling(unrounded);
+
+        pagedCourses = displayCourses!
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize);
+    }
+
+    public void HandlePageChange(int page) {
+        currentPage = page;
+        SetPage();
+    }
+}
+
+<style>
+    .table {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    .name-data {
+        max-width:60%;
+        text-wrap: wrap;
+        white-space: normal;
+    }
+
+    .page-iteration {
+        width:100%;
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+</style>
+
+

@@ -1,0 +1,30 @@
+@page "/register"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Components.Ui.Login;
+
+<div class="container">
+    <h1>Register</h1>
+    <RegisterForm />
+</div>
+
+
+
+
+@code {
+    protected async override Task OnInitializedAsync()
+    {
+        @* If a user session exists, skip the login screen. *@
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+

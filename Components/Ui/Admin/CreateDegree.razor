@@ -1,0 +1,170 @@
+@using System.ComponentModel
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore.Metadata.Conventions
+@using Microsoft.VisualBasic
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+
+@rendermode InteractiveServer
+@inject StudentPortalPracticeTwo.Components.Services.Admin.DegreeService degreeService
+
+<div class="overlay"></div>
+
+<div class="overlay-container">
+    <div class="standard-card standard-dialog">
+    <h1>@(IsEditing ? "Edit Degree" : "Create Degree")</h1>
+        <EditForm Model="editableDegree" OnValidSubmit="HandleSubmit"
+                  FormName="@($"{(IsEditing ? "Edit" : "Create")}" + " Degree Form")">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <InputText class="form-control" @bind-Value="editableDegree!.Name" />
+                <ValidationMessage For="(() => editableDegree!.Name)"/>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <InputText class="form-control" @bind-Value="editableDegree!.Description" />
+                <ValidationMessage For="(() => editableDegree!.Description)" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Required Classes</label>
+                
+                @* List all courses in this degree *@
+                <li class="dialog-lists">
+                    @foreach (Course course in editableDegree.Courses) {
+                        <ul>@course.Code | @course.Name | @course.Credits
+                            <button class="btn btn-danger" type="button" @onclick="() => RemoveCourse(course)">X</button>
+                        </ul>
+                    }
+                </li>
+
+                @* BUTTONS TO CREATE NEW COURSE OR ADD EXISTING ONE *@
+                <div>
+                    <button class="btn btn-link" type="button" @onclick="ToggleAddExistingCoursesDialog">Add Existing Course</button>
+                    <button class="btn btn-link" type="button" @onclick="ToggleCreateCourseDialog">Add New Course</button>
+                </div>
+
+                @* Display Dialog to create courses *@
+                @if (createCourseDialog) {
+                    <CreateCourse CloseDialog="ToggleCreateCourseDialog" addToDegree="editableDegree" />
+                }
+                @if (addExistingCourseDialog == true) {
+                    <ViewCoursesDialog 
+                        coursesInDegree="editableDegree!.Courses" 
+                        AddCourses="true" 
+                        OnAdd="AddExistingCourses"
+                        OnClose="ToggleAddExistingCoursesDialog" />
+                }
+                <p><span style="font-weight: 800;">Total Credits: @totalCredits</span></p>
+            </div>
+
+        @if (createCourseDialog == false && addExistingCourseDialog == false) {
+            <div class="dialog-buttons">
+                    <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+                    <button class="btn btn-primary" type="submit">@(IsEditing ? "Save Edits" : "Create Degree" )</button>
+                </div>                
+            }
+        </EditForm>
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter] public EventCallback CloseDialog { get; set; }
+    [Parameter] public EventCallback OnDegreeCreated { get; set; }
+    [Parameter] public Degree degree { get; set; } = new(); // The received degree Parameter
+    public Degree? editableDegree { get; set; } = null; // A copy of the received degree Parameter. This is so it doesn't save on close.
+    [Parameter] public bool IsEditing { get; set; } = false; // Will need to pass in 'degree' variable's parameter to pre-populate data
+    public bool createCourseDialog = false;
+    public bool addExistingCourseDialog = false;
+    public int totalCredits { get; set; } = 0;
+
+    public List<string> errorMessages = new();
+
+    protected override void OnParametersSet()
+    {
+        editableDegree = new Degree
+        {
+            Id = degree.Id,
+            Name = degree.Name,
+            Description = degree.Description,
+            Courses = degree.Courses.ToList()
+        };
+        TotalCredits(editableDegree);
+    }
+ 
+    public async Task HandleClose() {
+        await CloseDialog.InvokeAsync();
+    }
+
+    public async Task HandleSubmit() {
+        if (IsEditing) {
+            @* EDITING AN EXISTING DEGREE *@
+            try {
+                await degreeService.UpdateDegree(editableDegree!);
+                
+                @* Close Dialog *@
+                await HandleClose();
+
+                @* Notify parent of completion *@
+                await OnDegreeCreated.InvokeAsync();
+            }
+            catch (ValidationException ex)
+            {
+                Console.WriteLine($"Vaidation Exception during degree update. {ex}");
+                errorMessages.Add(ex.Message.ToString());
+            }
+            catch (Exception ex) {
+                Console.WriteLine($"The degree could not be updated. Ex: {ex}");
+            }
+        }
+        else {
+            @* CREATING A NEW DEGREE *@
+            try {
+                @* Try to create degree *@
+                await degreeService.CreateDegree(editableDegree!);
+                Console.WriteLine("Degree successfully created.");
+
+                @* Close Dialog *@
+                await HandleClose();
+
+                @* Notify parent of completion *@
+                await OnDegreeCreated.InvokeAsync();
+            }
+            catch (ValidationException ex) {
+                Console.WriteLine($"Vaidation Exception during degree creation. {ex}");
+                errorMessages.Add(ex.Message.ToString());
+            }
+            catch (Exception ex) {
+                Console.WriteLine($"Exception occured during degree creation: Ex: {ex}");
+            }
+        }
+    }
+
+    public void ToggleCreateCourseDialog() {
+        if (createCourseDialog == true) createCourseDialog = false;
+        else if (createCourseDialog == false) createCourseDialog = true;
+    }
+
+    public void ToggleAddExistingCoursesDialog() {
+        addExistingCourseDialog = !addExistingCourseDialog;
+    }
+
+    public void AddExistingCourses(Course course)
+    {
+        editableDegree!.Courses.Add(course);
+        TotalCredits(editableDegree);
+    }
+
+    public void RemoveCourse(Course course) {
+        editableDegree!.Courses.Remove(course);
+        TotalCredits(editableDegree);
+    }
+
+    public void TotalCredits(Degree degree) {
+        totalCredits = degree!.Courses.Sum(course => course.Credits);
+    }
+}

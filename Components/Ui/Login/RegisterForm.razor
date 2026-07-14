@@ -1,0 +1,58 @@
+@using System.ComponentModel.DataAnnotations
+@using StudentPortalPracticeTwo.Database.Models.Authentication;
+@inject NavigationManager NavigationManager
+
+
+<EditForm Model="register" OnValidSubmit="HandleSubmit" FormName="RegisterForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label class="form-label">Email</label>
+    <InputText class="form-control" @bind-Value="register.Email" type="email" />
+    <ValidationMessage For="@(() => register.Email)" />
+
+    <label class="form-label">Password</label>
+    <InputText class="form-control" @bind-Value="register.Password" type="password" />
+    <ValidationMessage For="@(() => register.Password)" />
+
+    <label class="form-label">Confirm Password</label>
+    <InputText class="form-control" @bind-Value="register.ConfirmPassword" type="password" />
+    <ValidationMessage For="@(() => register.ConfirmPassword)" />
+
+    <button type="submit" class="btn btn-primary">Register User</button>
+
+    @if (messages != "" || messages != null)
+    {
+        <p class="alert-danger">@messages</p>
+    }
+</EditForm>
+
+    @code {
+    Register register = new Register();
+    string messages = "";
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            @* BrandonPassed789* *@
+            messages = "";
+            @* AUTHENTICATE HERE - To do *@
+
+            NavigationManager.NavigateTo("/login");
+        }
+        catch (ValidationException ex)
+        {
+            Console.WriteLine($"Validation Exception during registration. Exception: {ex}");
+            messages = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"User could not be registered. Exception: {ex}");
+            messages = ex.Message;
+        }
+    }
+}
+
+
+

@@ -1,0 +1,56 @@
+@page "/submission-complete/{FinalApplicationId:int}"
+@layout ApplicationLayout
+@using Database.Models.Application
+@using StudentPortalPracticeTwo.Components.Services.Application
+
+@inject FinalApplicationDb data
+@inject NavigationManager NavigationManager
+
+
+<h1>Application Received</h1>
+
+@if (Final == null) {
+    @* LOADING UNTIL DATABASE FETCH COMPELTES *@
+    <p>Application Loading...</p>
+}
+else {
+    @* USER EXPECTATIONS AND INSTRUCTIONS *@
+    <p>
+        You application has been received and will be reviewed by our enrollment department. You can reach them here at:
+        enroll@csu.edu. Please allow 3 weeks for your application to be reviewed. You will receive an email with the status
+        of your enrollment at @Final.Email
+    </p>
+
+    @* ACTION ITEMS *@
+    <div>
+        <a class="btn btn-primary" href="/">Return to login</a>
+        <button type="button" class="btn btn-primary">Download a copy of your Application</button>
+    </div>
+
+    @* SUBMISSION DETAILS *@
+    <div>
+
+    </div>
+}
+
+
+
+@code {
+    [Parameter] public int FinalApplicationId { get; set; }
+    public ApplicationModel? Final { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Final = await data.GetById(FinalApplicationId);
+
+        if (Final == null) {
+            NavigationManager.NavigateTo("/preapply");
+        }
+
+    }
+
+    @* LEARNING IDEA - Create an official Application Document that a student can download and keep as record of applying *@
+
+}
+

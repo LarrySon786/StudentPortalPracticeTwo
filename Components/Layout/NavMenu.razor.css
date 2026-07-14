@@ -1,0 +1,106 @@
+
+nav {
+    display:grid;
+    grid-template-columns: auto, 1fr, auto;
+}
+
+/* Account Edit Section */
+.account-container {
+    display:grid;
+    grid-template-columns: auto 1fr;
+}
+
+.profile-pic {
+    padding-top:1rem;
+    padding-left: 1rem;
+    padding-bottom: 1rem;
+    padding-right:0.5rem;
+    width: 70px;
+    margin:0;
+}
+
+.account-name-container {
+    display:block;
+    text-align: left;
+    padding-top:1rem;
+    padding-right:1rem;
+    padding-bottom:1rem;
+}
+
+.account-name {
+    font-size: 1.2rem;
+    padding:0;
+    margin:0;
+}
+
+
+/* Navigation Menu */
+
+.nav-group {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 30vh;
+
+    & a {
+        text-decoration: none;
+    }
+}
+
+.nav-item {
+    padding-top:24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--text);
+
+    & a {
+        margin-left: 1.5rem;
+    }
+}
+
+
+
+
+
+
+
+
+@media screen and (min-width:792px) {
+    .left-tab {
+        /* Left Tab Display + Physics */
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 270px;
+        transition: transform 0.3s ease;
+
+        /* Left Tab Looks + Design */
+        background: linear-gradient(270deg, var(--primary-lighter), var(--primary));
+
+    }
+
+    .left-tab.closed {
+        transform: translateX(-100%);
+    }
+
+    .nav-open-close-button {
+        /* Button looks */
+        padding:0;
+        width:17px;
+        background-color: var(--primary-lighter);
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+
+        /* Positioning button */
+        position:absolute;
+        right:-17px;
+        top:40%;
+        bottom:40%;
+    }
+}
+
+
+
+
+
+

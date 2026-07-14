@@ -1,0 +1,103 @@
+@page "/admin/students"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Students
+@inject StudentPortalPracticeTwo.Components.Services.Students.UserService userService;
+@inject NavigationManager navigationManager;
+
+@* This page should be dedicated so admins can review all existing students *@
+
+@* On opening a student account, display a dashboard that render's all the student's info *@
+@* Admins should be able to view, edit, delete, and get all student demographics *@
+@* Admins should be able to view student's currently enrolled programs *@
+@* Admins should be able to view student's completed classes, transfer credits, and relevant details (non-editable) *@
+
+<h1>Existing Students</h1>
+<a href="/admin" class="btn btn-link">⬅ Return</a>
+
+@* Search bar to query all existing students *@
+<div class="search-bar">
+    <input class="form-control" id="search-bar" placeholder="Search..." @oninput="SearchQuery" />
+</div>
+
+@* Table to display all existing students *@
+<table class="table">
+    <thead>
+        <th>Name</th>
+        <th>Email</th>
+        <th>DOB</th>
+        <th></th>
+    </thead>
+    <tbody>
+        @* ITERATES THROUGH ALL USERS IN EXISTING STUDENTS *@
+        @foreach (UserModel user in paginatedFilteredResults) {
+            <tr>
+                <td>@user.FirstName @user.LastName</td>
+                <td>@user.Email</td>
+                <td>INSERT_DOB</td>
+                <button type="button" class="btn btn-primary"@onclick="() => NavigateToStudent(user.Id)">View/Edit Student Account</button>
+            </tr>
+        }
+        @* CREATED PAGINATION AT BOTTOM *@
+        @for (int i = 1; i <= totalPages; i++) {
+            var pages = i;
+            <button class="btn btn-secondary" @onclick="() => UpdatePage(pages)">@pages</button>
+            @if (totalPages > 10) {
+                <p class="btn"> ... </p>
+                break;
+            }
+        }
+        @* No results if no student found by query *@
+        @if (totalPages == 0) { <p>No results found.</p> }
+
+    </tbody>
+</table>
+
+
+@code {
+    public List<UserModel> users { get; set; } = new(); // DB query to get all USERS
+    public string query { get; set; } = String.Empty; // Search query received on user input
+    public int pageSize { get; set; } = 9; // Can change to display more/less students on each table page
+    public int currPage { get; set; } = 1; // Default starting page is 1
+    public int totalPages { get; set; } // Total pages is calculated by method 'UpdateTotalPages()'
+
+    public IEnumerable<UserModel> filteredResultsByQuery => // Filtered by search query
+        users.Where(a => query == "" ||
+                a.Email.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                a.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                a.LastName.Contains(query, StringComparison.OrdinalIgnoreCase)
+            );
+    public IEnumerable<UserModel> paginatedFilteredResults => // Filtered by page selected
+        filteredResultsByQuery.Skip((currPage - 1) * pageSize).Take(pageSize);
+
+
+
+    protected async override Task OnInitializedAsync() {
+        try {
+            users = await userService.GetAllUsers(); // Requests all USERS from DB
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"The users could not be fetched from the database. Ex: {ex}");
+        }
+        UpdateTotalPages();
+    }
+
+    public void NavigateToStudent(int id) {
+        navigationManager.NavigateTo($"/admin/students/{id}");
+    }
+
+    public void SearchQuery(ChangeEventArgs e) {
+        if (e.Value == null) query = "";
+        else query = e.Value.ToString()!;
+        UpdatePage(1);
+        UpdateTotalPages();
+    }
+
+    public void UpdatePage(int page) {
+        currPage = page;
+    }
+
+    public void UpdateTotalPages() {
+        totalPages = (int)Math.Ceiling((double)filteredResultsByQuery.Count() / pageSize);
+        currPage = 1;
+    }
+}

@@ -1,0 +1,109 @@
+@page "/degree-listings"
+@rendermode InteractiveServer
+@layout AdminDashboardLayout
+@using StudentPortalPracticeTwo.Components.Ui.Admin;
+
+<h1>Degree Listings</h1>
+<a href="/admin" class="btn btn-link">⬅ Return</a>
+
+
+@* BUTTONS TO CREATE NEW OBJECTS + DIALOG MENUS *@
+<button class="btn btn-primary" @onclick="ToggleDegreeDialog">Create New Degree</button>
+<button class="btn btn-primary" @onclick="ToggleCourseDialog">Create New Course</button>
+<button class="btn btn-primary" @onclick="ToggleClassSessionDialog">Create New Class Session</button>
+
+@if (createDegreeDialog == true) {
+    <CreateDegree CloseDialog="ToggleDegreeDialog" OnDegreeCreated="HandleDegreeCreated"/>
+}
+else if (createCourseDialog == true) {
+    <CreateCourse CloseDialog="ToggleCourseDialog" OnCourseCreate="HandleCourseCreated"/>
+}
+else if (createClassSession == true) {
+    <CreateSessionDialog CloseDialog="ToggleClassSessionDialog" OnSessionCreated="HandleSessionCreated"/>
+}
+
+
+
+@* TABLE DATA AND SELECTION *@
+<div>
+    <button class="btn btn-link" @onclick="ToggleTableDegrees">All Degrees</button>
+    <button class="btn btn-link" @onclick="ToggleTableCourses">All Courses</button>
+    <button class="btn btn-link" @onclick="ToggleTableSessions">All Sessions</button>
+
+    @if (tableDegrees == true) {
+        <TableDisplayDegrees @ref="degreeTable"/>
+    }
+    else if (tableCourses == true) {
+        <TableDisplayCourses @ref="courseTable" />
+    }
+    else if (tableSessions == true) {
+        <TableDisplaySessions @ref="sessionTable"/>
+    }
+</div>
+
+
+@code {
+    public bool createDegreeDialog = false;
+    public bool createCourseDialog = false;
+    public bool createClassSession = false;
+    public bool tableDegrees = true;
+    public bool tableCourses = false;
+    public bool tableSessions = false;
+
+    public TableDisplayDegrees? degreeTable;
+    public TableDisplayCourses? courseTable;
+    public TableDisplaySessions? sessionTable;
+
+@* Toggle Dialogs to create / edit / view degrees, courses, and classes *@
+    public void ToggleDegreeDialog() {
+        if (createDegreeDialog == false) createDegreeDialog = true;
+        else if (createDegreeDialog == true) createDegreeDialog = false;
+    }
+    public void ToggleCourseDialog()
+    {
+        if (createCourseDialog == false) createCourseDialog = true;
+        else if (createCourseDialog == true) createCourseDialog = false;
+    }
+    public void ToggleClassSessionDialog()
+    {
+        if (createClassSession == false) createClassSession = true;
+        else if (createClassSession == true) createClassSession = false;
+    }
+
+    @* Toggle which table is active *@
+    public async Task ToggleTableDegrees() {
+        @* if (tableDegrees == false) await degreeTable!.ReloadDegree(); *@
+
+        tableDegrees = true;
+        tableCourses = false;
+        tableSessions = false;
+    }
+    public async Task ToggleTableCourses()
+    {
+        @* if (tableCourses == false) await courseTable!.CourseReload(); *@
+
+        tableDegrees = false;
+        tableCourses = true;
+        tableSessions = false;
+    }
+    public async Task ToggleTableSessions()
+    {
+        @* if (tableSessions == false) await sessionTable!.SessionReload(); *@
+
+        tableDegrees = false;
+        tableCourses = false;
+        tableSessions = true;
+    }
+
+    @* Refresh the table when a degree or course is created *@
+    public async Task HandleDegreeCreated() {
+        await degreeTable!.ReloadDegree();
+    }
+    public async Task HandleCourseCreated() {
+        await courseTable!.CourseReload();
+    }
+    public async Task HandleSessionCreated() {
+        await sessionTable!.SessionReload();
+    }
+
+}

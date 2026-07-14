@@ -1,0 +1,155 @@
+@page "/admin/applicants"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Application;
+@inject StudentPortalPracticeTwo.Components.Services.Application.FinalApplicationDb studentApplication;
+@inject NavigationManager navigationManager;
+
+<h1>New Student Applications</h1>
+<a href="/admin" class="btn btn-link">⬅ Return</a>
+
+<div class="standard-card">
+    @* Search Filter *@
+    <div class="search-bar">
+        <input class="form-control" id="searchFilter" placeholder="Search..." @oninput="SearchQuery"/>
+
+        @* Buttons to decide filter for table *@
+        <div> 
+            <button class="btn @(selectedFilter == Status.All ? "btn-secondary" : "btn-primary")" type="button"
+                    @onclick="() => ChangeFilter(Status.All)">All</button>
+            <button class="btn @(selectedFilter == Status.Pending ? "btn-secondary" : "btn-primary")" type="button"
+                    @onclick="() => ChangeFilter(Status.Pending)">Pending</button>
+            <button class="btn @(selectedFilter == Status.Approved ? "btn-secondary" : "btn-primary")" type="button" 
+                    @onclick="() => ChangeFilter(Status.Approved)">Approved</button>
+            <button class="btn @(selectedFilter == Status.Denied ? "btn-secondary" : "btn-primary")" type="button"
+                    @onclick="() => ChangeFilter(Status.Denied)">Denied</button>
+        </div>
+    </div>
+
+    @* Table to display ALL STUDENT APPLICANTS PENDING *@
+    <table class="table">
+        <thead>
+            <th>Student</th>
+            <th>Date of Birth</th>
+            <th>Email</th>
+            <th>Date Received</th>
+        </thead>
+        <tbody>
+            @if (applicationsReceived == null || applicationsReceived.Count == 0) {
+                <p>Loading Pending Applications...</p>
+            }
+            else {
+                @foreach (ApplicationModel application in filteredApplications!) {
+                    @* Double click on student to open their details *@
+                    <tr @ondblclick="() => ReviewStudent(application.Id)">
+                        <td>@application.StudentInfo.FirstName @application.StudentInfo.LastName</td>
+                        <td>INSERT_DOB</td>
+                        <td>@application.Email</td>
+                        <td>INSERT_DATE RECEIVED</td>
+                    </tr>
+                }
+                for (int i = 1; i <= totalPages; i++) {
+                    var pages = i;
+                    <button class="btn btn-link" type="button" @onclick="() => SetPage(pages)">@pages</button> 
+                    @if (totalPages > 10)
+                    {
+                        <p class="btn"> ... </p>
+                        break;
+                    }
+                }
+                @if (totalPages == 0) {<p>No results found.</p>}
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+@* Button that opens a PDF of the student applicant info *@
+
+
+@* Area to edit student applicant info (should record changes made and dates made) *@
+
+
+@* Manual account creation (without an existing student application) *@
+
+
+@* Send student an email with temporary credentials. *@
+@* Student Login process for first time. *@
+
+
+
+
+@code {
+    public List<ApplicationModel> applicationsReceived { get; set; } = new();
+    public int currPage { get; set; } = 1;
+    public int pageSize { get; set; } = 10; // Edit to change size of pages
+    public int totalPages { get; set; }
+    public string query { get; set; } = String.Empty;
+    public Status selectedFilter { get; set; } = Status.Pending; // This can be changed to display approved, pending, or denied applications.
+    public IEnumerable<ApplicationModel> filteredResults => //This is the filter logic for approved / denied / pending.
+            selectedFilter == Status.All
+                ? applicationsReceived!
+                    .Where(a => string.IsNullOrWhiteSpace(query) ||
+                                        a.StudentInfo.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                                        a.StudentInfo.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                                        a.Email.Contains(query, StringComparison.OrdinalIgnoreCase))
+                : applicationsReceived!
+                    .Where(a => (a.ApprovedStatus == selectedFilter) &&
+                                        (string.IsNullOrWhiteSpace(query) ||
+                                        a.StudentInfo.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                                        a.StudentInfo.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                                        a.Email.Contains(query, StringComparison.OrdinalIgnoreCase)));
+
+    public IEnumerable<ApplicationModel> filteredApplications => // This filter handles pagination
+            filteredResults
+                .Skip((currPage - 1) * pageSize)
+                .Take(pageSize);
+
+
+    protected override async Task OnInitializedAsync() {
+        try {
+            applicationsReceived = await studentApplication.GetAllApplications();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not load existing applicants. Ex: {ex}");
+        }
+
+        UpdateTotalPages();
+    }
+
+    @* Review a student's application ID *@
+    public void ReviewStudent(int id) {
+        navigationManager.NavigateTo($"/admin/applicants/{id}", forceLoad: true);
+        return;
+    }
+
+    @* Search query to search for student by name, email, or DOB *@
+    public void SearchQuery(ChangeEventArgs e) {
+        if (e.Value == null) query = "";
+        else query = e!.Value!.ToString()!;
+        SetPage(1);
+        UpdateTotalPages();
+    }
+
+    public void ChangeFilter(Status status) {
+        selectedFilter = status;
+        SetPage(1);
+        UpdateTotalPages();
+    }
+
+    public void SetPage(int page) {
+        currPage = page;
+    }
+
+    private void UpdateTotalPages()
+    {
+        totalPages = (int)Math.Ceiling(filteredResults.Count() / (double)pageSize);
+
+        if (currPage > totalPages)
+            currPage = totalPages;
+    }
+
+
+}
+
+

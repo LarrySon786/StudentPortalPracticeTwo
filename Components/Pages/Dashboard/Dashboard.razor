@@ -1,0 +1,26 @@
+@using Microsoft.AspNetCore.Authorization
+
+@page "/dashboard"
+@rendermode InteractiveServer
+
+
+
+
+<button class="btn btn-primary" @onclick=Logout>Logout</button>
+
+
+@code {
+    public async Task Logout()
+    {
+        try
+        {
+            @* ADD LOGOUT METHOD HERE *@
+        } 
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not log the user out. Exception {ex}");
+        }
+    }
+
+}
+

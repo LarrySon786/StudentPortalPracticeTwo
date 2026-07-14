@@ -1,0 +1,81 @@
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService;
+@inject IJSRuntime JS
+
+<table class="table">
+    <thead>
+        <th>Course Code</th>
+        <th>Name</th>
+        <th>Credits</th>
+        <th></th>
+    </thead>
+
+    @foreach (Course course in courses)
+    {
+        <tr>
+            <td>@course.Code</td>
+            <td>@course.Name</td>
+            <td>@course.Credits</td>
+            <div>
+                <td><button class="btn btn-primary" @onclick="() => ToggleEdit(course)">Edit Course</button></td>
+                <td><button class="btn btn-secondary">View Degrees</button></td>
+                <td><button class="btn btn-secondary">View Sessions</button></td>
+                <td><button class="btn btn-danger" @onclick="() => HandleDelete(course.Id)">Delete</button></td>
+            </div>
+        </tr>
+    }
+</table>
+
+@if (editCourseDialog) {
+    <CreateCourse IsEditing="true" course="@selectedCourse" CloseDialog="() => ToggleEdit(selectedCourse)"/> 
+}
+
+
+
+@code {
+    public List<Course> courses = new();
+    public bool editCourseDialog = false;
+    public Course selectedCourse = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CourseReload();
+    }
+
+    public async Task CourseReload() 
+    {
+        try
+        {
+            courses = await courseService.GetAllCourses();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An exception occurred while getting all courses. Ex: {ex}");
+        }
+    }
+
+    public async Task HandleDelete(int courseId) {
+        try {
+            bool confirmation = await JS.InvokeAsync<bool>(
+                "confirm", 
+                "Delete this course? This cannot be undone.");
+
+            if (confirmation) {
+                await courseService.DeleteCourse(courseId);
+                await CourseReload();
+            }
+            else return;
+
+        } catch (Exception ex) {
+            Console.WriteLine($"Could not complete delete of course. Ex: {ex}");
+        }
+    }
+
+    public void ToggleEdit(Course selected) {
+        selectedCourse = selected;
+        if (editCourseDialog == false) editCourseDialog = true;
+        else if (editCourseDialog == true) editCourseDialog = false;
+    }
+}

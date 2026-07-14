@@ -1,0 +1,30 @@
+@using StudentPortalPracticeTwo.Database.Models.Application
+@using StudentPortalPracticeTwo.Database.Models.Enums
+
+@* The purpose of this component is to ONLY display all the student's data for the admins *@
+<div>
+    <div class="form-group">
+        <label class="form-label">First Name</label>
+        <InputText disabled class="form-control" @bind-Value="studentApplication.StudentInfo.FirstName "/>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <InputText disabled class="form-control" @bind-Value="studentApplication.StudentInfo.LastName" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Email</label>
+        <InputText disabled class="form-control" @bind-Value="studentApplication.Email" />
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label">Phone</label>
+        <InputText disabled class="form-control" @bind-Value="studentApplication.StudentContact.Phone" />
+    </div>
+</div>
+
+
+@code {
+    [Parameter] required public ApplicationModel studentApplication { get; set; }
+}

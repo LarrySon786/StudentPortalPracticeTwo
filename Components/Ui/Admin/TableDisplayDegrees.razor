@@ -1,0 +1,89 @@
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@inject StudentPortalPracticeTwo.Components.Services.Admin.DegreeService degreeService;
+@inject IJSRuntime JS;
+
+<table class="table">
+    <thead>
+        <th>Degree</th>
+        <th></th>
+    </thead>
+    
+    @foreach(Degree degree in degrees) {
+        <tr>
+            <td>@degree.Name</td>
+            <div>
+                <td><button class="btn btn-primary" type="button" @onclick="() => ToggleEditDegree(degree)">Edit Degree</button></td>
+                <td><button class="btn btn-secondary" type="button">View Courses</button></td>
+                <td><button class="btn btn-danger" type="button" @onclick="() => DeleteDegree(degree.Id)">Delete</button>
+                </td>
+            </div>
+        </tr>
+    }
+</table>
+
+@if (editDegreeDialog) {
+    <CreateDegree degree="selectedDegree" CloseDialog="() => ToggleEditDegree(selectedDegree!)" IsEditing="true" />
+}
+
+
+
+@code {
+    public List<Degree> degrees = new();
+
+    public bool editDegreeDialog = false;
+    public Degree? selectedDegree { get; set; }
+
+
+
+    protected override async Task OnInitializedAsync() {
+        await ReloadDegree();
+    }
+
+    public async Task ReloadDegree() {
+        try
+        {
+            degrees = await degreeService.GetAllDegrees();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An exception occurred while getting all degrees. Ex: {ex}");
+        }
+    }
+
+    public async Task DeleteDegree(int id) {
+        bool confirmation = await JS.InvokeAsync<bool>(
+            "confirm", 
+            "Do you want to delete this degree? This action cannot be undone");
+
+        if (confirmation == true)
+        {
+            try
+            {
+                await degreeService.DeleteDegree(id);
+                await ReloadDegree();
+            } 
+            catch (Exception ex) {
+                Console.WriteLine($"An exception occured. Degree could not be deleted: {ex}");
+            }
+        }
+        else if (confirmation!) return;
+    }
+
+    public void ToggleEditDegree(Degree selected) {
+        selectedDegree = selected;
+        if (editDegreeDialog == false) editDegreeDialog = true;
+        else if (editDegreeDialog == true) editDegreeDialog = false;
+    }
+    public async Task EditDegree(Degree updated) {
+        try {
+            await degreeService.UpdateDegree(updated);
+            editDegreeDialog = false;
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not edit degree. Ex: {ex}");
+        }
+    }
+
+}

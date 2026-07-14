@@ -1,0 +1,24 @@
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@rendermode InteractiveServer
+@inject StudentPortalPracticeTwo.Components.Services.Admin.ClassSessionService classService;
+
+
+
+
+
+
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnAdd { get; set; }
+    [Parameter] public Course? originalCourse { get; set; }
+    public Course? copyOriginalCourse { get; set; }
+    List<ClassSession>? allSessions { get; set; }
+    List<ClassSession>? displayedSessions { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+
+    }
+}
+
+
+

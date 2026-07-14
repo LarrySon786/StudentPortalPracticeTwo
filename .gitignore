@@ -1,0 +1,64 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+
+# VS Code
+.vscode/
+
+# .NET generated files
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+# Test results
+TestResults/
+*.trx
+
+# NuGet packages
+*.nupkg
+packages/
+
+# Publish output
+publish/
+wwwroot/dist/
+
+# Environment files / secrets
+.env
+.env.*
+appsettings.Development.json
+appsettings.Local.json
+
+# User-specific ASP.NET Core files
+secrets.json
+
+# Database files (if using local databases)
+*.db
+*.sqlite
+*.sqlite3
+
+# EF Core migration snapshots? (DO NOT ignore migrations)
+# Keep Migrations/ tracked
+
+# Node files (if using npm anywhere)
+node_modules/
+npm-debug.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp

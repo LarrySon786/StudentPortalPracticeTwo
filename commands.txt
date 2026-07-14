@@ -1,0 +1,9 @@
+Setup authorization using ASP.NET's standard authorization core
+dotnet add package Microsoft.AspNetCore.Components.Authorization
+
+NOTE TO SELF - Left off with trying to add user creation via application approval. Needs finished and debugged
+- Add Email service later
+- Add Pathfinding on all pages (start with admin pages). Basically the path to your current page appears:
+/admin/students/{student_name} ||| Users can select 'students' to return to '/admin/students' or 'admin' to return to '/admin'
+
+

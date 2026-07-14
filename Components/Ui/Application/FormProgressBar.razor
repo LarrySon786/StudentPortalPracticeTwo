@@ -1,0 +1,42 @@
+<div class="progress-bar-container">
+    
+    <div class="steps">
+        <div class="step completed">
+            <div class="circle" style="font-size:0.6rem;">@Percentage%</div>
+        </div>
+
+        @for (int i = 1; i <= TotalPages; i++) {
+            var state = i < CurrentPage ? "completed"
+                        : i == CurrentPage ? "active"
+                        : "";
+
+            <div class="step @state">
+                <div class="circle">@i</div>
+            </div>
+        }
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-completed" style="width:@Percentage%"></div>
+        
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+
+    public decimal Percentage { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Percentage = TotalPages > 0
+            ? Math.Round((decimal)CurrentPage / TotalPages * 100, 0)
+            : 0;
+
+    }
+
+}
+
+

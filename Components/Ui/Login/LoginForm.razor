@@ -1,0 +1,54 @@
+@using System.ComponentModel.DataAnnotations
+@using StudentPortalPracticeTwo.Database.Models.Authentication;
+@using System.Text.Json;
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<EditForm Model="login" OnValidSubmit="HandleSubmit" FormName="LoginForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label class="form-label">Email</label>
+    <InputText class="form-control" @bind-Value="login.Email" type="email" />
+    <ValidationMessage For="@(() => login.Email)"/>
+
+    <label class="form-label">Password</label>
+    <InputText class="form-control" @bind-Value="login.Password" type="password" />
+    <ValidationMessage For="@(() => login.Password)" />
+
+    <button type="submit" class="btn btn-primary">Login</button>
+
+    @if (messages != "" || messages != null) {
+        <p class="alert-danger">@messages</p>
+    }
+</EditForm>
+
+
+
+    @code {
+    Login login = new Login();
+    string messages = "";
+
+    private async Task HandleSubmit() {
+        try {
+            messages = "";
+            
+            @* Authentication HERE *@
+
+            NavigationManager.NavigateTo( "/dashboard", forceLoad: true);
+            
+        } 
+        catch (ValidationException ex)
+        {
+            Console.WriteLine($"Validation Exception during login. Exception: {ex}");
+            messages = ex.Message;
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"User could not be logged in. Exception: {ex}");
+            messages = ex.Message;
+        }
+    }
+}
+
+
+

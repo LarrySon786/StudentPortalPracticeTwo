@@ -1,0 +1,80 @@
+.progress-bar-container {
+    width: 100%;
+    max-width: 750px;
+    position: relative;
+}
+
+.steps {
+    display: flex;
+    justify-content: space-between;
+    z-index: 2;
+    position:relative;
+}
+
+.step .circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #DCEFEA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: #486581;
+    transition: all 0.3s ease;
+}
+
+.step.completed .circle {
+    background: #2A9D8F;
+    color: white;
+}
+
+.step.active .circle {
+    background: #6FD3C8;
+    color: white;
+    box-shadow: 0 0 0 4px rgba(42, 157, 143, 0.2);
+}
+
+.progress-bar {
+    text-align: center;
+    height:10px;
+    border-radius: 999px;
+    width: 100%;
+    max-width: 750px;
+    position: absolute;
+    top:12px;
+    left:0;
+    right:0;
+    background-color: #CED4DA;
+
+    & p {
+        margin: 0rem;
+        padding: 0.2rem;
+        border-radius: 1rem;
+        z-index: 1000;
+        font-size: 1.2rem;
+        color:white;
+    }
+
+    & .progress-completed {
+        background: linear-gradient(90deg, #2A9D8F, #6FD3C8);
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        min-width: 20px;
+        transition: width 0.4s ease;
+    }
+
+}
+
+@media screen and (max-width: 800px) {
+    .progress-bar-container {
+        max-width: 100%;
+        width:100%;
+    }
+
+    .progress-bar {
+        width:100%;
+    }
+}

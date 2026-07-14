@@ -1,0 +1,20 @@
+﻿@inherits LayoutComponentBase
+
+<main>
+    @* Navigation on left *@
+    <NavMenu NavOpen=@NavOpen ToggleNav=@ToggleNav />
+
+    @* Content for each page in dashboard *@
+    <article class="content px-4 opened @(NavOpen ? "" : "closed")">
+        @Body
+    </article>
+</main>
+
+@code {
+    public bool NavOpen { get; set; } = true;
+
+    public void ToggleNav() {
+        if (NavOpen == true) NavOpen = false;
+        else if (NavOpen == false) NavOpen = true;
+    }
+}

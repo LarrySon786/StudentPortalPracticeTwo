@@ -1,0 +1,109 @@
+@using StudentPortalPracticeTwo.Components.Services.Application
+@using StudentPortalPracticeTwo.Database.Models.Application
+@using System.ComponentModel.DataAnnotations
+
+@inject FinalApplicationDb data
+@inject NavigationManager NavigationManager
+
+
+
+<EditForm Model="@Model" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <fieldset>
+        <legend>Student Information</legend>
+
+        <label class="form-label">First Name</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.FirstName" readonly/>
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.FirstName)"/>
+
+        <label class="form-label">Last Name</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo.LastName" readonly />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.LastName)" />
+
+    </fieldset>
+    <fieldset>
+        <legend>Contact Information</legend>
+
+        <label class="form-label">Email</label>
+        <InputText class="form-control" @bind-Value="Model.Email" readonly />
+        <p class="text-muted">Your email will become your user login. Please ensure that your email is correct.</p>
+        <ValidationMessage For="@(() => Model.Email)" />
+
+        <label class="form-label">Phone</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentContact!.Phone" readonly />
+        <ValidationMessage For="@(() => Model.DraftStudentContact.Phone)" />
+
+    </fieldset>
+
+    <div>
+        @if (@message != "") 
+        {
+            <p class="error-messages">To make changes to your application, please navigate back to the correct section.</p>
+            <p class="error-messages">@message</p>
+        }
+        else 
+        {
+
+        }
+    </div>
+
+    <div class="form-nav-buttons">
+        <button class="btn btn-primary" type="button" @onclick="HandleBack">Back</button>
+        <button class="btn btn-primary" type="submit">Finish and Apply</button>
+    </div>
+</EditForm>
+
+
+
+
+@code {
+    [Parameter] public required DraftApplicationModel Model { get; set; }
+    [Parameter] public EventCallback Prev { get; set; }
+    string message = "";
+
+    public async Task HandleSubmit() {
+
+        try
+        {
+            var newApplication = await data.CreateApplication(Model);
+
+            if (newApplication != null)
+                NavigationManager.NavigateTo($"submission-complete/{newApplication.Id}");
+        }
+        catch(ValidationException ex) {
+            message = ex.Message;
+            Console.WriteLine($"An error occured submitting this form. Error: {ex}");
+            @* StateHasChanged(); *@
+        }
+        catch (Exception ex) {
+            message = "An error occured while submiting this form. Please try again.";
+            Console.WriteLine($"An error occured submitting this form. Error: {ex}");
+            @* StateHasChanged(); *@
+        }
+    }
+
+
+    public async Task HandleBack() {
+        message = "";
+        await Prev.InvokeAsync();
+    }
+}
+
+<style>
+    .form-nav-buttons {
+        position: sticky;
+        bottom: 0;
+
+        background: white;
+        padding: 16px 24px;
+        margin-top: 24px;
+
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+
+        border-top: 1px solid #E0F0EE;
+    }
+</style>

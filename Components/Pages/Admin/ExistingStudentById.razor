@@ -1,0 +1,55 @@
+@page "/admin/students/{studentId:int}"
+@using StudentPortalPracticeTwo.Database.Models.Students
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@using StudentPortalPracticeTwo.Components.Ui.Admin.Students;
+
+@inject StudentPortalPracticeTwo.Components.Services.Students.UserService studentService;
+@inject NavigationManager navigationManager
+
+
+@if (student == null) {
+    <p>Loading student details...</p>
+}
+else {
+    <h1>@student!.FirstName @student.LastName</h1>
+
+    <div class="path-finding">
+        <a href="" class="btn btn-link"></a>
+    </div>
+
+    <StudentDashboardAdminView Mode="EditMode.Edit" Student="student" OnSavedChanges="RefreshComponent" />
+
+
+
+    @* Tab Sections of student details *@
+
+    @* FOR THIS SECTION, move existing tabs and child elements 
+    into there own component. reuse that component But with
+    an edit=true sort of property to enable editing on existing students.
+    
+    See if I can learn how to create a log that tracks edits such as these
+     *@
+
+
+
+
+}
+
+@code {
+    [Parameter] public int studentId { get; set; } // received on page initialize
+    public UserModel? student { get; set; }
+
+    protected async override Task OnInitializedAsync() {
+        await GetStudent();
+    }
+
+    public async Task GetStudent() {
+        student = await studentService.GetUserById(studentId);
+        if (student == null) navigationManager.NavigateTo("/admin/students");
+    }
+
+    public async Task RefreshComponent() {
+        await GetStudent();
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,149 @@
+@page "/admin/applicants/{applicationId:int}"
+@using StudentPortalPracticeTwo.Database.Models.Application;
+@using StudentPortalPracticeTwo.Components.Ui.Admin.Students
+@inject StudentPortalPracticeTwo.Components.Services.Application.FinalApplicationDb finalApplicationService;
+@inject NavigationManager navigationManager;
+
+@if (studentApplication == null) { <p>Loading student details...</p> }
+else
+{
+    <h1>@studentApplication!.StudentInfo.FirstName @studentApplication.StudentInfo.LastName</h1>
+
+    <div class="tab-nav add-margin-bottom">
+        <a href="/admin/applicants">⬅ Return</a>
+        <button class="btn btn-link @(tab == StudentTab.Demographics ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.Demographics)">Demographics</button>
+        <button class="btn btn-link @(tab == StudentTab.EnrolledPrograms ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.EnrolledPrograms)">Enrolled Programs</button>
+        <button class="btn btn-link @(tab == StudentTab.CurrentCourses ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.CurrentCourses)">Current Courses</button>
+        <button class="btn btn-link @(tab == StudentTab.DegreeProgress ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.DegreeProgress)">Degree Progress</button>
+        <button class="btn btn-link @(tab == StudentTab.Other ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.Other)">Other</button>
+    </div>
+    
+    <div class="page-content">
+        @* Display different tabs depending on selected link *@
+        @if (tab == StudentTab.Demographics) 
+        {
+            <AdminApplicationDisplayDemographics studentApplication="studentApplication"/>
+        }
+        else if (tab == StudentTab.EnrolledPrograms) 
+        {
+            <h4>Display EnrolledPrograms</h4>
+        }
+        else if (tab == StudentTab.CurrentCourses)
+        {
+            <h4>Display CurrentCourses</h4>
+        }
+        else if (tab == StudentTab.DegreeProgress)
+        {
+            <h4>Display DegreeProgress</h4>
+        }
+        else if (tab == StudentTab.Other)
+        {
+            <h4>Display Other</h4>
+        }
+    </div>
+
+    <div class="bottom-bar">
+        <button class="btn btn-secondary" type="button" @onclick="() => finalApplicationService.DownloadPdf(applicationId)">
+            Download Application PDF
+        </button>
+        <button class="btn btn-danger" type="button" disabled="@approvalLoading" @onclick="() => Decline()">
+            Decline Application
+        </button>
+        <button class="btn btn-primary" type="button" disabled="@approvalLoading" @onclick="() => Approve()">
+            Approve Application
+        </button>
+    </div>
+
+}
+
+@code {
+    [Parameter] public int applicationId { get; set; }
+    public ApplicationModel? studentApplication { get; set; }
+    public StudentTab tab { get; set; }
+
+    public bool approvalLoading { get; set; } = false;
+
+    public enum StudentTab {
+        Demographics,
+        EnrolledPrograms,
+        CurrentCourses,
+        DegreeProgress,
+        Other
+    } 
+
+    protected override async Task OnInitializedAsync() {
+        try {
+            studentApplication = await finalApplicationService.GetById(applicationId);
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not load the student application. Ex: {ex}");
+        }
+        if (studentApplication == null) {
+            navigationManager.NavigateTo("/admin/applicants", forceLoad: true);
+            return;
+        }
+    }
+
+    public void TabSwitch(StudentTab changed) {
+        tab = changed;
+    }
+
+    public async Task Approve() {
+        @* This function disables the approve button and begins creating a student account *@
+        try {
+            approvalLoading = true;
+            await finalApplicationService.ApproveApplication(applicationId);
+            navigationManager.NavigateTo("/admin/applicants");
+            return;
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not create student account. Ex: {ex}");
+        }
+        finally {
+            approvalLoading = false; 
+        }
+    }
+
+    public async Task Decline()
+    {
+        @* This function disables the approve button and begins declining a student account *@
+        try
+        {
+            approvalLoading = true;
+            await finalApplicationService.DeclineApplication(applicationId);
+            navigationManager.NavigateTo("/admin/applicants");
+            return;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not create student account. Ex: {ex}");
+        }
+        finally
+        {
+            approvalLoading = false;
+        }
+    }
+}
+
+
+
+<style>
+    .tab-nav {
+        display:flex;
+        justify-content: space-around;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .page-content {
+        margin-bottom:15px;
+        min-height: 80vh;
+    }
+    .active {
+        text-decoration: none;
+    }
+</style>
