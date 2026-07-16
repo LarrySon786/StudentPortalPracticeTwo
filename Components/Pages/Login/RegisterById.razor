@@ -1,0 +1,51 @@
+@page "/register"
+@layout ApplicationLayout;
+@using StudentPortalPracticeTwo.Database.Models.Students;
+@using StudentPortalPracticeTwo.Database.Models.Authentication;
+@inject StudentPortalPracticeTwo.Components.Services.Students.UserService userService;
+@inject NavigationManager navigationManager;
+
+<div class="standard-card">
+    <h1>Set Password</h1>
+    <EditForm Model="registerInfo" OnValidSubmit="HandleSubmit" FormName="Reset Password Form">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label class="form-label">New Password</label>
+            <InputText class="form-control" @bind-Value="registerInfo.Password"/>
+            <ValidationMessage For="@(() => registerInfo.Password)"/>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <InputText class="form-control" @bind-Value="registerInfo.ConfirmPassword" />
+            <ValidationMessage For="@(() => registerInfo.ConfirmPassword)" />
+        </div>
+        <button type="submit" class="btn btn-primary">Set Password</button>
+    </EditForm>
+</div>
+
+
+@code {
+    [SupplyParameterFromQuery] public required string UserId { get; set; } // Registration Id so the student can register and account
+    [SupplyParameterFromQuery] public required string Token { get; set; } //Validation Token to reset / create password
+    public UserModel? user { get; set; }
+    public RegistrationInfo registerInfo { get; set; } = new();
+
+    protected override async Task OnInitializedAsync() {
+        @* GET user for page *@
+        user = await userService.GetUserById(int.Parse(UserId));
+        if (user == null) navigationManager.NavigateTo("/login");
+    }
+
+    public async Task HandleSubmit() {
+        try {
+            @* RESET / SET user password *@
+            await userService.SetPassword(registerInfo.Password, Token, user);
+            navigationManager.NavigateTo("/login");
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not update the user's password. Ex: {ex}");
+        }
+    }
+
+
+}

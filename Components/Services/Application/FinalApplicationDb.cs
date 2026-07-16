@@ -1,8 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
+using StudentPortalPracticeTwo.Components.Services.EmailServices;
 using StudentPortalPracticeTwo.Components.Services.Students;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Application;
+using StudentPortalPracticeTwo.Database.Models.Students;
+using StudentPortalPracticeTwo.Components.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace StudentPortalPracticeTwo.Components.Services.Application;
 
@@ -10,11 +15,21 @@ public class FinalApplicationDb
 {
     private readonly ApplicationDbContext _context;
     private readonly UserService _userService;
+    private readonly IEmailService _emailService; // 
+    private readonly IWebHostEnvironment _environment; // Allows tracing back to root of project
+    private readonly IConfiguration _configuration; // Gets base URL for the project 
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public FinalApplicationDb(ApplicationDbContext context, UserService userService)
+    public FinalApplicationDb(ApplicationDbContext context, UserService userService,
+        IEmailService emailService, IWebHostEnvironment environment, IConfiguration configuration,
+        UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _userService = userService;
+        _emailService = emailService;
+        _environment = environment;
+        _configuration = configuration;
+        _userManager = userManager;
     }
 
 
@@ -36,8 +51,6 @@ public class FinalApplicationDb
             .Include(y => y.StudentContact)
             .ToListAsync();
     }
-
-    // 
 
     public async Task<ApplicationModel?> GetByEmail(string email)
     {
@@ -204,21 +217,30 @@ public class FinalApplicationDb
     {
         var application = await GetById(id);
         if (application == null) throw new Exception("No application could be found to approve.");
-
-        // TODO - Create student login credentials
-
-        // Create new student user.
-        await _userService.CreateUserByApplication(application);
+        if (application.ApprovedStatus == Status.Approved) return;
 
         // Update student application to be marked as accepted
         application.ApprovedStatus = Status.Approved;
+
+        // Create new student user + Create user Identity for Authorization / Authentication
+        UserModel user = await _userService.CreateUserByApplication(application);
         await _context.SaveChangesAsync();
 
-        // Send an email to the student | Send login credentials and acceptance letter
-        // var html = await File.ReadAllTextAsync("Components/Ui/EmailTemplates/Approved.html");
+        // CREATE EMAIL | Email Subject | HTML Body
+        var firstLastName = $"{application.StudentInfo.FirstName} {application.StudentInfo.LastName}";
+        var htmlTemplatePath = Path.Combine(_environment.ContentRootPath, "Components", "Ui", "EmailTemplates", "Approved.html"); // Approved Email Template
+        var baseUrl = _configuration["AppSettings:BaseUrl"]; //Gets the base URL of the website
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user.IdentityUser!); // Create token for link
+        token = Uri.EscapeDataString(token); // Encodes the token
+        var registrationLink = $"{baseUrl}/register?userId={user.Id}&token={token}";
+        var subject = "Welcome to CSU";
+        var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template for approved letters
 
-        // html = html.Replace("{{Student_First_And_Last_Name}}", $"{application.StudentInfo.FirstName} {application.StudentInfo.LastName}");
-        // html = html.Replace("{{Link_To_Register}}", "New Link to Sign-up");
+        html = html.Replace("{{Link_To_Register}}", registrationLink);
+        html = html.Replace("{{Student_First_And_Last_Name}}", firstLastName);
+
+        // SEND NEW USER EMAIL TO REGISTER ACCOUNT
+        await _emailService.SendEmailAsync(application.Email, firstLastName, subject, html);
     }
 
     public async Task DeclineApplication(int id)
@@ -226,10 +248,23 @@ public class FinalApplicationDb
         var application = await GetById(id);
         if (application == null) throw new Exception("No application could be found to deny.");
 
-        // Mark application as declined
+        // Mark application as denied
         application.ApprovedStatus = Status.Denied;
 
+        // SAVE denied status
+        await _context.SaveChangesAsync();
+
         // Send email to notify student
+        // CREATE EMAIL | Email Subject | HTML Body
+        var firstLastName = $"{application.StudentInfo.FirstName} {application.StudentInfo.LastName}";
+        var htmlTemplatePath = Path.Combine(_environment.ContentRootPath, "Components", "Ui", "EmailTemplates", "Denied.html");
+        var subject = "CSU Admissions Decision";
+        var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template for approved letters
+
+        html = html.Replace("{{student_name}}", firstLastName);
+
+        // SEND NEW USER EMAIL TO REGISTER ACCOUNT
+        await _emailService.SendEmailAsync(application.Email, firstLastName, subject, html);
     }
 
     public async Task PendingApplication(int id)
@@ -239,6 +274,8 @@ public class FinalApplicationDb
 
         // Mark application as declined
         application.ApprovedStatus = Status.Pending;
+
+        await _context.SaveChangesAsync();
     }
 }
 

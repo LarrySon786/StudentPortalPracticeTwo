@@ -50,6 +50,13 @@ public class ApplicationDbContext : DbContext
             .HasOne(x => x.OriginalFinalApplication)
             .WithMany()
             .HasForeignKey(x => x.FinalApplicationId);
+
+        modelBuilder.Entity<UserModel>()
+            .HasOne(x => x.IdentityUser)
+            .WithMany()
+            .HasForeignKey(x => x.IdentityUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         
         // Final
         modelBuilder.Entity<ApplicationModel>()

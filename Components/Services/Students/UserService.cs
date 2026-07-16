@@ -3,16 +3,27 @@ using StudentPortalPracticeTwo.Database.Models.Application;
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Students;
+using Microsoft.AspNetCore.Identity;
+using StudentPortalPracticeTwo.Components.Services.Interfaces;
 
 namespace StudentPortalPracticeTwo.Components.Services.Students;
 
 public class UserService
 {
     private readonly ApplicationDbContext _context;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmailService _emailService;
+    private readonly IWebHostEnvironment _environment;
+    private readonly IConfiguration _configuration;
 
-    public UserService(ApplicationDbContext context)
+    public UserService(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService,
+        IWebHostEnvironment environment, IConfiguration configuration)
     {
         _context = context;
+        _userManager = userManager;
+        _emailService = emailService;
+        _environment = environment;
+        _configuration = configuration;
     }
 
     // GET ALL STUDENTS
@@ -21,6 +32,7 @@ public class UserService
         return await _context.UserDb
             .Include(x => x.ContactDetails)
             .Include(x => x.OriginalFinalApplication)
+            .Include(x => x.IdentityUser)
             .ToListAsync();
     }
 
@@ -30,6 +42,7 @@ public class UserService
         return await _context.UserDb
             .Include(x => x.ContactDetails)
             .Include(x => x.OriginalFinalApplication)
+            .Include(x => x.IdentityUser)
             .Where(x => x.Email == email)
             .FirstOrDefaultAsync();
     }
@@ -40,13 +53,35 @@ public class UserService
         return await _context.UserDb
             .Include(x => x.ContactDetails)
             .Include(x => x.OriginalFinalApplication)
+            .Include(x => x.IdentityUser)
             .Where(x => x.Id == id)
             .FirstOrDefaultAsync();
     }
 
     // CREATE NEW STUDENT | by finalApplication approval
-    public async Task CreateUserByApplication(ApplicationModel finalApplication)
+    public async Task<UserModel> CreateUserByApplication(ApplicationModel finalApplication)
     {
+        // Check for existing user FIRST
+        var existingUser = await _userManager.FindByEmailAsync(finalApplication.Email);
+        if (existingUser != null) throw new Exception($"An account already exists for {finalApplication.Email}");
+
+        // Create User Identity for Authorization
+        var applicationUser = new ApplicationUser()
+        {
+            Email = finalApplication.Email,
+            UserName = finalApplication.Email,
+            EmailConfirmed = true
+        };
+
+        var result = await _userManager.CreateAsync(applicationUser);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+            throw new Exception( $"Could not create identity user. {errors}");
+        }
+
+        // Create user in Database
         UserModel entity = new()
         {
             FirstName = finalApplication.StudentInfo.FirstName,
@@ -56,12 +91,17 @@ public class UserService
             {
                 Phone = finalApplication.StudentContact.Phone
             },
+            // Link final application to this user account
             OriginalFinalApplication = finalApplication,
-            FinalApplicationId = finalApplication.Id
+            FinalApplicationId = finalApplication.Id,
+            // Link identity user to this user account
+            IdentityUser = applicationUser,
+            IdentityUserId = applicationUser.Id
         };
 
         _context.UserDb.Add(entity);
         await _context.SaveChangesAsync();
+        return entity;
     }
 
     // CREATE NEW STUDENT | by manual creation
@@ -85,13 +125,49 @@ public class UserService
         await _context.SaveChangesAsync();
     }
 
+    // Password Reset Email
+    public async Task EmailPasswordReset(string email)
+    {
+        var existing = await GetUserByEmail(email);
+        if (existing == null) throw new Exception("No user found with this email. Plese try again");
+
+        // Create Email
+        var htmlTemplatePath = Path.Combine(_environment.ContentRootPath, "Components", "Ui", "EmailTemplates", "ResetPassword.html"); // Approved Email Template
+        var baseUrl = _configuration["AppSettings:BaseUrl"]; //Gets the base URL of the website
+        var token = await _userManager.GeneratePasswordResetTokenAsync(existing.IdentityUser!); // Create token for link
+        token = Uri.EscapeDataString(token); // Encodes the token
+        var resetLink = $"{baseUrl}/register?userId={existing.Id}&token={token}";
+        var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template for approved letters
+
+        html = html.Replace("{{reset_link}}", resetLink);
+        html = html.Replace("{{first_name}}", existing.FirstName);
+
+        // Send Email
+        await _emailService.SendEmailAsync(existing.Email, existing.FirstName, "Password Reset", html);
+    }
+
+    // Reset user password (or set password for first time)
+    public async Task SetPassword(string password, string token, UserModel user)
+    {
+        // Confirm user exists
+        if (user.IdentityUser == null) throw new Exception("Cannot reset password. User not found.");
+        var result = await _userManager.ResetPasswordAsync(user.IdentityUser, token, password); // reset password
+
+        // Handle errors if result was NOT successful
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+            throw new Exception($"User was found in system, but password failed to be set/reset. {errors}");
+        }
+    }
+
     // Disable / Re-enable Student Account
     public async Task DisableUserToggle(int id)
     {
         UserModel? existing = await GetUserById(id);
         if (existing == null) throw new Exception("Could not find a user with that Id");
 
-        existing.isDisabled = !existing.isDisabled;
+        existing.IsDisabled = !existing.IsDisabled;
 
         await _context.SaveChangesAsync();
     }

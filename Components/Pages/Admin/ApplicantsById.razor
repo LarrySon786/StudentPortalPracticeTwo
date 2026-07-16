@@ -46,14 +46,28 @@ else
         <button class="btn btn-secondary" type="button" @onclick="() => finalApplicationService.DownloadPdf(applicationId)">
             Download Application PDF
         </button>
-        <button class="btn btn-danger" type="button" disabled="@approvalLoading" @onclick="() => Decline()">
-            Decline Application
-        </button>
-        <button class="btn btn-primary" type="button" disabled="@approvalLoading" @onclick="() => Approve()">
-            Approve Application
-        </button>
+        @if (studentApplication.ApprovedStatus == Status.Approved) {
+            <button class="btn btn-secondary" type="button">
+                Reset Password
+            </button>
+            <button class="btn btn-danger" type="button">
+                Disable Student Account
+            </button>
+        }
+        @if (studentApplication.ApprovedStatus == Status.Pending) {
+            <button class="btn btn-danger" type="button" disabled="@approvalLoading" @onclick="() => Decline()">
+                Decline Application
+            </button>
+            <button class="btn btn-primary" type="button" disabled="@approvalLoading" @onclick="() => Approve()">
+                Approve Application
+            </button>
+        }
+        @if (studentApplication.ApprovedStatus == Status.Denied) {
+            <button class="btn btn-primary" type="button" disabled="@approvalLoading" @onclick="() => Pending()">
+                Mark as Pending Application
+            </button>
+        }
     </div>
-
 }
 
 @code {
@@ -111,6 +125,26 @@ else
         {
             approvalLoading = true;
             await finalApplicationService.DeclineApplication(applicationId);
+            navigationManager.NavigateTo("/admin/applicants");
+            return;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not create student account. Ex: {ex}");
+        }
+        finally
+        {
+            approvalLoading = false;
+        }
+    }
+
+    public async Task Pending() {
+        @* In the event that the admission team makes a mistake and wants to approve a denied student *@
+        @* They can move them to a pending status once again. *@
+        try
+        {
+            approvalLoading = true;
+            await finalApplicationService.PendingApplication(applicationId);
             navigationManager.NavigateTo("/admin/applicants");
             return;
         }

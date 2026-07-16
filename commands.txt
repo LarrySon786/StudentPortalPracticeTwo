@@ -1,9 +1,46 @@
 Setup authorization using ASP.NET's standard authorization core
 dotnet add package Microsoft.AspNetCore.Components.Authorization
 
+SEND GRID | Email service
+dotnet add package SendGrid
+
+LEFT off
+- I just finished setting up the denied application email, the user registeration link email, 
+the user registeration page (also password reset page), the forgot password page (accepts email then sends link to reset)
+- I still need to set up the login process to check user credentials and log them in.
+- I still need to add authorization to each individual page to verify user identity.
+- I created a reset database link, but may want to have it prepopulate an admin user so I can continue to login easily.
+
+
 NOTE TO SELF - Left off with trying to add user creation via application approval. Needs finished and debugged
-- Add Email service later
 - Add Pathfinding on all pages (start with admin pages). Basically the path to your current page appears:
 /admin/students/{student_name} ||| Users can select 'students' to return to '/admin/students' or 'admin' to return to '/admin'
+
+
+TO DO LIST
+- Complete New Student Application Form
+- Web page pathfindings
+- Student program selection
+- Student Class Registration
+- Student Support Tickets
+- Student Update Account Details
+- Student Transcript access 
+- 
+
+- Admin: Logs of edits made on students, courses, and degrees.
+- Admin: Logs of edits made on accounts by students.
+- Admin: Student Transcript creation 
+- 
+
+- Complete Website CSS
+- Authentication + Authorization
+- Server side validation on ALL forms
+- Make EMAIL unique for draft applications and student accounts
+- Email Services
+- Set up PDF Creator | Student Applications | Student Summaries | Student Transcripts (CSU editions)
+- Real DB connection and updates
+- Deploy Website on Azure
+
+
 
 
