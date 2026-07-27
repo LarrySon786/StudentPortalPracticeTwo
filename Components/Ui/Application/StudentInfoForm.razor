@@ -1,20 +1,94 @@
 @using StudentPortalPracticeTwo.Database.Models.Application
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@using StudentPortalPracticeTwo.Components.Services.Extensions
 
 <FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
     <legend>Student Information</legend>
-
-    <label class="form-label">First Name</label>
-    <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.FirstName"/>
-    <ValidationMessage For="@(() => Model.DraftStudentInfo.FirstName)"/>
     
-    <label class="form-label">Last Name</label>
-    <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.LastName" />
-    <ValidationMessage For="@(() => Model.DraftStudentInfo.LastName)" />
+    <div class="mb-3">
+        <label class="form-label">First Name</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.FirstName" />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.FirstName)" />
+    </div>
 
+    <div class="mb-3">
+        <label class="form-label">Middle Name</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.MiddleName" />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.MiddleName)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Last Name</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.LastName" />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.LastName)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Race</label>
+        <InputSelect class="form-select" @bind-Value="Model.DraftStudentInfo!.Race">
+            <option value="">Select race</option>
+            @foreach (var race in Enum.GetValues<Race>())
+            {
+                <option value="@race">@race.GetDisplayName()</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.Race)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Gender</label>
+        <InputSelect class="form-select" @bind-Value="Model.DraftStudentInfo!.Gender">
+            <option value="">Select gender</option>
+            @foreach (var gender in Enum.GetValues<Gender>())
+            {
+                <option value="@gender">@gender.GetDisplayName()</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.Gender)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Citizenship Country</label>
+        <InputSelect class="form-select" @bind-Value="Model.DraftStudentInfo!.CitizenshipCountry">
+            <option value="">Select country</option>
+            @foreach (var country in Enum.GetValues<Country>())
+            {
+                <option value="@country">@country.GetDisplayName()</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.CitizenshipCountry)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Street Address 1</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.StreetOneAddress" />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.StreetOneAddress)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Street Address 2</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.StreetTwoAddress" />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.StreetTwoAddress)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">City</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.City" />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.City)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">State or Province</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.StateOrProvince" />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.StateOrProvince)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Zip Code</label>
+        <InputNumber class="form-control" @bind-Value="Model.DraftStudentInfo!.Zipcode" />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.Zipcode)" />
+    </div>
 </FormNavigation>
-
-
-
 
 @code {
     [Parameter] public required DraftApplicationModel Model { get; set; }
@@ -22,7 +96,4 @@
     [Parameter] public EventCallback Prev { get; set; }
     [Parameter] public int CurrentPage { get; set; }
     [Parameter] public int TotalPages { get; set; }
-
-
-
 }

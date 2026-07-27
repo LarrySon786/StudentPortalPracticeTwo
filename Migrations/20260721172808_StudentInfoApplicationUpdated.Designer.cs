@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudentPortalPracticeTwo.Database;
@@ -12,9 +13,11 @@ using StudentPortalPracticeTwo.Database;
 namespace StudentPortalPracticeTwo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260721172808_StudentInfoApplicationUpdated")]
+    partial class StudentInfoApplicationUpdated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,43 +210,10 @@ namespace StudentPortalPracticeTwo.Migrations
                     b.ToTable("DraftApplicationDb");
                 });
 
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.DraftEmergencyContactModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ContactName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("DraftApplicationId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Relationship")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DraftApplicationId");
-
-                    b.ToTable("DraftEmergencyContact");
-                });
-
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.DraftStudentContactModel", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("integer");
-
-                    b.Property<string>("AltPhone")
-                        .HasColumnType("text");
 
                     b.Property<string>("Phone")
                         .HasColumnType("text");
@@ -303,44 +273,10 @@ namespace StudentPortalPracticeTwo.Migrations
                     b.ToTable("DraftStudentInfoDb");
                 });
 
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.EmergencyContactModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ApplicationId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ContactName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Relationship")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationId");
-
-                    b.ToTable("EmergencyContactDb");
-                });
-
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.StudentContactModel", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("integer");
-
-                    b.Property<string>("AltPhone")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -709,17 +645,6 @@ namespace StudentPortalPracticeTwo.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.DraftEmergencyContactModel", b =>
-                {
-                    b.HasOne("StudentPortalPracticeTwo.Database.Models.Application.DraftApplicationModel", "Application")
-                        .WithMany("DraftEmergencyContact")
-                        .HasForeignKey("DraftApplicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Application");
-                });
-
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.DraftStudentContactModel", b =>
                 {
                     b.HasOne("StudentPortalPracticeTwo.Database.Models.Application.DraftApplicationModel", "Application")
@@ -736,17 +661,6 @@ namespace StudentPortalPracticeTwo.Migrations
                     b.HasOne("StudentPortalPracticeTwo.Database.Models.Application.DraftApplicationModel", "Application")
                         .WithOne("DraftStudentInfo")
                         .HasForeignKey("StudentPortalPracticeTwo.Database.Models.Application.DraftStudentInfoModel", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Application");
-                });
-
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.EmergencyContactModel", b =>
-                {
-                    b.HasOne("StudentPortalPracticeTwo.Database.Models.Application.ApplicationModel", "Application")
-                        .WithMany("EmergencyContact")
-                        .HasForeignKey("ApplicationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -816,8 +730,6 @@ namespace StudentPortalPracticeTwo.Migrations
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.ApplicationModel", b =>
                 {
-                    b.Navigation("EmergencyContact");
-
                     b.Navigation("StudentContact")
                         .IsRequired();
 
@@ -827,13 +739,9 @@ namespace StudentPortalPracticeTwo.Migrations
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.DraftApplicationModel", b =>
                 {
-                    b.Navigation("DraftEmergencyContact");
+                    b.Navigation("DraftStudentContact");
 
-                    b.Navigation("DraftStudentContact")
-                        .IsRequired();
-
-                    b.Navigation("DraftStudentInfo")
-                        .IsRequired();
+                    b.Navigation("DraftStudentInfo");
                 });
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.Course", b =>

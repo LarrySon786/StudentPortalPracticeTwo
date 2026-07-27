@@ -5,6 +5,7 @@ using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Students;
 using Microsoft.AspNetCore.Identity;
 using StudentPortalPracticeTwo.Components.Services.Interfaces;
+using Superpower.Model;
 
 namespace StudentPortalPracticeTwo.Components.Services.Students;
 
@@ -73,13 +74,14 @@ public class UserService
             EmailConfirmed = true
         };
 
+        // Creates the identity User
         var result = await _userManager.CreateAsync(applicationUser);
-
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(x => x.Description));
-            throw new Exception( $"Could not create identity user. {errors}");
+            throw new Exception($"Could not create identity user. {errors}");
         }
+        else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
 
         // Create user in Database
         UserModel entity = new()
@@ -107,6 +109,27 @@ public class UserService
     // CREATE NEW STUDENT | by manual creation
     public async Task CreateUserManually(UserModel user)
     {
+        var existingUser = await _userManager.FindByEmailAsync(user.Email);
+        if (existingUser != null) throw new Exception($"An account already exists for {user.Email}");
+
+        // Create User Identity for Authorization
+        var applicationUser = new ApplicationUser()
+        {
+            Email = user.Email,
+            UserName = user.Email,
+            EmailConfirmed = true
+        };
+
+        // Creates the identity User
+        var result = await _userManager.CreateAsync(applicationUser);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+            throw new Exception($"Could not create identity user. {errors}");
+        }
+        else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
+
+        // Create user in Database
         _context.UserDb.Add(user);
         await _context.SaveChangesAsync();
     }
@@ -179,4 +202,37 @@ public class UserService
             .Where(x => x.Id == id)
             .ExecuteDeleteAsync();
     }
+
+
+    // ADMINS
+    public async Task CreateAdmin(UserModel admin, string? password)
+    {
+        var response = await GetUserByEmail(admin.Email);
+        if (response != null) throw new Exception("Cannot create admin. This email already exists with a student or admin account.");
+
+        // Set Identity User Values
+        var identityUser = new ApplicationUser()
+        {
+            Email = admin.Email,
+            UserName = admin.Email,
+            EmailConfirmed = true
+        };
+
+        // Generate email to set password
+        if (password == null) password = "1234"; // CHANGE LATER
+
+        // Create Identitty User
+        var result = await _userManager.CreateAsync(identityUser, password);
+        if (!result.Succeeded) throw new Exception("Could not create admin account. Failed to create identity User");
+        else await _userManager.AddToRoleAsync(identityUser, "Admin"); // Set Admin Roles
+
+        admin.IdentityUserId = identityUser.Id;
+        admin.IdentityUser = identityUser;
+
+        _context.Add(admin);
+        await _context.SaveChangesAsync();
+    }
+
+
+
 }

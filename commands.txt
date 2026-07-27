@@ -5,11 +5,11 @@ SEND GRID | Email service
 dotnet add package SendGrid
 
 LEFT off
-- I just finished setting up the denied application email, the user registeration link email, 
-the user registeration page (also password reset page), the forgot password page (accepts email then sends link to reset)
-- I still need to set up the login process to check user credentials and log them in.
-- I still need to add authorization to each individual page to verify user identity.
-- I created a reset database link, but may want to have it prepopulate an admin user so I can continue to login easily.
+- I started updating my application to have all user data / info. I finished Student Info and student contact.
+- I am currently working on Emergency contact. I wrote the models. Did the migrations. I need to ensure the 
+form components are completely written and designed. I need to make sure the emergency contact is created on form submission properly.
+- I need to define all auth roles, what they will have access to
+
 
 
 NOTE TO SELF - Left off with trying to add user creation via application approval. Needs finished and debugged
@@ -44,3 +44,26 @@ TO DO LIST
 
 
 
+REVIEW - 
+Authentication + authorization
+- Need builder.Services.AddCascadingAuthenticationState()
+- Need builder.Services.AddAuthorization()
+- Need builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+- Need builder.Services.ConfigureApplicationCookie(options => // Cookie configurations
+{
+    options.Cookie.Name = "StudentPortal.Identity";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.LoginPath = "/login";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.SlidingExpiration = true;
+});
+- Need the app.UseAuthentication() + app.UseAuthorization()
+- Login and logout use <form> NOT <EditForm>
+- They must be done through HTTP requests through an app.map() method
+- The submission happens from <form method="post" action="/account/login" >
+- Make sure cookie is being created. See program.cs for details of route request and cookie creation.
+- Roles are assigned at user creation.
+- Cookie expiration, persistence, and other settings are set before app.build().

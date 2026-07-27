@@ -1,0 +1,81 @@
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using StudentPortalPracticeTwo.Database.Models.Application
+
+
+
+<FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
+    <legend>Emergency Contacts</legend>
+    
+    
+    @foreach (DraftEmergencyContactModel contact in Model.DraftEmergencyContact!)
+    {
+        <div>
+            <h4>Contact Information:</h4>
+            <label class="form-label">Contact Name</label>
+            <InputText class="form-control" @bind-Value="contact.ContactName"/>
+            <ValidationMessage For="@(() => contact.ContactName)"/>
+
+            <label class="form-label">Relationship</label>
+            <InputText class="form-control" @bind-Value="contact.Relationship" />
+            <ValidationMessage For="@(() => contact.Relationship)" />
+
+            <label class="form-label">Contact Phone</label>
+            <InputText class="form-control" @bind-Value="contact.Phone" />
+            <ValidationMessage For="@(() => contact.Phone)" />
+        </div> 
+    }
+    
+    
+    
+    @if (contactCount > 1) {
+        <button type="button" class="btn btn-secondary" @onclick="DecrementContacts">Remove Contact</button>
+    }
+    @if (contactCount <= 3) {
+        <button type="button" class="btn btn-primary" @onclick="IncrementContacts">Add Contact</button>
+    }
+
+    
+</FormNavigation>
+
+
+@code {
+    [Parameter] public required DraftApplicationModel Model { get; set; }
+    [Parameter] public EventCallback Next { get; set; }
+    [Parameter] public EventCallback Prev { get; set; }
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+    public int contactCount { get; set; }
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        
+        contactCount = Model.DraftEmergencyContact!.Count();
+        if (contactCount == 0)
+        {
+            IncrementContacts();
+        }
+    }
+
+    private void IncrementContacts() {
+        var startingContact = new DraftEmergencyContactModel()
+        {
+            ContactName = "",
+            Phone = "",
+            Relationship = ""
+        };
+        Model.DraftEmergencyContact.Add(startingContact);
+        contactCount = Model.DraftEmergencyContact.Count();
+
+        StateHasChanged();
+    }
+
+    private void DecrementContacts()
+    {
+        DraftEmergencyContactModel lastContact = Model.DraftEmergencyContact[contactCount - 1];
+        Model.DraftEmergencyContact.Remove(lastContact);
+        contactCount = Model.DraftEmergencyContact.Count();
+
+        StateHasChanged();
+    }
+}

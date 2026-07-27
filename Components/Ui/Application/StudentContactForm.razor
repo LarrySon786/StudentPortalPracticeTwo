@@ -1,11 +1,18 @@
 @using StudentPortalPracticeTwo.Database.Models.Application
 
 <FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
-
     <label class="form-label">Phone</label>
     <InputText class="form-control" @bind-Value="Model.DraftStudentContact!.Phone" />
     <ValidationMessage For="@(() => Model.DraftStudentContact.Phone)" />
-    
+
+    <label class="form-label">Alternative Phone (optional)</label>
+    <InputText class="form-control" @bind-Value="Model.DraftStudentContact!.AltPhone" />
+    <ValidationMessage For="@(() => Model.DraftStudentContact.AltPhone)" />
+
+    <label class="form-label">Email</label>
+    <InputText class="form-control" @bind-Value="Model.Email" disabled />
+    <ValidationMessage For="@(() => Model.Email)" />
+    <p class="text-muted">Please create a new student application if you wish to change your email address.</p>
 
 </FormNavigation>
 

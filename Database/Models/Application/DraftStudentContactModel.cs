@@ -14,5 +14,8 @@ public class DraftStudentContactModel
     [Phone(ErrorMessage = "Must be a valid phone number")]
     public string? Phone { get; set; }
 
+    [Phone(ErrorMessage = "Must be a valid phone number")]
+    public string? AltPhone { get; set; }
+
 
 }

@@ -1,7 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Hosting;
-using StudentPortalPracticeTwo.Components.Services.EmailServices;
 using StudentPortalPracticeTwo.Components.Services.Students;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Application;
@@ -95,6 +93,18 @@ public class FinalApplicationDb
         if (errors.Any())
             throw new ValidationException(string.Join(Environment.NewLine, errors));
 
+        // Create Emergency Contacts for final application
+        var EmergencyContactList = new List<EmergencyContactModel>();
+        foreach (DraftEmergencyContactModel contact in draft.DraftEmergencyContact!)
+        {
+            EmergencyContactModel EmergencyContact = new()
+            {
+                ContactName = contact.ContactName,
+                Relationship = contact.Relationship,
+                Phone = contact.Phone,
+            };
+            EmergencyContactList.Add(EmergencyContact);
+        }
         // CREATE FINAL DRAFT FROM existing draft
         ApplicationModel entity = new()
         {
@@ -102,12 +112,25 @@ public class FinalApplicationDb
             StudentInfo = new StudentInfoModel()
             {
                 FirstName = draft.DraftStudentInfo!.FirstName!,
+                MiddleName = draft.DraftStudentInfo!.MiddleName!,
                 LastName = draft.DraftStudentInfo!.LastName!,
+                Race = draft.DraftStudentInfo.Race!.Value,
+                Gender = draft.DraftStudentInfo.Gender!.Value,
+                CitizenshipCountry = draft.DraftStudentInfo.CitizenshipCountry!.Value,
+                StreetOneAddress = draft.DraftStudentInfo.StreetOneAddress!,
+                StreetTwoAddress = draft.DraftStudentInfo.StreetTwoAddress ?? string.Empty,
+                City = draft.DraftStudentInfo.City!,
+                StateOrProvince = draft.DraftStudentInfo.StateOrProvince!,
+                Zipcode = draft.DraftStudentInfo.Zipcode!.Value,
             },
             StudentContact = new StudentContactModel()
             {
                 Phone = draft.DraftStudentContact!.Phone!,
+                AltPhone = draft.DraftStudentContact.AltPhone ?? string.Empty,
             },
+            EmergencyContact = EmergencyContactList, // Emergency Contact List created above
+
+
             ApprovedStatus = Status.Pending
         };
 
@@ -129,9 +152,19 @@ public class FinalApplicationDb
 
         entity.Email = updated.Email;
         entity.StudentInfo.FirstName = updated.StudentInfo.FirstName;
+        entity.StudentInfo.MiddleName = updated.StudentInfo.MiddleName;
         entity.StudentInfo.LastName = updated.StudentInfo.LastName;
+        entity.StudentInfo.Race = updated.StudentInfo.Race;
+        entity.StudentInfo.Gender = updated.StudentInfo.Gender;
+        entity.StudentInfo.CitizenshipCountry = updated.StudentInfo.CitizenshipCountry;
+        entity.StudentInfo.StreetOneAddress = updated.StudentInfo.StreetOneAddress;
+        entity.StudentInfo.StreetTwoAddress = updated.StudentInfo.StreetTwoAddress;
+        entity.StudentInfo.City = updated.StudentInfo.City;
+        entity.StudentInfo.StateOrProvince = updated.StudentInfo.StateOrProvince;
+        entity.StudentInfo.Zipcode = updated.StudentInfo.Zipcode;
 
         entity.StudentContact.Phone = updated.StudentContact.Phone;
+        entity.StudentContact.AltPhone = updated.StudentContact.AltPhone;
 
         await _context.SaveChangesAsync();
     }
@@ -141,17 +174,54 @@ public class FinalApplicationDb
         if (errors == null)
             errors = new();
 
+        // Application Information
         if (string.IsNullOrWhiteSpace(draft.Email))
             errors.Add("Please add an Email to your application.");
 
+        // Student Information
         if (string.IsNullOrWhiteSpace(draft.DraftStudentInfo?.FirstName))
             errors.Add("Please add a First Name to your application.");
 
         if (string.IsNullOrWhiteSpace(draft.DraftStudentInfo?.LastName))
             errors.Add("Please add a Last Name to your application.");
 
+        if (draft.DraftStudentInfo?.Race == null)
+            errors.Add("Please select a Race for your application.");
+
+        if (draft.DraftStudentInfo?.Gender == null)
+            errors.Add("Please select a Gender for your application.");
+
+        if (draft.DraftStudentInfo?.CitizenshipCountry == null)
+            errors.Add("Please select a Citizenship Country for your application.");
+
+        if (string.IsNullOrWhiteSpace(draft.DraftStudentInfo?.StreetOneAddress))
+            errors.Add("Please add a Street Address to your application.");
+
+        if (string.IsNullOrWhiteSpace(draft.DraftStudentInfo?.City))
+            errors.Add("Please add a City to your application.");
+
+        if (string.IsNullOrWhiteSpace(draft.DraftStudentInfo?.StateOrProvince))
+            errors.Add("Please add a State or Province to your application.");
+
+        if (draft.DraftStudentInfo?.Zipcode == null || draft.DraftStudentInfo.Zipcode == 0)
+            errors.Add("Please add a Zip Code to your application.");
+
+        // Contact Information
         if (string.IsNullOrWhiteSpace(draft.DraftStudentContact?.Phone))
             errors.Add("Please add a Phone Number to your application.");
+
+        // Emergency Contact Information
+        foreach (DraftEmergencyContactModel contact in draft.DraftEmergencyContact)
+        {
+            if (string.IsNullOrWhiteSpace(contact.ContactName))
+                errors.Add("Please add a name to all your emergency contacts.");
+
+            if (string.IsNullOrWhiteSpace(contact.Phone))
+                errors.Add("Please add a Phone number to all your emergency contacts.");
+
+            if (string.IsNullOrWhiteSpace(contact.Relationship))
+                errors.Add("Please add a relationship to all of your emergency contacts.");
+        }
 
         if (errors.Count == 0)
             return true;

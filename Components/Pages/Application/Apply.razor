@@ -34,7 +34,7 @@
                 <div class="form-nav-buttons">
                     <button class="btn btn-primary" type="button" @onclick="Next">Next</button>
                 </div>
-                
+            
             }
             else if (currentPage == 1) {
                 <StudentInfoForm Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />
@@ -45,16 +45,19 @@
 
             }
             else if (currentPage == 3) {
+                <StudentEmergencyContact Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />
+            }
+            else if (currentPage == 4) {
                 <SubmissionForm Model="@Application" Prev=@Prev />
             }
-        }
+        } 
     </div>
 </div>
 @code {
     [Parameter] public int ApplicationId { get; set; }
     DraftApplicationModel? Application { get; set; }
     int currentPage = 0;
-    int totalPages = 3;
+    int totalPages = 4;
     private string message = "";
 
     protected override async Task OnInitializedAsync()

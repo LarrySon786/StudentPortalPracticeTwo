@@ -1,5 +1,6 @@
 
 
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Database.Models.Application;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
@@ -8,7 +9,7 @@ using StudentPortalPracticeTwo.Database.Models.Students;
 namespace StudentPortalPracticeTwo.Database;
 
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -22,11 +23,13 @@ public class ApplicationDbContext : DbContext
     public DbSet<ApplicationModel> ApplicationDb { get; set; }
     public DbSet<StudentInfoModel> StudentInfoDb { get; set; }
     public DbSet<StudentContactModel> StudentContactDb { get; set; }
+    public DbSet<EmergencyContactModel> EmergencyContactDb { get; set; }
 
     // DRAFT Application - used to save student progress in their application
     public DbSet<DraftApplicationModel> DraftApplicationDb { get; set; }
     public DbSet<DraftStudentInfoModel> DraftStudentInfoDb { get; set; }
     public DbSet<DraftStudentContactModel> DraftStudentContact { get; set; }
+    public DbSet<DraftEmergencyContactModel> DraftEmergencyContact { get; set; }
 
     // DEGREES 
     public DbSet<Degree> DegreeDb { get; set; }
@@ -69,6 +72,11 @@ public class ApplicationDbContext : DbContext
             .WithOne(x => x.Application)
             .HasForeignKey<StudentContactModel>(x => x.Id);
 
+        modelBuilder.Entity<ApplicationModel>()
+            .HasMany(x => x.EmergencyContact)
+            .WithOne(x => x.Application)
+            .HasForeignKey(x => x.ApplicationId);
+
         // Draft
         modelBuilder.Entity<DraftApplicationModel>()
             .HasOne(x => x.DraftStudentInfo)
@@ -79,6 +87,11 @@ public class ApplicationDbContext : DbContext
             .HasOne(x => x.DraftStudentContact)
             .WithOne(x => x.Application)
             .HasForeignKey<DraftStudentContactModel>(x => x.Id);
+
+        modelBuilder.Entity<DraftApplicationModel>()
+            .HasMany(x => x.DraftEmergencyContact)
+            .WithOne(x => x.Application)
+            .HasForeignKey(x => x.DraftApplicationId);
 
         // Degree
         modelBuilder.Entity<Degree>()

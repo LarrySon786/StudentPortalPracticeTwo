@@ -1,29 +1,75 @@
 @using StudentPortalPracticeTwo.Components.Services.Application
 @using StudentPortalPracticeTwo.Database.Models.Application
 @using System.ComponentModel.DataAnnotations
+@using StudentPortalPracticeTwo.Components.Services.Extensions
 
 @inject FinalApplicationDb data
 @inject NavigationManager NavigationManager
-
-
 
 <EditForm Model="@Model" OnValidSubmit="HandleSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <fieldset>
+        @* Student Information *@
         <legend>Student Information</legend>
 
         <label class="form-label">First Name</label>
         <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.FirstName" readonly/>
         <ValidationMessage For="@(() => Model.DraftStudentInfo.FirstName)"/>
 
+        <label class="form-label">Middle Name</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo!.MiddleName" readonly />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.MiddleName)" />
+
         <label class="form-label">Last Name</label>
         <InputText class="form-control" @bind-Value="Model.DraftStudentInfo.LastName" readonly />
         <ValidationMessage For="@(() => Model.DraftStudentInfo.LastName)" />
 
+        <label class="form-label">Race</label>
+        <InputSelect class="form-control" @bind-Value="Model.DraftStudentInfo.Race" readonly>
+            <option value=@Model.DraftStudentInfo.Race>@Model.DraftStudentInfo.Race!.GetDisplayName()</option>
+        </InputSelect>
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.Race)" />
+
+        <label class="form-label">Gender</label>
+        <InputSelect class="form-control" @bind-Value="Model.DraftStudentInfo.Gender" readonly>
+            <option value=@Model.DraftStudentInfo.Gender>@Model.DraftStudentInfo.Gender!.GetDisplayName()</option>
+        </InputSelect>
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.Gender)" />
+
+        <label class="form-label">Country of Citizenship</label>
+        <InputSelect class="form-control" @bind-Value="Model.DraftStudentInfo.CitizenshipCountry" readonly>
+            <option value=@Model.DraftStudentInfo.CitizenshipCountry>
+                @Model.DraftStudentInfo.CitizenshipCountry!.GetDisplayName()
+            </option>
+        </InputSelect>
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.CitizenshipCountry)" />
+
+        @* ADDRESS *@
+        <label class="form-label">Street Address Line 1</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo.StreetOneAddress" readonly />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.StreetOneAddress)" />
+        
+        <label class="form-label">Street Address Line 2 (optional)</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo.StreetTwoAddress" readonly />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.StreetTwoAddress)" />
+
+        <label class="form-label">City</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo.City" readonly />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.City)" />
+
+        <label class="form-label">State</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentInfo.StateOrProvince" readonly />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.StateOrProvince)" />
+
+        <label class="form-label">Zip Code</label>
+        <InputNumber class="form-control" @bind-Value="Model.DraftStudentInfo.Zipcode" readonly />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.Zipcode)" />
+
     </fieldset>
     <fieldset>
+        @* Contact Information *@
         <legend>Contact Information</legend>
 
         <label class="form-label">Email</label>
@@ -35,6 +81,30 @@
         <InputText class="form-control" @bind-Value="Model.DraftStudentContact!.Phone" readonly />
         <ValidationMessage For="@(() => Model.DraftStudentContact.Phone)" />
 
+        <label class="form-label">Alternative Phone (optional)</label>
+        <InputText class="form-control" @bind-Value="Model.DraftStudentContact!.AltPhone" readonly />
+        <ValidationMessage For="@(() => Model.DraftStudentContact.AltPhone)" />
+
+    </fieldset>
+
+    @* Emergency Contacts *@
+    <fieldset>
+        <legend>Contact Information</legend>
+
+        @* Iterate through each emergency contact (up to three) *@
+        @foreach (DraftEmergencyContactModel contact in Model.DraftEmergencyContact) {
+            <label class="form-label">Contact Name</label>
+            <InputText class="form-control" @bind-Value="contact.ContactName" readonly/>
+            <ValidationMessage For="(() => contact.ContactName)"/>
+
+            <label class="form-label">Contact Relationship</label>
+            <InputText class="form-control" @bind-Value="contact.Relationship" readonly />
+            <ValidationMessage For="(() => contact.Relationship)" />
+
+            <label class="form-label">Contact Phone Number</label>
+            <InputText class="form-control" @bind-Value="contact.Phone" readonly />
+            <ValidationMessage For="(() => contact.Phone)" />
+        }
     </fieldset>
 
     <div>
@@ -73,6 +143,7 @@
                 NavigationManager.NavigateTo($"submission-complete/{newApplication.Id}");
         }
         catch(ValidationException ex) {
+            
             message = ex.Message;
             Console.WriteLine($"An error occured submitting this form. Error: {ex}");
             @* StateHasChanged(); *@

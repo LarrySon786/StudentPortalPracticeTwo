@@ -55,6 +55,7 @@ public class DraftApplicationDb
         DraftApplicationModel? existing = await _context.DraftApplicationDb
             .Include(x => x.DraftStudentInfo)
             .Include(x => x.DraftStudentContact)
+            .Include(x => x.DraftEmergencyContact)
             .FirstOrDefaultAsync(x => x.Id == updated.Id);
 
         if (existing == null)
@@ -69,8 +70,12 @@ public class DraftApplicationDb
 
         existing.DraftStudentContact?.Phone = updated.DraftStudentContact?.Phone;
 
+        existing.DraftEmergencyContact = updated.DraftEmergencyContact;
+
         await _context.SaveChangesAsync();
     }
+
+
 
 }
 

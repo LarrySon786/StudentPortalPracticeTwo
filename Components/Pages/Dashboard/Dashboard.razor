@@ -1,26 +1,34 @@
 @using Microsoft.AspNetCore.Authorization
 
 @page "/dashboard"
+@attribute [Authorize]
 @rendermode InteractiveServer
+@inject StudentPortalPracticeTwo.Components.Services.Authentication.AuthLogin auth;
+@inject NavigationManager navigationManager;
 
 
 
 
-<button class="btn btn-primary" @onclick=Logout>Logout</button>
+
+<form method="post" action="/account/logout">
+    <button type="submit" class="btn btn-primary">
+        Logout
+    </button>
+</form>
 
 
 @code {
-    public async Task Logout()
-    {
-        try
-        {
-            @* ADD LOGOUT METHOD HERE *@
-        } 
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Could not log the user out. Exception {ex}");
-        }
-    }
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
 
+    protected override async Task OnInitializedAsync() {
+        var authState = await AuthenticationStateTask!;
+        if (authState == null)
+        {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+        var user = authState.User;
+        Console.WriteLine(user.Identity!.IsAuthenticated);
+    }
 }
 

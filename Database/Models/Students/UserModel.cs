@@ -9,7 +9,7 @@ public class UserModel
     public int Id { get; set; }
 
     // Student's Admissions Application
-    public int FinalApplicationId { get; set; }
+    public int? FinalApplicationId { get; set; }
     public ApplicationModel? OriginalFinalApplication { get; set; } = null;
 
     // IDENTITY USER | For tokens, auth, and authorization
