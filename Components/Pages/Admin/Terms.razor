@@ -1,0 +1,76 @@
+@page "/admin/terms"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@using StudentPortalPracticeTwo.Components.Ui.Admin
+@inject StudentPortalPracticeTwo.Components.Services.Admin.TermService termService
+
+
+<h1>Scheduled Terms</h1>
+
+@* Button to add new term *@
+<button class="btn btn-primary" @onclick="() => ToggleEditTermDialog(EditMode.Create)">Create New Term</button>
+
+@* Display terms with options to edit *@
+<table class="table">
+    <thead>
+        <th>Term</th>
+        <th></th>
+    </thead>
+    <tbody>
+        @if (terms.Count() == 0) {
+            <p>Loading Terms... If no terms appear, try adding a new term.</p>
+        }
+        else {
+            @foreach(Term term in terms) {
+                <tr>
+                    <td>@term.DisplayName</td>
+                    <button class="btn btn-primary" @onclick="() => ToggleEditTermDialog(EditMode.Edit, term)">Edit Term</button>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (termDialog) {
+    <TermDialog editMode="@editMode" term="selectedTerm" closeDialog="() => ToggleEditTermDialog(EditMode.Edit)" ReloadTerms="ReloadTerms"/>
+}
+
+
+
+@code {
+    public bool termDialog = false;
+    public EditMode editMode = EditMode.Create;
+    public Term selectedTerm = new();
+    List<Term> terms = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await ReloadTerms();
+    }
+
+    public async Task ToggleEditTermDialog(EditMode editedType, Term? chosenTerm = null) {
+        if (chosenTerm != null) selectedTerm = chosenTerm;
+        else selectedTerm = new(); // Establish the term to be edited or created
+
+        if (editedType == EditMode.Create) editMode = EditMode.Create;
+        else if (editedType == EditMode.Edit) editMode = EditMode.Edit; // Select create or edit type
+
+        if (termDialog == true) termDialog = false;
+        else if (termDialog == false) termDialog = true; // Open the Dialog (or close)
+        @* await ReloadTerms(); *@
+        StateHasChanged();
+    }
+
+    public async Task ReloadTerms() {
+        try {
+            terms = await termService.GetAllTerms();
+            StateHasChanged();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not reload the terms. Ex: {ex}");
+        }
+    }
+
+}
+

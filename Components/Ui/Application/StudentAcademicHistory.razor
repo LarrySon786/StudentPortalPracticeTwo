@@ -1,0 +1,69 @@
+@using StudentPortalPracticeTwo.Database.Models.Application
+@inject StudentPortalPracticeTwo.Components.Services.Application.DraftApplicationDb draftService
+
+<FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
+
+    <div class="form-group">
+        <label class="form-label">*Highschool Transcript</label>
+        <InputFile OnChange="UploadHighschoolTranscript" />
+        <ValidationMessage For="(() => Model.DraftAcademicHistory.HighschoolTranscript)"/>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">College Transcript (optional)</label>
+        <InputFile OnChange="UploadCollegeTranscript" />
+        <ValidationMessage For="(() => Model.DraftAcademicHistory.CollegeTranscript)" />
+    </div>
+
+</FormNavigation>
+
+
+@code {
+    [Parameter] public required DraftApplicationModel Model { get; set; }
+    [Parameter] public EventCallback Next { get; set; }
+    [Parameter] public EventCallback Prev { get; set; }
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+
+    public async Task UploadHighschoolTranscript(InputFileChangeEventArgs e) {
+
+        try {
+            var file = e.File;
+
+            if (file.ContentType != "application/pdf") return; // reject
+
+            using var memoryStream = new MemoryStream();
+            await file.OpenReadStream(maxAllowedSize: 5_000_000).CopyToAsync(memoryStream);
+
+            Model.DraftAcademicHistory.HighschoolTranscript = memoryStream.ToArray(); // Assign file to memory
+            Model.DraftAcademicHistory.HighschoolTranscriptFileName = file.Name;
+
+            await draftService.UpdateApplication(Model); // Save Upload
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not update the draft application. Ex: {ex}");
+        }
+    }
+
+    public async Task UploadCollegeTranscript(InputFileChangeEventArgs e)
+    {
+        try {
+            var file = e.File;
+
+            if (file.ContentType != "application/pdf") return; // reject
+
+            using var memoryStream = new MemoryStream();
+            await file.OpenReadStream(maxAllowedSize: 5_000_000).CopyToAsync(memoryStream);
+
+            Model.DraftAcademicHistory.CollegeTranscript = memoryStream.ToArray(); // Assign file to memory
+            Model.DraftAcademicHistory.CollegeTranscriptFileName = file.Name;
+
+            await draftService.UpdateApplication(Model); // Save Upload
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not update the draft application. Ex: {ex}");
+        }
+    }
+
+}

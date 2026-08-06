@@ -1,0 +1,99 @@
+@using StudentPortalPracticeTwo.Database.Models.Application
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@inject StudentPortalPracticeTwo.Components.Services.Admin.DegreeService degreeService
+@inject StudentPortalPracticeTwo.Components.Services.Admin.TermService termService
+
+
+<FormNavigation Model="@Model" Next="@OnNextSave" Prev="@OnBackSave" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
+
+    <legend>Program Selection</legend>
+
+    @if (degrees.Count == 0 || terms.Count == 0)
+    {
+        <p>Loading Available Programs...</p>
+    }
+    else
+    {
+        @* TODO: Add links to program descriptions *@
+
+        @* Program Selection *@
+        <label class="form-label">Choose Your Program</label>
+        <InputSelect class="form-select" @bind-Value="Model.DraftProgramSelection.SelectedProgramId">
+            <option value="">-- Select a Program --</option>
+            @foreach (Degree degree in degrees)
+            {
+                <option value="@degree.Id"> @degree.Name </option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => Model.DraftProgramSelection.SelectedProgramId)" />
+
+
+        @* Term Selection *@
+        <label class="form-label">Choose Your Start Term</label>
+        <InputSelect class="form-select" @bind-Value="Model.DraftProgramSelection.StartTermId">
+            <option value="">-- Select a Term --</option>
+            @foreach (Term term in terms)
+            {
+                <option value="@term.Id"> @term.DisplayName </option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => Model.DraftProgramSelection.StartTermId)" />
+    }
+
+</FormNavigation>
+
+
+@code {
+    [Parameter] public required DraftApplicationModel Model { get; set; }
+    [Parameter] public EventCallback Next { get; set; }
+    [Parameter] public EventCallback Prev { get; set; }
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+
+    private List<Degree> degrees { get; set; } = new();
+    private List<Term> terms { get; set; } = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            degrees = await degreeService.GetAllDegrees();
+            List<Term> allTerms = await termService.GetAllTerms();
+            terms = allTerms.Where(x => x.AvailableToRegisterClasses == true).ToList();
+            if (Model.DraftProgramSelection.StartTerm != null) {
+                
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not obtain all degrees. Ex: {ex}");
+        }
+    }
+
+    public async Task OnNextSave() {
+        try {
+            Model.DraftProgramSelection.SelectedProgram = degrees.FirstOrDefault(x => x.Id == Model.DraftProgramSelection.SelectedProgramId);
+            Model.DraftProgramSelection.StartTerm = terms.FirstOrDefault(x => x.Id == Model.DraftProgramSelection.StartTermId);
+            await Next.InvokeAsync();
+        }
+        catch (Exception ex ) {
+            Console.WriteLine($"Could not save draft. {ex}");
+        }
+    }
+
+    public async Task OnBackSave() {
+        try
+        {
+            Model.DraftProgramSelection.SelectedProgram = degrees.FirstOrDefault(x => x.Id == Model.DraftProgramSelection.SelectedProgramId);
+            Model.DraftProgramSelection.StartTerm = terms.FirstOrDefault(x => x.Id == Model.DraftProgramSelection.StartTermId);
+            await Prev.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not save draft. {ex}");
+        }
+    }
+
+}

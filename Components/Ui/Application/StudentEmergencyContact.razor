@@ -5,8 +5,6 @@
 
 <FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
     <legend>Emergency Contacts</legend>
-    
-    
     @foreach (DraftEmergencyContactModel contact in Model.DraftEmergencyContact!)
     {
         <div>

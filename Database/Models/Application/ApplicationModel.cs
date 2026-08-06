@@ -24,6 +24,13 @@ public class ApplicationModel
 
     [Required(ErrorMessage = "Emergency contacts are required")]
     public required List<EmergencyContactModel> EmergencyContact { get; set; }
+
+    [Required(ErrorMessage = "Student program selection is required")]
+    public required StudentProgram StudentProgram { get; set; }
+
+    [Required(ErrorMessage = "Student Academic History is required")]
+    public required AcademicHistoryModel AcademicHistory { get; set; }
+
 }
 public enum Status
 {

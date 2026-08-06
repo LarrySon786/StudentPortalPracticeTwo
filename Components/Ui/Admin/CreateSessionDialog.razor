@@ -3,6 +3,7 @@
 @using StudentPortalPracticeTwo.Database.Models.Degrees
 @inject StudentPortalPracticeTwo.Components.Services.Admin.ClassSessionService classSessionService;
 @inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService;
+@inject StudentPortalPracticeTwo.Components.Services.Extensions.TermServiceHelper termService;
 
 @* Background for Dialog *@
 <div class="overlay"></div> 
@@ -62,7 +63,12 @@
             @* Term *@
             <div class="form-group">
                 <label class="form-label">Term</label>
-                <InputText class="form-control" @bind-Value="editableSession!.Term" />
+                <InputSelect class="form-select" @bind-Value="editableSession!.Term" >
+                    <option value="" disabled> -- Select Term --</option>
+                    @foreach(Term term in terms) {
+                        <option value="@term">@term.DisplayName</option>
+                    }
+                </InputSelect>
                 <ValidationMessage For="(() => editableSession!.Term)" />
             </div>
             
@@ -120,9 +126,12 @@
     [Parameter] public EventCallback OnSessionCreated { get; set; }
     [Parameter] public Course courseSelected { get; set; } = null!; // This is the course the created Session is attached to. 
     [Parameter] public bool isEdit { get; set; } = false;
-    public List<Course>? availableCourses { get; set; } 
+    public List<Course>? availableCourses { get; set; }
+    public List<Term> terms { get; set; } = new();
 
     protected override async Task OnInitializedAsync() {
+        terms = termService.CalculateUpcomingTerms();
+
         @* Create and editable session for form *@
         editableSession = new ClassSession
         {

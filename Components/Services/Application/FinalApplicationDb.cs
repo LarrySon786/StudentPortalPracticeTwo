@@ -129,7 +129,18 @@ public class FinalApplicationDb
                 AltPhone = draft.DraftStudentContact.AltPhone ?? string.Empty,
             },
             EmergencyContact = EmergencyContactList, // Emergency Contact List created above
-
+            StudentProgram = new StudentProgram()
+            {
+                SelectedProgram = draft.DraftProgramSelection.SelectedProgram!,
+                StartTerm = draft.DraftProgramSelection.StartTerm!
+            },
+            AcademicHistory = new AcademicHistoryModel()
+            {
+                HighschoolTranscriptFileName = draft.DraftAcademicHistory.HighschoolTranscriptFileName,
+                HighschoolTranscript = draft.DraftAcademicHistory.HighschoolTranscript!,
+                CollegeTranscriptFileName = draft.DraftAcademicHistory.CollegeTranscriptFileName,
+                CollegeTranscript = draft.DraftAcademicHistory.CollegeTranscript
+            },
 
             ApprovedStatus = Status.Pending
         };
@@ -222,6 +233,16 @@ public class FinalApplicationDb
             if (string.IsNullOrWhiteSpace(contact.Relationship))
                 errors.Add("Please add a relationship to all of your emergency contacts.");
         }
+
+        // Program Selection
+        if (string.IsNullOrWhiteSpace(draft.DraftProgramSelection.SelectedProgram?.Name))
+            errors.Add("You must select a program to apply.");
+
+        if (string.IsNullOrWhiteSpace(draft.DraftProgramSelection.StartTerm?.DisplayName))
+            errors.Add("You must select a term to apply.");
+
+        if (draft.DraftAcademicHistory.HighschoolTranscript == null || draft.DraftAcademicHistory.HighschoolTranscript.Length == 0)
+            errors.Add("You must upload a highschool transcript to apply.");
 
         if (errors.Count == 0)
             return true;

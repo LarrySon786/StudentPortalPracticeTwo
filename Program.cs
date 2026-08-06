@@ -10,6 +10,7 @@ using StudentPortalPracticeTwo.Components.Services.EmailServices;
 using StudentPortalPracticeTwo.Components.Services.Students;
 using DotNetEnv;
 using StudentPortalPracticeTwo.Components.Services.Authentication;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,9 +44,11 @@ builder.Services.AddScoped<FinalApplicationDb>(); // Student Application
 builder.Services.AddScoped<DegreeService>(); // Admin Service - create degrees
 builder.Services.AddScoped<CourseService>(); // Admin Service - create courses/classes
 builder.Services.AddScoped<ClassSessionService>(); // Admin Service - create class sessions
+builder.Services.AddScoped<TermService>(); // Term Service - create and manage terms for students to register in
 builder.Services.AddScoped<IEmailService, EmailService>(); // Email services | Used in approval / declined application letters
 builder.Services.AddScoped<UserService>(); // Service to manage Users, reset passwords, and more
 builder.Services.AddScoped<AuthLogin>(); // Login, logout, and other auth methods
+builder.Services.AddScoped<TermServiceHelper>();
 DotNetEnv.Env.Load();
 
 var app = builder.Build();

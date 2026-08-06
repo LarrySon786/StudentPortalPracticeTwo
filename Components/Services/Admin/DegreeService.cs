@@ -23,8 +23,9 @@ public class DegreeService
     }
 
     // GET degree by id
-    public async Task<Degree?> GetDegreeById(int id)
+    public async Task<Degree?> GetDegreeById(int? id)
     {
+        if (id == null) throw new Exception("Could not get degree by id. Id received in parameter is null");
         return await _context.DegreeDb
             .Where(x => x.Id == id)
             .FirstOrDefaultAsync();

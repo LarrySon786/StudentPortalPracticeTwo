@@ -1,0 +1,71 @@
+@using SendGrid
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@inject StudentPortalPracticeTwo.Components.Services.Admin.TermService termService
+
+<div class="overlay">
+    <div class="overlay-container">
+        <div class="standard-card standard-dialog">
+            <EditForm Model="term" OnValidSubmit="HandleSubmit" FormName="Create or Edit Term">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label class="form-label">Year</label>
+                    <InputNumber class="form-control" @bind-Value="term.Year"/>
+                    <ValidationMessage For="@(() => term.Year)"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Season</label>
+                    <InputSelect class="form-select" @bind-Value="term.Season">
+                        <option value="" selected>--Select Season--</option> 
+                        <option value="@TermSeason.Fall">Fall</option>
+                        <option value="@TermSeason.Spring">Spring</option>
+                    </InputSelect>
+                    <ValidationMessage For="@(() => term.Season)" />
+                </div>
+                <div class="form-group mt-3">
+                    <label class="form-label">Make Term Available for Students to Sign Up</label>
+                    <InputRadioGroup class="form-radio" @bind-Value="term.AvailableToRegisterClasses">
+                        <label class="form-label" style="display:block;"
+                            ><InputRadio value="true" />Yes</label>
+                        <label class="form-label" style="display:block;">
+                            <InputRadio value="false" />No
+                        </label>
+                    </InputRadioGroup>
+                    <ValidationMessage For="@(() => term.Season)" />
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Term</button>
+                </div>
+                
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public EditMode editMode { get; set; } = EditMode.Create; // Sets edit or create mode
+    [Parameter] public Term term { get; set; } = new(); // Term that will be edited or created (optional parameter)
+    [Parameter] public EventCallback closeDialog { get; set; } // Action to close the dialog box
+    [Parameter] public EventCallback ReloadTerms { get; set; }
+
+    public async Task HandleSubmit() {
+        try {
+            if (editMode == EditMode.Create) await termService.CreateTerm(term); // Create Term
+            else if (editMode == EditMode.Edit) await termService.UpdateTerm(term); // Update Term
+            await HandleClose(); // Close Dialog
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not create/save changed to term. {ex}");
+        }
+    }
+
+    public async Task HandleClose() {
+        await closeDialog.InvokeAsync(); // Close Dialog
+        await ReloadTerms.InvokeAsync();
+    }
+}
+
+
+

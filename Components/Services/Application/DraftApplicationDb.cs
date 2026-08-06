@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Admin;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Application;
 
@@ -8,10 +9,12 @@ namespace StudentPortalPracticeTwo.Components.Services.Application;
 public class DraftApplicationDb
 {
     private readonly ApplicationDbContext _context;
+    private readonly DegreeService _degree;
 
-    public DraftApplicationDb(ApplicationDbContext context)
+    public DraftApplicationDb(ApplicationDbContext context, DegreeService degree)
     {
         _context = context;
+        _degree = degree;
     }
 
 
@@ -41,7 +44,9 @@ public class DraftApplicationDb
         {
             Email = email,
             DraftStudentInfo = new(),
-            DraftStudentContact = new()
+            DraftStudentContact = new(),
+            DraftEmergencyContact = new(),
+            DraftProgramSelection = new()
         };
 
         _context.DraftApplicationDb.Add(entity);
@@ -56,12 +61,14 @@ public class DraftApplicationDb
             .Include(x => x.DraftStudentInfo)
             .Include(x => x.DraftStudentContact)
             .Include(x => x.DraftEmergencyContact)
+            .Include(x => x.DraftProgramSelection)
             .FirstOrDefaultAsync(x => x.Id == updated.Id);
 
         if (existing == null)
         {
             throw new Exception("No application found");
         }
+        
 
         existing.Email = updated.Email;
 
@@ -71,6 +78,11 @@ public class DraftApplicationDb
         existing.DraftStudentContact?.Phone = updated.DraftStudentContact?.Phone;
 
         existing.DraftEmergencyContact = updated.DraftEmergencyContact;
+
+        existing.DraftProgramSelection = updated.DraftProgramSelection;
+
+        existing.DraftAcademicHistory = updated.DraftAcademicHistory;
+        
 
         await _context.SaveChangesAsync();
     }

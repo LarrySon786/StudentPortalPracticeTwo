@@ -5,9 +5,12 @@ SEND GRID | Email service
 dotnet add package SendGrid
 
 LEFT off
-- I started updating my application to have all user data / info. I finished Student Info and student contact.
-- I am currently working on Emergency contact. I wrote the models. Did the migrations. I need to ensure the 
-form components are completely written and designed. I need to make sure the emergency contact is created on form submission properly.
+- ClassSessions broke and needs repaired
+- I began to create the AcademicHistory section of the application. The models, UI components are set up. Databse updated
+Right now file upload works. It does NOT persist after navigating to different pages of the wizard form. Need to fix that
+- I was able to successfully finish the program select and sync with database. 
+- I also successfully created a term creation process from the admin end.
+- Degree creation, course creation all still working
 - I need to define all auth roles, what they will have access to
 
 

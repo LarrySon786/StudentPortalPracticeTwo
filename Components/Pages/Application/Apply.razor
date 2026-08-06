@@ -46,8 +46,19 @@
             }
             else if (currentPage == 3) {
                 <StudentEmergencyContact Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />
-            }
+            }  
+            @* Program Selection *@
             else if (currentPage == 4) {
+                <StudentProgramSelection Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />
+            }
+
+            @* Academic History *@
+            else if (currentPage == 5) {
+                <StudentAcademicHistory Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />
+            }
+
+            @* Submission Page *@
+            else if (currentPage == 6) {
                 <SubmissionForm Model="@Application" Prev=@Prev />
             }
         } 
@@ -57,7 +68,7 @@
     [Parameter] public int ApplicationId { get; set; }
     DraftApplicationModel? Application { get; set; }
     int currentPage = 0;
-    int totalPages = 4;
+    int totalPages = 6;
     private string message = "";
 
     protected override async Task OnInitializedAsync()

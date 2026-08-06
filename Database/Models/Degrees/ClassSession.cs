@@ -25,9 +25,10 @@ public class ClassSession
     public string Description { get; set; } = string.Empty;
 
     // Assign dates and times to the class (and school block)
-    [Required]
-    [StringLength(50)]
-    public string Term { get; set; } = string.Empty;
+    public int TermId { get; set; } // Term Relationship for database
+
+    [Required(ErrorMessage = "Term is required")]
+    public Term Term { get; set; } = null!; // Term Relationship for database
 
     [DataType(DataType.Date)]
     public DateOnly StartDate { get; set; }

@@ -92,19 +92,42 @@
         <legend>Contact Information</legend>
 
         @* Iterate through each emergency contact (up to three) *@
-        @foreach (DraftEmergencyContactModel contact in Model.DraftEmergencyContact) {
-            <label class="form-label">Contact Name</label>
-            <InputText class="form-control" @bind-Value="contact.ContactName" readonly/>
-            <ValidationMessage For="(() => contact.ContactName)"/>
+        @if (Model.DraftEmergencyContact != null) {
+            @foreach (DraftEmergencyContactModel contact in Model.DraftEmergencyContact) {
+                <label class="form-label">Contact Name</label>
+                <InputText class="form-control" @bind-Value="contact.ContactName" readonly/>
+                <ValidationMessage For="(() => contact.ContactName)"/>
 
-            <label class="form-label">Contact Relationship</label>
-            <InputText class="form-control" @bind-Value="contact.Relationship" readonly />
-            <ValidationMessage For="(() => contact.Relationship)" />
+                <label class="form-label">Contact Relationship</label>
+                <InputText class="form-control" @bind-Value="contact.Relationship" readonly />
+                <ValidationMessage For="(() => contact.Relationship)" />
 
-            <label class="form-label">Contact Phone Number</label>
-            <InputText class="form-control" @bind-Value="contact.Phone" readonly />
-            <ValidationMessage For="(() => contact.Phone)" />
+                <label class="form-label">Contact Phone Number</label>
+                <InputText class="form-control" @bind-Value="contact.Phone" readonly />
+                <ValidationMessage For="(() => contact.Phone)" />
+            }
         }
+    </fieldset>
+
+    <fieldset>
+        <legend>Program</legend>
+
+        <label class="form-label">Term</label>
+        <InputSelect class="form-control" @bind-Value="Model.DraftProgramSelection.StartTerm" readonly>
+            <option value=@Model.DraftProgramSelection.StartTerm>
+                @Model.DraftProgramSelection.StartTerm?.DisplayName
+            </option>
+        </InputSelect>
+        <ValidationMessage For="@(() => Model.DraftProgramSelection.StartTerm)" />
+
+        <label class="form-label">Program</label>
+        <InputSelect class="form-control" @bind-Value="Model.DraftProgramSelection.SelectedProgram" readonly>
+            <option value=@Model.DraftProgramSelection.SelectedProgram>
+                @Model.DraftProgramSelection.SelectedProgram?.Name
+            </option>
+        </InputSelect>
+        <ValidationMessage For="@(() => Model.DraftProgramSelection.StartTerm)" />
+
     </fieldset>
 
     <div>
@@ -112,10 +135,6 @@
         {
             <p class="error-messages">To make changes to your application, please navigate back to the correct section.</p>
             <p class="error-messages">@message</p>
-        }
-        else 
-        {
-
         }
     </div>
 

@@ -24,17 +24,21 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<StudentInfoModel> StudentInfoDb { get; set; }
     public DbSet<StudentContactModel> StudentContactDb { get; set; }
     public DbSet<EmergencyContactModel> EmergencyContactDb { get; set; }
+    public DbSet<StudentProgram> StudentProgramDb { get; set; }
 
     // DRAFT Application - used to save student progress in their application
     public DbSet<DraftApplicationModel> DraftApplicationDb { get; set; }
     public DbSet<DraftStudentInfoModel> DraftStudentInfoDb { get; set; }
     public DbSet<DraftStudentContactModel> DraftStudentContact { get; set; }
     public DbSet<DraftEmergencyContactModel> DraftEmergencyContact { get; set; }
+    public DbSet<DraftStudentProgram> DraftStudentProgram { get; set; }
+    public DbSet<DraftAcademicHistoryModel> DraftAcademicHistoryDb { get; set; }
 
     // DEGREES 
     public DbSet<Degree> DegreeDb { get; set; }
     public DbSet<Course> CourseDb { get; set; }
     public DbSet<ClassSession> ClassSessionDb { get; set; }
+    public DbSet<Term> TermDb { get; set; }
 
 
     // MODEL BUILDER
@@ -65,33 +69,76 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<ApplicationModel>()
             .HasOne(x => x.StudentInfo)
             .WithOne(x => x.Application)
-            .HasForeignKey<StudentInfoModel>(x => x.Id);
+            .HasForeignKey<StudentInfoModel>(x => x.Id)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<ApplicationModel>()
             .HasOne(x => x.StudentContact)
             .WithOne(x => x.Application)
-            .HasForeignKey<StudentContactModel>(x => x.Id);
+            .HasForeignKey<StudentContactModel>(x => x.Id)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<ApplicationModel>()
             .HasMany(x => x.EmergencyContact)
             .WithOne(x => x.Application)
-            .HasForeignKey(x => x.ApplicationId);
+            .HasForeignKey(x => x.ApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ApplicationModel>()
+            .HasOne(x => x.StudentProgram)
+            .WithOne(x => x.Application)
+            .HasForeignKey<StudentProgram>(x => x.ApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<ApplicationModel>() 
+            .HasOne(x => x.AcademicHistory)
+            .WithOne(x => x.Application)
+            .HasForeignKey<AcademicHistoryModel>(x => x.ApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
 
         // Draft
         modelBuilder.Entity<DraftApplicationModel>()
             .HasOne(x => x.DraftStudentInfo)
             .WithOne(x => x.Application)
-            .HasForeignKey<DraftStudentInfoModel>(x => x.Id);
+            .HasForeignKey<DraftStudentInfoModel>(x => x.Id)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<DraftApplicationModel>()
             .HasOne(x => x.DraftStudentContact)
             .WithOne(x => x.Application)
-            .HasForeignKey<DraftStudentContactModel>(x => x.Id);
+            .HasForeignKey<DraftStudentContactModel>(x => x.Id)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<DraftApplicationModel>()
             .HasMany(x => x.DraftEmergencyContact)
             .WithOne(x => x.Application)
-            .HasForeignKey(x => x.DraftApplicationId);
+            .HasForeignKey(x => x.DraftApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DraftApplicationModel>()
+            .HasOne(x => x.DraftProgramSelection)
+            .WithOne(x => x.Application)
+            .HasForeignKey<DraftStudentProgram>(x => x.ApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DraftStudentProgram>()
+            .HasOne(x => x.SelectedProgram)
+            .WithMany()
+            .HasForeignKey(x => x.SelectedProgramId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<DraftStudentProgram>()
+            .HasOne(x => x.StartTerm)
+            .WithMany()
+            .HasForeignKey(x => x.StartTermId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<DraftApplicationModel>()
+            .HasOne(x => x.DraftAcademicHistory)
+            .WithOne(x => x.DraftApplication)
+            .HasForeignKey<DraftAcademicHistoryModel>(x => x.DraftApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Degree
         modelBuilder.Entity<Degree>()
@@ -102,6 +149,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasMany(x => x.Sessions)
             .WithOne(x => x.Course)
             .HasForeignKey(x => x.CourseId);
+
+        modelBuilder.Entity<ClassSession>()
+            .HasOne(x => x.Term)
+            .WithMany(x => x.ClassSessions)
+            .HasForeignKey(x => x.TermId)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 }
 

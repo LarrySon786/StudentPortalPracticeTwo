@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudentPortalPracticeTwo.Database;
@@ -12,9 +13,11 @@ using StudentPortalPracticeTwo.Database;
 namespace StudentPortalPracticeTwo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260728145804_UpdateProgramSelection")]
+    partial class UpdateProgramSelection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -170,40 +173,6 @@ namespace StudentPortalPracticeTwo.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.AcademicHistoryModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ApplicationId")
-                        .HasColumnType("integer");
-
-                    b.Property<byte[]>("CollegeTranscript")
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("CollegeTranscriptFileName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<byte[]>("HighschoolTranscript")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("HighschoolTranscriptFileName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationId")
-                        .IsUnique();
-
-                    b.ToTable("AcademicHistoryModel");
-                });
-
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.ApplicationModel", b =>
                 {
                     b.Property<int>("Id")
@@ -222,39 +191,6 @@ namespace StudentPortalPracticeTwo.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ApplicationDb");
-                });
-
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.DraftAcademicHistoryModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<byte[]>("CollegeTranscript")
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("CollegeTranscriptFileName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("DraftApplicationId")
-                        .HasColumnType("integer");
-
-                    b.Property<byte[]>("HighschoolTranscript")
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("HighschoolTranscriptFileName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DraftApplicationId")
-                        .IsUnique();
-
-                    b.ToTable("DraftAcademicHistoryDb");
                 });
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.DraftApplicationModel", b =>
@@ -381,10 +317,10 @@ namespace StudentPortalPracticeTwo.Migrations
                     b.Property<int>("ApplicationId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("SelectedProgramId")
+                    b.Property<int>("SelectedProgramId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("StartTermId")
+                    b.Property<int>("StartTermId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -530,7 +466,7 @@ namespace StudentPortalPracticeTwo.Migrations
 
                     b.HasIndex("StartTermId");
 
-                    b.ToTable("StudentProgramDb");
+                    b.ToTable("StudentProgram");
                 });
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.ClassSession", b =>
@@ -650,9 +586,6 @@ namespace StudentPortalPracticeTwo.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("AvailableToRegisterClasses")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("Season")
                         .HasColumnType("integer");
 
@@ -661,7 +594,7 @@ namespace StudentPortalPracticeTwo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TermDb");
+                    b.ToTable("Term");
                 });
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Students.ApplicationUser", b =>
@@ -856,28 +789,6 @@ namespace StudentPortalPracticeTwo.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.AcademicHistoryModel", b =>
-                {
-                    b.HasOne("StudentPortalPracticeTwo.Database.Models.Application.ApplicationModel", "Application")
-                        .WithOne("AcademicHistory")
-                        .HasForeignKey("StudentPortalPracticeTwo.Database.Models.Application.AcademicHistoryModel", "ApplicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Application");
-                });
-
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.DraftAcademicHistoryModel", b =>
-                {
-                    b.HasOne("StudentPortalPracticeTwo.Database.Models.Application.DraftApplicationModel", "DraftApplication")
-                        .WithOne("DraftAcademicHistory")
-                        .HasForeignKey("StudentPortalPracticeTwo.Database.Models.Application.DraftAcademicHistoryModel", "DraftApplicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DraftApplication");
-                });
-
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.DraftEmergencyContactModel", b =>
                 {
                     b.HasOne("StudentPortalPracticeTwo.Database.Models.Application.DraftApplicationModel", "Application")
@@ -922,12 +833,14 @@ namespace StudentPortalPracticeTwo.Migrations
                     b.HasOne("StudentPortalPracticeTwo.Database.Models.Degrees.Degree", "SelectedProgram")
                         .WithMany()
                         .HasForeignKey("SelectedProgramId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("StudentPortalPracticeTwo.Database.Models.Degrees.Term", "StartTerm")
                         .WithMany()
                         .HasForeignKey("StartTermId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Application");
 
@@ -1045,9 +958,6 @@ namespace StudentPortalPracticeTwo.Migrations
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.ApplicationModel", b =>
                 {
-                    b.Navigation("AcademicHistory")
-                        .IsRequired();
-
                     b.Navigation("EmergencyContact");
 
                     b.Navigation("StudentContact")
@@ -1062,9 +972,6 @@ namespace StudentPortalPracticeTwo.Migrations
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Application.DraftApplicationModel", b =>
                 {
-                    b.Navigation("DraftAcademicHistory")
-                        .IsRequired();
-
                     b.Navigation("DraftEmergencyContact");
 
                     b.Navigation("DraftProgramSelection")
