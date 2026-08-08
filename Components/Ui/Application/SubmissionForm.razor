@@ -130,6 +130,32 @@
 
     </fieldset>
 
+    <fieldset>
+        <legend>Academic History</legend>
+
+        <label class="form-label">Highschool Transcript</label>
+        @if (string.IsNullOrWhiteSpace(@Model.DraftAcademicHistory.HighschoolTranscriptFileName) == false) {
+            <p>@Model.DraftAcademicHistory.HighschoolTranscriptFileName</p> 
+        }
+        else if (string.IsNullOrWhiteSpace(@Model.DraftAcademicHistory.HighschoolTranscriptFileName) == true) {
+            <p>None</p>
+        }
+        <ValidationMessage For="(() => Model.DraftAcademicHistory.HighschoolTranscript)"/>
+        
+
+        <label class="form-label">College Transcript</label>
+        @if (string.IsNullOrWhiteSpace(@Model.DraftAcademicHistory.CollegeTranscriptFileName) == false)
+        {
+            <p>@Model.DraftAcademicHistory.CollegeTranscriptFileName</p>
+        }
+        else if (string.IsNullOrWhiteSpace(@Model.DraftAcademicHistory.CollegeTranscriptFileName) == true)
+        {
+            <p>None</p>
+        }
+        <ValidationMessage For="(() => Model.DraftAcademicHistory.CollegeTranscript)" />
+
+    </fieldset>
+
     <div>
         @if (@message != "") 
         {

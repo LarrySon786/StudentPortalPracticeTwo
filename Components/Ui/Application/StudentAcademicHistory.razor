@@ -1,15 +1,29 @@
 @using StudentPortalPracticeTwo.Database.Models.Application
+@using StudentPortalPracticeTwo.Database.Models.Enums
 @inject StudentPortalPracticeTwo.Components.Services.Application.DraftApplicationDb draftService
 
 <FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
 
     <div class="form-group">
-        <label class="form-label">*Highschool Transcript</label>
+        @if (string.IsNullOrWhiteSpace(Model.DraftAcademicHistory.HighschoolTranscriptFileName) == false) {
+            <p><span style="font-weight: 800;">Current Highschool Transcript:</span> @Model.DraftAcademicHistory.HighschoolTranscriptFileName</p>
+                <button type="button" class="btn btn-link" style="display:inline" @onclick="() => RemoveTranscript(TranscriptType.Highschool)">Remove
+                    Transcript</button>
+        }
+        <label class="form-label" style="display:block;">*Highschool Transcript</label>
         <InputFile OnChange="UploadHighschoolTranscript" />
+        
         <ValidationMessage For="(() => Model.DraftAcademicHistory.HighschoolTranscript)"/>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" >
+            @if (string.IsNullOrWhiteSpace(Model.DraftAcademicHistory.CollegeTranscriptFileName) == false)
+            {
+                <p><span style="font-weight: 800;">Current College Transcript:</span> @Model.DraftAcademicHistory.CollegeTranscriptFileName</p>
+                        <button type="button" class="btn btn-link" style="display:block;" @onclick=" ()=>
+                            RemoveTranscript(TranscriptType.College)">Remove Transcript</button>
+
+            }
         <label class="form-label">College Transcript (optional)</label>
         <InputFile OnChange="UploadCollegeTranscript" />
         <ValidationMessage For="(() => Model.DraftAcademicHistory.CollegeTranscript)" />
@@ -63,6 +77,23 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Could not update the draft application. Ex: {ex}");
+        }
+    }
+
+    public async Task RemoveTranscript(TranscriptType type) {
+        if (type == TranscriptType.Highschool) {
+            Model.DraftAcademicHistory.HighschoolTranscript = null;
+            Model.DraftAcademicHistory.HighschoolTranscriptFileName = string.Empty;
+        }
+        else if (type == TranscriptType.College) {
+            Model.DraftAcademicHistory.CollegeTranscript = null;
+            Model.DraftAcademicHistory.CollegeTranscriptFileName = string.Empty;
+        }
+        try {
+            await draftService.UpdateApplication(Model);
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not remove transcript. Ex: {ex}");
         }
     }
 

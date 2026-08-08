@@ -1,16 +1,8 @@
-Setup authorization using ASP.NET's standard authorization core
-dotnet add package Microsoft.AspNetCore.Components.Authorization
 
-SEND GRID | Email service
-dotnet add package SendGrid
 
 LEFT off
 - ClassSessions broke and needs repaired
-- I began to create the AcademicHistory section of the application. The models, UI components are set up. Databse updated
-Right now file upload works. It does NOT persist after navigating to different pages of the wizard form. Need to fix that
-- I was able to successfully finish the program select and sync with database. 
-- I also successfully created a term creation process from the admin end.
-- Degree creation, course creation all still working
+- I successfully finished Academic History. Saves to DB as expected. State persists.
 - I need to define all auth roles, what they will have access to
 
 
@@ -70,3 +62,10 @@ Authentication + authorization
 - Make sure cookie is being created. See program.cs for details of route request and cookie creation.
 - Roles are assigned at user creation.
 - Cookie expiration, persistence, and other settings are set before app.build().
+
+
+Setup authorization using ASP.NET's standard authorization core
+dotnet add package Microsoft.AspNetCore.Components.Authorization
+
+SEND GRID | Email service
+dotnet add package SendGrid
