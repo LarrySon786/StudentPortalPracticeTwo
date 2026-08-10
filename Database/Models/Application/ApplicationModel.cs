@@ -31,6 +31,9 @@ public class ApplicationModel
     [Required(ErrorMessage = "Student Academic History is required")]
     public required AcademicHistoryModel AcademicHistory { get; set; }
 
+    [Required(ErrorMessage = "Student Essays are required")]
+    public required StudentEssayModel Essays { get; set; }
+
 }
 public enum Status
 {

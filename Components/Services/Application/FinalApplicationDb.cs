@@ -37,6 +37,10 @@ public class FinalApplicationDb
         return await _context.ApplicationDb
             .Include(x => x.StudentInfo)
             .Include(y => y.StudentContact)
+            .Include(x => x.EmergencyContact)
+            .Include(x => x.StudentProgram)
+            .Include(x => x.AcademicHistory)
+            .Include(x => x.Essays)
             .ToListAsync();
     }
 
@@ -47,6 +51,10 @@ public class FinalApplicationDb
             .Where(x => x.ApprovedStatus == Status.Pending)
             .Include(x => x.StudentInfo)
             .Include(y => y.StudentContact)
+            .Include(x => x.EmergencyContact)
+            .Include(x => x.StudentProgram)
+            .Include(x => x.AcademicHistory)
+            .Include(x => x.Essays)
             .ToListAsync();
     }
 
@@ -55,6 +63,10 @@ public class FinalApplicationDb
         var entity = await _context.ApplicationDb
             .Include(x => x.StudentInfo)
             .Include(x => x.StudentContact)
+            .Include(x => x.EmergencyContact)
+            .Include(x => x.StudentProgram)
+            .Include(x => x.AcademicHistory)
+            .Include(x => x.Essays)
             .FirstOrDefaultAsync(x => x.Email == email);
 
         return entity;
@@ -65,6 +77,10 @@ public class FinalApplicationDb
         var entity = await _context.ApplicationDb
             .Include(x => x.StudentInfo)
             .Include(x => x.StudentContact)
+            .Include(x => x.EmergencyContact)
+            .Include(x => x.StudentProgram)
+            .Include(x => x.AcademicHistory)
+            .Include(x => x.Essays)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         return entity;
@@ -114,6 +130,7 @@ public class FinalApplicationDb
                 FirstName = draft.DraftStudentInfo!.FirstName!,
                 MiddleName = draft.DraftStudentInfo!.MiddleName!,
                 LastName = draft.DraftStudentInfo!.LastName!,
+                DateOfBirth = draft.DraftStudentInfo.DateOfBirth,
                 Race = draft.DraftStudentInfo.Race!.Value,
                 Gender = draft.DraftStudentInfo.Gender!.Value,
                 CitizenshipCountry = draft.DraftStudentInfo.CitizenshipCountry!.Value,
@@ -126,7 +143,7 @@ public class FinalApplicationDb
             StudentContact = new StudentContactModel()
             {
                 Phone = draft.DraftStudentContact!.Phone!,
-                AltPhone = draft.DraftStudentContact.AltPhone ?? string.Empty,
+                AltPhone = draft.DraftStudentContact.AltPhone,
             },
             EmergencyContact = EmergencyContactList, // Emergency Contact List created above
             StudentProgram = new StudentProgram()
@@ -141,9 +158,28 @@ public class FinalApplicationDb
                 CollegeTranscriptFileName = draft.DraftAcademicHistory.CollegeTranscriptFileName,
                 CollegeTranscript = draft.DraftAcademicHistory.CollegeTranscript
             },
+            Essays = new StudentEssayModel()
+            {
+                ResponseOne = draft.DraftEssays.ResponseOne,
+                ResponseTwo = draft.DraftEssays.ResponseTwo,
+                ResponseThree = draft.DraftEssays.ResponseThree
+            },
 
             ApprovedStatus = Status.Pending
         };
+        // Validate Final Draft
+        ValidateFinalDraft(entity, validationResults);
+
+        // Add server-side errors to UI errors
+        errors.AddRange(validationResults
+            .Where(v => !string.IsNullOrWhiteSpace(v.ErrorMessage))
+            .Select(v => v.ErrorMessage!)
+        );
+
+        // BLOCK SAVE AND THROW ERRORS IF ANY
+        if (errors.Any())
+            throw new ValidationException(string.Join(Environment.NewLine, errors));
+
 
         _context.ApplicationDb.Add(entity);
         await _context.SaveChangesAsync();
@@ -156,6 +192,10 @@ public class FinalApplicationDb
         ApplicationModel? entity = await _context.ApplicationDb
             .Include(x => x.StudentContact)
             .Include(x => x.StudentInfo)
+            .Include(x => x.EmergencyContact)
+            .Include(x => x.StudentProgram)
+            .Include(x => x.AcademicHistory)
+            .Include(x => x.Essays)
             .FirstOrDefaultAsync(x => x.Id == updated.Id);
 
         if (entity == null)
@@ -244,9 +284,28 @@ public class FinalApplicationDb
         if (draft.DraftAcademicHistory.HighschoolTranscript == null || draft.DraftAcademicHistory.HighschoolTranscript.Length == 0)
             errors.Add("You must upload a highschool transcript to apply.");
 
+        // Highschool Transcript
+        if (string.IsNullOrWhiteSpace(draft.DraftAcademicHistory.HighschoolTranscriptFileName))
+        {
+            errors.Add("You must have a highschool transcript uploaded to submit this application.");
+        }
+
+        // Essay Questions
+        if (string.IsNullOrWhiteSpace(draft.DraftEssays.ResponseOne))
+        {
+            errors.Add("Essay response one is missing.");
+        }
+        if (string.IsNullOrWhiteSpace(draft.DraftEssays.ResponseTwo))
+        {
+            errors.Add("Essay response two is missing.");
+        }
+        if (string.IsNullOrWhiteSpace(draft.DraftEssays.ResponseThree))
+        {
+            errors.Add("Essay response three is missing.");
+        }
+
         if (errors.Count == 0)
             return true;
-
         return false;
     }
 
@@ -257,42 +316,139 @@ public class FinalApplicationDb
 
         bool isValid = true;
 
-        // Validate parent
-        var parentContext = new ValidationContext(draft);
-        isValid &= Validator.TryValidateObject(
-            draft,
-            parentContext,
-            validationResults,
-            validateAllProperties: true
-        );
+        // // Validate parent
+        // var parentContext = new ValidationContext(draft);
+        // isValid &= Validator.TryValidateObject(
+        //     draft,
+        //     parentContext,
+        //     validationResults,
+        //     validateAllProperties: true
+        // );
 
-        // Validate StudentInfo
-        if (draft.DraftStudentInfo != null)
+        // // Validate StudentInfo
+        // if (draft.DraftStudentInfo != null)
+        // {
+        //     var studentInfoContext = new ValidationContext(draft.DraftStudentInfo);
+        //     isValid &= Validator.TryValidateObject(
+        //         draft.DraftStudentInfo,
+        //         studentInfoContext,
+        //         validationResults,
+        //         validateAllProperties: true
+        //     );
+        // }
+
+        // Console.WriteLine($"Phone: '{draft.DraftStudentContact.Phone}'");
+        // Console.WriteLine($"AltPhone: '{draft.DraftStudentContact.AltPhone}'");
+        // Console.WriteLine($"AltPhone null: {draft.DraftStudentContact.AltPhone == null}");
+        // Console.WriteLine($"AltPhone length: {draft.DraftStudentContact.AltPhone?.Length}");
+
+        // // Validate StudentContact
+        // if (draft.DraftStudentContact != null)
+        // {
+        //     var studentContactContext = new ValidationContext(draft.DraftStudentContact);
+        //     isValid &= Validator.TryValidateObject(
+        //         draft.DraftStudentContact,
+        //         studentContactContext,
+        //         validationResults,
+        //         validateAllProperties: true
+        //     );
+        // }
+
+        // if (draft.DraftEssays != null)
+        // {
+        //     var studentEssayContext = new ValidationContext(draft.DraftEssays);
+        //     isValid &= Validator.TryValidateObject(
+        //         draft.DraftEssays,
+        //         studentEssayContext,
+        //         validationResults,
+        //         validateAllProperties: true
+        //     );
+        // }
+
+        return isValid;
+    }
+
+    public bool ValidateFinalDraft(ApplicationModel final, List<ValidationResult>? validationResults)
+    {
+        if (validationResults == null)
+            validationResults = new List<ValidationResult>();
+
+        bool isValid = true;
+
+        if (final.StudentInfo != null)
         {
-            var studentInfoContext = new ValidationContext(draft.DraftStudentInfo);
+            var studentInfoContext = new ValidationContext(final.StudentInfo);
             isValid &= Validator.TryValidateObject(
-                draft.DraftStudentInfo,
+                final.StudentInfo,
                 studentInfoContext,
                 validationResults,
                 validateAllProperties: true
             );
         }
 
-        // Validate StudentContact
-        if (draft.DraftStudentContact != null)
+        var minimumDate = DateOnly.FromDateTime(DateTime.Today).AddYears(-12); // Minimum Age is 12 to apply
+        if ((final.StudentInfo!.DateOfBirth < minimumDate) == false)
         {
-            var studentContactContext = new ValidationContext(draft.DraftStudentContact);
+            isValid = false;
+            var dateResult = new ValidationResult("The minimum age to apply is 12 years old. Please change your date of birth.");
+            validationResults.Add(dateResult);
+        }
+        
+
+        if (final.StudentContact != null)
+        {
+            var studentContactContext = new ValidationContext(final.StudentContact);
             isValid &= Validator.TryValidateObject(
-                draft.DraftStudentContact,
+                final.StudentContact,
                 studentContactContext,
                 validationResults,
                 validateAllProperties: true
             );
         }
+        if (final.EmergencyContact != null)
+        {
+            var studentEmergencyContext = new ValidationContext(final.EmergencyContact);
+            isValid &= Validator.TryValidateObject(
+                final.EmergencyContact,
+                studentEmergencyContext,
+                validationResults,
+                validateAllProperties: true
+            );
+        }
+        if (final.StudentProgram != null)
+        {
+            var studentProgramContext = new ValidationContext(final.StudentProgram);
+            isValid &= Validator.TryValidateObject(
+                final.StudentProgram,
+                studentProgramContext,
+                validationResults,
+                validateAllProperties: true
+            );
+        }
+        if (final.AcademicHistory != null)
+        {
+            var studentAcademicContext = new ValidationContext(final.AcademicHistory);
+            isValid &= Validator.TryValidateObject(
+                final.AcademicHistory,
+                studentAcademicContext,
+                validationResults,
+                validateAllProperties: true
+            );
+        }
+        if (final.Essays != null)
+        {
+            var studentEssaysContext = new ValidationContext(final.Essays);
+            isValid &= Validator.TryValidateObject(
+                final.Essays,
+                studentEssaysContext,
+                validationResults,
+                validateAllProperties: true
+            );
+        }
+
 
         return isValid;
     }
-
     public async Task DownloadPdf(int id)
     {
         var application = await GetById(id);

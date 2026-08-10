@@ -26,6 +26,10 @@ public class StudentInfoModel
     [StringLength(100, ErrorMessage = "Last name cannot exceed 100 characters")]
     public required string LastName { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Date of birth is required.")]
+    [Display(Name = "Date of Birth")]
+    public required DateOnly DateOfBirth { get; set; }
+
     [Required(ErrorMessage = "Race is required")]
     [Display(Name = "Race")]
     public required Race Race { get; set; }

@@ -1,0 +1,33 @@
+@using StudentPortalPracticeTwo.Database.Models.Application
+
+<FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
+    <p>For this section, please enter a response for each question (Between 300 - 700 words)</p>
+    
+    <div class="form-group">
+        <label class="form-label">Essay Entry One:</label>
+        <InputTextArea class="form-control" @bind-Value="Model.DraftEssays.ResponseOne"/>
+        <ValidationMessage For="(() => Model.DraftEssays.ResponseOne)"/>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Essay Entry Two:</label>
+        <InputTextArea class="form-control" @bind-Value="Model.DraftEssays.ResponseTwo" />
+        <ValidationMessage For="(() => Model.DraftEssays.ResponseTwo)" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Essay Entry Three:</label>
+        <InputTextArea class="form-control" @bind-Value="Model.DraftEssays.ResponseThree" />
+        <ValidationMessage For="(() => Model.DraftEssays.ResponseThree)" />
+    </div>
+</FormNavigation>
+
+
+@code {
+    [Parameter] public required DraftApplicationModel Model { get; set; }
+    [Parameter] public EventCallback Next { get; set; }
+    [Parameter] public EventCallback Prev { get; set; }
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+
+}

@@ -26,4 +26,6 @@ public class DraftApplicationModel
 
     public DraftAcademicHistoryModel DraftAcademicHistory { get; set; } = new();
 
+    public DraftStudentEssayModel DraftEssays { get; set; } = new();
+
 }

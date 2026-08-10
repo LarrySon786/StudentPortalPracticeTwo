@@ -1,8 +1,10 @@
 
 
 LEFT off
+
 - ClassSessions broke and needs repaired
-- I successfully finished Academic History. Saves to DB as expected. State persists.
+- I fixed transcripts not rendering immediately on reload of draft
+- I fixed all validation errors and it is functioning
 - I need to define all auth roles, what they will have access to
 
 
@@ -69,3 +71,8 @@ dotnet add package Microsoft.AspNetCore.Components.Authorization
 
 SEND GRID | Email service
 dotnet add package SendGrid
+
+450 character Lorem Text
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae justo nec erat feugiat tincidunt. Integer euismod, nisl at convallis luctus, sapien arcu facilisis massa, vitae posuere libero neque sed augue. Curabitur non magna vel mi consequat suscipit. Donec interdum, sapien a ullamcorper luctus, justo erat tincidunt nibh, sed feugiat lectus urna vitae nulla. Aliquam erat volutpat. Sed posuere, nisl non dignissim luctus, nunc erat sed.
+

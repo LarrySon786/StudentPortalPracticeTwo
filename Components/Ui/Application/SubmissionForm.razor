@@ -156,6 +156,29 @@
 
     </fieldset>
 
+    <fieldset>
+        <legend>Essay Responses</legend>
+
+        <div class="form-group">
+            <label class="form-label">Essay Entry One:</label>
+            <InputTextArea class="form-control" @bind-Value="Model.DraftEssays.ResponseOne" disabled />
+            <ValidationMessage For="(() => Model.DraftEssays.ResponseOne)" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Essay Entry Two:</label>
+            <InputTextArea class="form-control" @bind-Value="Model.DraftEssays.ResponseTwo" disabled />
+            <ValidationMessage For="(() => Model.DraftEssays.ResponseTwo)" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Essay Entry Three:</label>
+            <InputTextArea class="form-control" @bind-Value="Model.DraftEssays.ResponseThree" disabled />
+            <ValidationMessage For="(() => Model.DraftEssays.ResponseThree)" />
+        </div>
+
+    </fieldset>
+
     <div>
         @if (@message != "") 
         {

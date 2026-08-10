@@ -23,6 +23,10 @@ public class DraftApplicationDb
         var entity = await _context.DraftApplicationDb
             .Include(x => x.DraftStudentInfo)
             .Include(x => x.DraftStudentContact)
+            .Include(x => x.DraftEmergencyContact)
+            .Include(x => x.DraftProgramSelection)
+            .Include(x => x.DraftAcademicHistory)
+            .Include(x => x.DraftEssays)
             .FirstOrDefaultAsync(x => x.Email == email);
 
         return entity;
@@ -33,6 +37,10 @@ public class DraftApplicationDb
         var entity = await _context.DraftApplicationDb
             .Include(x => x.DraftStudentInfo)
             .Include(x => x.DraftStudentContact)
+            .Include(x => x.DraftEmergencyContact)
+            .Include(x => x.DraftProgramSelection)
+            .Include(x => x.DraftAcademicHistory)
+            .Include(x => x.DraftEssays)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         return entity;
@@ -46,7 +54,9 @@ public class DraftApplicationDb
             DraftStudentInfo = new(),
             DraftStudentContact = new(),
             DraftEmergencyContact = new(),
-            DraftProgramSelection = new()
+            DraftProgramSelection = new(),
+            DraftAcademicHistory = new(),
+            DraftEssays = new(),
         };
 
         _context.DraftApplicationDb.Add(entity);
@@ -62,6 +72,8 @@ public class DraftApplicationDb
             .Include(x => x.DraftStudentContact)
             .Include(x => x.DraftEmergencyContact)
             .Include(x => x.DraftProgramSelection)
+            .Include(x => x.DraftAcademicHistory)
+            .Include(x => x.DraftEssays)
             .FirstOrDefaultAsync(x => x.Id == updated.Id);
 
         if (existing == null)
@@ -72,16 +84,17 @@ public class DraftApplicationDb
 
         existing.Email = updated.Email;
 
-        existing.DraftStudentInfo?.FirstName = updated.DraftStudentInfo?.FirstName;
-        existing.DraftStudentInfo?.LastName = updated.DraftStudentInfo?.LastName;
+        existing.DraftStudentInfo = updated.DraftStudentInfo;
 
-        existing.DraftStudentContact?.Phone = updated.DraftStudentContact?.Phone;
+        existing.DraftStudentContact = updated.DraftStudentContact;
 
         existing.DraftEmergencyContact = updated.DraftEmergencyContact;
 
         existing.DraftProgramSelection = updated.DraftProgramSelection;
 
         existing.DraftAcademicHistory = updated.DraftAcademicHistory;
+
+        existing.DraftEssays = updated.DraftEssays;
         
 
         await _context.SaveChangesAsync();

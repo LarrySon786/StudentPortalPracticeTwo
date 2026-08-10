@@ -1,0 +1,27 @@
+***This document is to list all my accomplishments in this project***
+
+
+EF Core Identity Authentication / Authorization
+
+
+
+
+Other:
+Supabase auth
+Supabase database
+Azure database
+
+Traceable trail:
+
+
+
+- I finished the emergency contacts. Fixed errors with state not saving on list
+- I successfully finished student program selection. I fixed errors involving non-save of terms.
+- I created an admin page to manage terms and add them / mark as available for scheduling
+- I successfully finished Academic History. Saves to DB as expected. State persists.
+- I finished setting up Student Essay responses
+- I fixed transcripts not rendering immediately on reload of draft
+- I fixed all validation errors and it is functioning
+- I added date of birth to the application. Added server side validation
+
+

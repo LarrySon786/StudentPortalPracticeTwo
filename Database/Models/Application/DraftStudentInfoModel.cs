@@ -23,6 +23,9 @@ public class DraftStudentInfoModel
     [StringLength(100, ErrorMessage = "Last name cannot exceed 100 characters")]
     public string? LastName { get; set; }
 
+    [Display(Name = "Date of Birth")]
+    public DateOnly DateOfBirth { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+
     [Display(Name = "Race")]
     public Race? Race { get; set; }
 

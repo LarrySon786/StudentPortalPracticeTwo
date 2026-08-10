@@ -57,8 +57,13 @@
                 <StudentAcademicHistory Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />
             }
 
-            @* Submission Page *@
+            @* Student Essays *@
             else if (currentPage == 6) {
+                <StudentEssayQuestions Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />
+            }
+            
+            @* Submission Page *@
+            else if (currentPage == 7) {
                 <SubmissionForm Model="@Application" Prev=@Prev />
             }
         } 
@@ -68,7 +73,7 @@
     [Parameter] public int ApplicationId { get; set; }
     DraftApplicationModel? Application { get; set; }
     int currentPage = 0;
-    int totalPages = 6;
+    int totalPages = 7;
     private string message = "";
 
     protected override async Task OnInitializedAsync()

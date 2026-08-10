@@ -42,7 +42,7 @@
                     @* Double click on student to open their details *@
                     <tr @ondblclick="() => ReviewStudent(application.Id)">
                         <td>@application.StudentInfo.FirstName @application.StudentInfo.LastName</td>
-                        <td>INSERT_DOB</td>
+                        <td>@application.StudentInfo.DateOfBirth</td>
                         <td>@application.Email</td>
                         <td>INSERT_DATE RECEIVED</td>
                     </tr>

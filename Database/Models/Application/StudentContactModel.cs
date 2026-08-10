@@ -12,11 +12,10 @@ public class StudentContactModel
     public ApplicationModel Application { get; set; } = null!;
 
     [Required(ErrorMessage = "Phone number is required")]
-    [Phone(ErrorMessage = "Must be a valid phone number")]
+    [Phone(ErrorMessage = "Must be a valid phone number.")]
     public required string Phone { get; set; }
 
-    [Phone(ErrorMessage = "Must be a valid phone number")]
-    public required string AltPhone { get; set; }
-
+    [Phone(ErrorMessage = "Must be a valid alternative phone number.")]
+    public string? AltPhone { get; set; }
 
 }

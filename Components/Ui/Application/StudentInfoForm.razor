@@ -24,6 +24,12 @@
     </div>
 
     <div class="mb-3">
+        <label class="form-label">Date of Birth</label>
+        <InputDate class="form-control" @bind-Value="Model.DraftStudentInfo!.DateOfBirth" />
+        <ValidationMessage For="@(() => Model.DraftStudentInfo.DateOfBirth)" />
+    </div>
+
+    <div class="mb-3">
         <label class="form-label">Race</label>
         <InputSelect class="form-select" @bind-Value="Model.DraftStudentInfo!.Race">
             <option value="">Select race</option>
