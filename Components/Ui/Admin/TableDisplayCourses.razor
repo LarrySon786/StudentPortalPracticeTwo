@@ -18,7 +18,7 @@
             <td>@course.Name</td>
             <td>@course.Credits</td>
             <div>
-                <td><button class="btn btn-primary" @onclick="() => ToggleEdit(course)">Edit Course</button></td>
+                <td><button class="btn btn-primary" @onclick="() => ToggleEdit(course.Id)">Edit Course</button></td>
                 <td><button class="btn btn-secondary">View Degrees</button></td>
                 <td><button class="btn btn-secondary">View Sessions</button></td>
                 <td><button class="btn btn-danger" @onclick="() => HandleDelete(course.Id)">Delete</button></td>
@@ -28,7 +28,7 @@
 </table>
 
 @if (editCourseDialog) {
-    <CreateCourse IsEditing="true" course="@selectedCourse" CloseDialog="() => ToggleEdit(selectedCourse)"/> 
+    <CreateCourse IsEditing="true" courseId="selectedCourseId" CloseDialog="() => ToggleEdit(selectedCourseId)"/> 
 }
 
 
@@ -36,7 +36,7 @@
 @code {
     public List<Course> courses = new();
     public bool editCourseDialog = false;
-    public Course selectedCourse = new();
+    public int selectedCourseId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,8 +73,9 @@
         }
     }
 
-    public void ToggleEdit(Course selected) {
-        selectedCourse = selected;
+    public async Task ToggleEdit(int selectedId) {
+
+        selectedCourseId = selectedId;
         if (editCourseDialog == false) editCourseDialog = true;
         else if (editCourseDialog == true) editCourseDialog = false;
     }

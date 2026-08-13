@@ -1,11 +1,8 @@
 
 
 LEFT off
-
-- ClassSessions broke and needs repaired
-- I fixed transcripts not rendering immediately on reload of draft
-- I fixed all validation errors and it is functioning
-- I need to define all auth roles, what they will have access to
+- I finished fixing ClassSessions. There is one error where course's reference to class session does not referesh
+after deleting classSession. It does referesh after page reload.
 
 
 

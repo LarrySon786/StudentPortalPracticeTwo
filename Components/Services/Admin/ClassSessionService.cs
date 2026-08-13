@@ -54,6 +54,7 @@ public class ClassSessionService
         existing.StartTime = updated.StartTime;
         existing.EndTime = updated.EndTime;
         existing.Location = updated.Location;
+        existing.Term!.Id = updated.Term!.Id;
 
         await _context.SaveChangesAsync();
     }
@@ -61,8 +62,8 @@ public class ClassSessionService
     // DELETE existing class session
     public async Task DeleteClassSession(int id)
     {
-        _context.ClassSessionDb
+        await _context.ClassSessionDb
             .Where(x => x.Id == id)
-            .ExecuteDelete();
+            .ExecuteDeleteAsync();
     }
 }

@@ -11,76 +11,89 @@
     <div class="standard-card standard-dialog">
         <h1>@(IsEditing ? "Edit Course" : "Create Course")</h1>
 
-        <EditForm Model="course" OnValidSubmit="HandleSubmit" FormName="@(IsEditing ? "Edit Course Form" : "Create Course Form")">
-            <DataAnnotationsValidator />
-            <div class="form-group">
-                <label class="form-label">Course Name</label>
-                <InputText class="form-control" @bind-Value="course.Name" />
-                <ValidationMessage For="(() => course.Name)"/>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Course Code</label>
-                <InputText class="form-control" @bind-Value="course.Code" />
-                <ValidationMessage For="(() => course.Code)" />
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Credits</label>
-                <InputNumber class="form-control" @bind-Value="course.Credits" />
-                <ValidationMessage For="(() => course.Credits)" />
-            </div>
-
-            @* Display Existing Sessions *@
-
-            @if (IsEditing) {
+        @if (course == null) {
+            <p>Loading course details...</p>
+        }
+        else {
+            <EditForm Model="course" OnValidSubmit="HandleSubmit" FormName="@(IsEditing ? "Edit Course Form" : "Create Course Form")">
+                <DataAnnotationsValidator />
                 <div class="form-group">
-                    <label class="form-label">Add a class session</label>
-                    <li class="dialog-lists">
-                        @foreach (ClassSession session in course.Sessions)
-                        {
-                            <ul>@session.Term | @session.StartDate - @session.EndDate | @session.Instructor</ul>
-                        }
-                    </li>
+                    <label class="form-label">Course Name</label>
+                    <InputText class="form-control" @bind-Value="course.Name" />
+                    <ValidationMessage For="(() => course.Name)"/>
+                </div>
 
-                    @* ADD A NEW CLASS SESSION *@
-                    @if (AddSessionDialog == true) {
-                        <CreateSessionDialog 
-                            AddClassSession="AddClassSession"
-                             CloseDialog="ToggleAddClassSession" 
-                             Session="@session"
-                             courseSelected="@course" />
-                    }
-                    <div>
-                        @* <button class="btn btn-link" type="button" @onclick="ToggleAddClassSession">Add Existing Session</button> *@
-                        <button class="btn btn-link" type="button" @onclick="ToggleAddClassSession">Add New Session</button>
+                <div class="form-group">
+                    <label class="form-label">Course Code</label>
+                    <InputText class="form-control" @bind-Value="course.Code" />
+                    <ValidationMessage For="(() => course.Code)" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Credits</label>
+                    <InputNumber class="form-control" @bind-Value="course.Credits" />
+                    <ValidationMessage For="(() => course.Credits)" />
+                </div>
+
+                @* Display Existing Sessions *@
+
+                @if (IsEditing) {
+                    <div class="form-group">
+                        <label class="form-label">Add a class session</label>
+                        <li class="dialog-lists">
+                            @foreach (ClassSession session in course.Sessions)
+                            {
+                                <ul>@session.Term | @session.StartDate - @session.EndDate | @session.Instructor</ul>
+                            }
+                        </li>
+
+                        @* ADD A NEW CLASS SESSION *@
+                        @if (AddSessionDialog == true) {
+                            <CreateSessionDialog 
+                                AddClassSession="AddClassSession"
+                                IsAddToCourse = "true"
+                                CloseDialog="ToggleAddClassSession" 
+                                Session="@session"
+                                courseSelected="@course" />
+                        }
+                        <div>
+                            @* <button class="btn btn-link" type="button" @onclick="ToggleAddClassSession">Add Existing Session</button> *@
+                            <button class="btn btn-link" type="button" @onclick="ToggleAddClassSession">Add New Session</button>
+                        </div>
                     </div>
-                </div>
-            }
-            @* Submission or exit Dialog *@
-            @if (AddSessionDialog == false) {
-                <div class="dialog-buttons">
-                    <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
-                    <button class="btn btn-primary" type="submit">@(IsEditing ? "Save Edits" : "Create Course")</button>
-                </div>
-            }
-        </EditForm>   
+                }
+                @* Submission or exit Dialog *@
+                @if (AddSessionDialog == false) {
+                    <div class="dialog-buttons">
+                        <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+                        <button class="btn btn-primary" type="submit">@(IsEditing ? "Save Edits" : "Create Course")</button>
+                    </div>
+                }
+            </EditForm>  
+        }
     </div> 
 </div>
 
 @code {
     [Parameter] public EventCallback CloseDialog { get; set; }
     [Parameter] public EventCallback OnCourseCreate { get; set; }
-    [Parameter] public Course course { get; set; } = new();
+    [Parameter] public int courseId { get; set; }
+    public Course? course { get; set; } = new();
     [Parameter] public Degree? addToDegree { get; set; } //Adds the course to an existing degree IF created from degre dialog menu.
     [Parameter] public bool IsEditing { get; set; } = false; // Pass course into this component to pre-populate data on form
-    public bool createSessionDialog { get; set; } = false;
 
 
     public ClassSession session = new();
     public bool AddSessionDialog = false;
     public List<string> errorMessages = new();
 
+
+    protected override async Task OnInitializedAsync() {
+        if (IsEditing) course = await courseService.GetCourseById(courseId);
+        else course = new();
+        if (course == null) await HandleClose();
+        StateHasChanged();
+    }
 
     public async Task HandleClose()
     {
@@ -92,13 +105,13 @@
         try
         {
             @* EDIT EXISTING COURSE *@ 
-            if (IsEditing) await courseService.UpdateCourse(course);
+            if (IsEditing) await courseService.UpdateCourse(course!);
 
             @* CREATE COURSE *@
-            else await courseService.CreateCourse(course);
+            else await courseService.CreateCourse(course!);
             
             @* If a degree was passed as a parameter, add this course to that degree's courses *@
-            if (addToDegree != null) addToDegree?.Courses.Add(course);
+            if (addToDegree != null) addToDegree?.Courses.Add(course!);
             
             @* Close Dialog *@
             await HandleClose();
@@ -127,7 +140,7 @@
         try {
             @* Session is added to the database by the component *@
             @* Add Class Session to this course *@
-            course.Sessions.Add(session);
+            course!.Sessions.Add(session);
             AddSessionDialog = false;
         }
         catch (Exception ex) {

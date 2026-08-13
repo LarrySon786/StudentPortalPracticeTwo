@@ -11,6 +11,8 @@ using StudentPortalPracticeTwo.Components.Services.Students;
 using DotNetEnv;
 using StudentPortalPracticeTwo.Components.Services.Authentication;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
+using StudentPortalPracticeTwo.Database.Models.Degrees;
+using StudentPortalPracticeTwo.Database.Models.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,38 +103,91 @@ app.MapRazorComponents<App>()
 // RESET DB for testing purposes. Clears all database data. Visit the route: '/rest-db'
 if (app.Environment.IsDevelopment())
 {
-    app.MapGet("/reset-db", async (
-        ApplicationDbContext db,
-        SignInManager<ApplicationUser> signInManager,
-        UserService userService,
-        RoleManager<IdentityRole> roleManager) =>
+    app.MapGet("/reset-db", async (IServiceScopeFactory scopeFactory) =>
     {
+        await using var scope = scopeFactory.CreateAsyncScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var signInManager = scope.ServiceProvider.GetRequiredService<SignInManager<ApplicationUser>>();
+
+        var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+        var termService = scope.ServiceProvider.GetRequiredService<TermService>();
+
+        var degreeService = scope.ServiceProvider.GetRequiredService<DegreeService>();
+
+        var courseService = scope.ServiceProvider.GetRequiredService<CourseService>();
+
         await signInManager.SignOutAsync();
+
         await db.Database.EnsureDeletedAsync();
         await db.Database.MigrateAsync();
+        await signInManager.SignOutAsync();
+            await db.Database.EnsureDeletedAsync();
+            await db.Database.MigrateAsync();
 
-        // Create roles for authorization
-        if (!await roleManager.RoleExistsAsync("Admin")) await roleManager.CreateAsync(new IdentityRole("Admin"));
-        if (!await roleManager.RoleExistsAsync("Student")) await roleManager.CreateAsync(new IdentityRole("Student"));
+            // Create roles for authorization
+            if (!await roleManager.RoleExistsAsync("Admin")) await roleManager.CreateAsync(new IdentityRole("Admin"));
+            if (!await roleManager.RoleExistsAsync("Student")) await roleManager.CreateAsync(new IdentityRole("Student"));
 
-        // Create default admin role
-        var admin = new UserModel()
-        {
-            FirstName = "Admin",
-            LastName = "User",
-            Email = "richardsbrandon4@gmail.com",
-            ContactDetails = new()
+            // Create default admin role
+            var admin = new UserModel()
             {
-                Phone = "111-222-3333"
-            },
-            IdentityUserId = null!,
-            FinalApplicationId = null,
-            OriginalFinalApplication = null,
-        };
+                FirstName = "Admin",
+                LastName = "User",
+                Email = "richardsbrandon4@gmail.com",
+                DateOfBirth = new DateOnly(2001, 6, 26),
+                ContactDetails = new()
+                {
+                    Phone = "111-222-3333"
+                },
+                IdentityUserId = null!,
+                FinalApplicationId = null,
+                OriginalFinalApplication = null,
+            };
+            await userService.CreateAdmin(admin, "Brandoniscool1234$");
 
-        await userService.CreateAdmin(admin, "Brandoniscool1234$");
+            // Create Default Terms
+            var termOne = new Term()
+            {
+                Season = TermSeason.Fall,
+                Year = 2026,
+                AvailableToRegisterClasses = true,
+            };
 
-        return "Database reset";
+            var termTwo = new Term()
+            {
+                Season = TermSeason.Spring,
+                Year = 2027,
+                AvailableToRegisterClasses = true,
+            };
+            await termService.CreateTerm(termOne);
+            await termService.CreateTerm(termTwo);
+
+            // Create Course
+            Course course = new()
+            {
+                Name = "Calculous",
+                Credits = 4,
+                Code = "MATH201",
+            };
+            await courseService.CreateCourse(course);
+
+            // Create Default Degree
+            Degree degree = new()
+            {
+                Name = "Software Engineering",
+                Description = "Software Engineering is the finnest dicipline.",
+                Courses = [course],
+            };
+            await degreeService.CreateDegree(degree);
+
+
+
+            return "Database reset";
     });
 }
 

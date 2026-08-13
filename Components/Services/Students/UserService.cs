@@ -88,6 +88,7 @@ public class UserService
         {
             FirstName = finalApplication.StudentInfo.FirstName,
             LastName = finalApplication.StudentInfo.LastName,
+            DateOfBirth = finalApplication.StudentInfo.DateOfBirth,
             Email = finalApplication.Email,
             ContactDetails = new()
             {
@@ -142,6 +143,7 @@ public class UserService
 
         existing.FirstName = updated.FirstName;
         existing.LastName = updated.LastName;
+        existing.DateOfBirth = updated.DateOfBirth;
         existing.Email = updated.Email;
         existing.ContactDetails.Phone = updated.ContactDetails.Phone;
 

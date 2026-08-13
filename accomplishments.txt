@@ -2,6 +2,20 @@
 
 
 EF Core Identity Authentication / Authorization
+Searchable UI interface for admins and student view. 
+Searchable UI interface for Degree in admin view
+Searchable UI Interface for Courses in admin view
+Searchable UI Interface for ClassSessions in admin view
+Client side validation on student application form [DataAnnotations in blazor]
+Server side validation on Student Application form
+Database save on Student Application form
+Local state management on Student Application form
+AutoSave on navigation in student application form
+Progress bar on student application form
+Preapply page to load student form
+Email to accepted student to set up login credentials
+Email to denied students
+Admin management of pending applications, approved applications, denied applications.
 
 
 
@@ -23,5 +37,7 @@ Traceable trail:
 - I fixed transcripts not rendering immediately on reload of draft
 - I fixed all validation errors and it is functioning
 - I added date of birth to the application. Added server side validation
-
+- ClassSessions was broke and needed repaired. Compelted
+- I was trying to fix AddSession and ran into a bunch of issues with courseService.GetAllCourses. That file and reset-db were 
+changes quite a bit in trouble shooting. Also CreateSessionDialog.razor was changed quite a bit. COMPLETED
 

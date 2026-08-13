@@ -19,10 +19,12 @@ public class CourseService
     // GET ALL COURSES
     public async Task<List<Course>> GetAllCourses()
     {
-        return await _context.CourseDb
+        var result = await _context.CourseDb
             .Include(x => x.Degrees)
             .Include(x => x.Sessions)
             .ToListAsync();
+
+        return result;
     }
 
     // GET course by Id
@@ -31,6 +33,7 @@ public class CourseService
         return await _context.CourseDb
             .Include(x => x.Degrees)
             .Include(x => x.Sessions)
+            .Where(x => x.Id == id)
             .FirstOrDefaultAsync();
     }
 

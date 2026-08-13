@@ -19,9 +19,9 @@ public class TermService
     // GET all terms
     public async Task<List<Term>> GetAllTerms()
     {
+        Console.WriteLine(_context.GetHashCode());
         var existing = await _context.TermDb.ToListAsync();
-        if (existing == null) throw new Exception("No existing terms found in Database");
-        else return existing;
+        return existing;
     }
 
     // Get Term by Id

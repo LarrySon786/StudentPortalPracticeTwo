@@ -28,7 +28,7 @@ public class ClassSession
     public int TermId { get; set; } // Term Relationship for database
 
     [Required(ErrorMessage = "Term is required")]
-    public Term Term { get; set; } = null!; // Term Relationship for database
+    public Term? Term { get; set; }
 
     [DataType(DataType.Date)]
     public DateOnly StartDate { get; set; }

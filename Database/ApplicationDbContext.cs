@@ -162,7 +162,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Course>()
             .HasMany(x => x.Sessions)
             .WithOne(x => x.Course)
-            .HasForeignKey(x => x.CourseId);
+            .HasForeignKey(x => x.CourseId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<ClassSession>()
             .HasOne(x => x.Term)
