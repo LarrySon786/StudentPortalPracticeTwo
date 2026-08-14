@@ -1,6 +1,10 @@
 
 
 LEFT off
+
+- I added auto-populating sample DATA. May want to practice writing JSON, deserializing it, and 
+setting up DTOs to transfer data from JSON to models.
+
 - I finished fixing ClassSessions. There is one error where course's reference to class session does not referesh
 after deleting classSession. It does referesh after page reload.
 
@@ -12,7 +16,7 @@ NOTE TO SELF - Left off with trying to add user creation via application approva
 
 
 TO DO LIST
-- Complete New Student Application Form
+- DONE Complete New Student Application Form
 - Web page pathfindings
 - Student program selection
 - Student Class Registration

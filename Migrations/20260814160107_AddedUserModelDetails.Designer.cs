@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudentPortalPracticeTwo.Database;
@@ -11,9 +12,11 @@ using StudentPortalPracticeTwo.Database;
 namespace StudentPortalPracticeTwo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260814160107_AddedUserModelDetails")]
+    partial class AddedUserModelDetails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -561,6 +564,7 @@ namespace StudentPortalPracticeTwo.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<string>("StreetTwoAddress")
+                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
@@ -1200,9 +1204,9 @@ namespace StudentPortalPracticeTwo.Migrations
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Students.UserProgramModel", b =>
                 {
                     b.HasOne("StudentPortalPracticeTwo.Database.Models.Degrees.Degree", "MyDegree")
-                        .WithMany("StudentPrograms")
+                        .WithMany()
                         .HasForeignKey("DegreeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("StudentPortalPracticeTwo.Database.Models.Students.UserModel", "User")
@@ -1259,11 +1263,6 @@ namespace StudentPortalPracticeTwo.Migrations
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.Course", b =>
                 {
                     b.Navigation("Sessions");
-                });
-
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.Degree", b =>
-                {
-                    b.Navigation("StudentPrograms");
                 });
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.Term", b =>

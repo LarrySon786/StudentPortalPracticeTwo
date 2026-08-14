@@ -40,4 +40,4 @@ Traceable trail:
 - ClassSessions was broke and needed repaired. Compelted
 - I was trying to fix AddSession and ran into a bunch of issues with courseService.GetAllCourses. That file and reset-db were 
 changes quite a bit in trouble shooting. Also CreateSessionDialog.razor was changed quite a bit. COMPLETED
-
+- I created Sample Data from JSON files using deserializers and Data Transfer Object classes (DTOs)

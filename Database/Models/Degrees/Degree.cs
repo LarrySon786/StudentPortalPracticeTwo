@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using StudentPortalPracticeTwo.Database.Models.Students;
 
 namespace StudentPortalPracticeTwo.Database.Models.Degrees;
 
@@ -13,6 +14,7 @@ public class Degree
     public string Name { get; set; } = null!;
 
     public List<Course> Courses { get; set; } = [];
+    public List<UserProgramModel> StudentPrograms { get; set; } = [];
 
     [StringLength(2000)]
     public string Description { get; set; } = string.Empty;

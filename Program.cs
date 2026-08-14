@@ -13,6 +13,8 @@ using StudentPortalPracticeTwo.Components.Services.Authentication;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Enums;
+using System.Text.Json;
+using StudentPortalPracticeTwo.Database.Models.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -121,73 +123,135 @@ if (app.Environment.IsDevelopment())
 
         var courseService = scope.ServiceProvider.GetRequiredService<CourseService>();
 
-        await signInManager.SignOutAsync();
+        var classSessionService = scope.ServiceProvider.GetRequiredService<ClassSessionService>();
 
+        await signInManager.SignOutAsync();
         await db.Database.EnsureDeletedAsync();
         await db.Database.MigrateAsync();
-        await signInManager.SignOutAsync();
-            await db.Database.EnsureDeletedAsync();
-            await db.Database.MigrateAsync();
 
-            // Create roles for authorization
-            if (!await roleManager.RoleExistsAsync("Admin")) await roleManager.CreateAsync(new IdentityRole("Admin"));
-            if (!await roleManager.RoleExistsAsync("Student")) await roleManager.CreateAsync(new IdentityRole("Student"));
+        // Create roles for authorization
+        if (!await roleManager.RoleExistsAsync("Admin")) await roleManager.CreateAsync(new IdentityRole("Admin"));
+        if (!await roleManager.RoleExistsAsync("Student")) await roleManager.CreateAsync(new IdentityRole("Student"));
 
-            // Create default admin role
-            var admin = new UserModel()
+
+        // Create Default Terms
+        var termOne = new Term()
+        {
+            Season = TermSeason.Fall,
+            Year = 2026,
+            AvailableToRegisterClasses = true,
+        };
+
+        var termTwo = new Term()
+        {
+            Season = TermSeason.Spring,
+            Year = 2027,
+            AvailableToRegisterClasses = true,
+        };
+        await termService.CreateTerm(termOne);
+        await termService.CreateTerm(termTwo);
+
+
+       // Create Courses
+        var jsonCourses = File.ReadAllText("Database/JSON/Courses/SoftwareEngineering.json"); // Course JSON
+        var courseDefinition = JsonSerializer.Deserialize<List<JsonCourse>>( jsonCourses , new JsonSerializerOptions {
+                PropertyNameCaseInsensitive = true });
+
+        foreach (JsonCourse courseItem in courseDefinition!) // Iterate through all courses to create
+        {
+            var course = new Course()
             {
-                FirstName = "Admin",
-                LastName = "User",
-                Email = "richardsbrandon4@gmail.com",
-                DateOfBirth = new DateOnly(2001, 6, 26),
-                ContactDetails = new()
-                {
-                    Phone = "111-222-3333"
-                },
-                IdentityUserId = null!,
-                FinalApplicationId = null,
-                OriginalFinalApplication = null,
+                Name = courseItem.Name,
+                Code = courseItem.Code,
+                Credits = courseItem.Credits,
             };
-            await userService.CreateAdmin(admin, "Brandoniscool1234$");
+            await courseService.CreateCourse(course); // Save
+        }
 
-            // Create Default Terms
-            var termOne = new Term()
+        // Create Default Degree
+        var jsonDegree = File.ReadAllText("Database/JSON/Degrees/SoftwareEngineering.json"); // Get JSON of degree
+        var degreeDefinition = JsonSerializer.Deserialize<JsonDegree>(
+            jsonDegree, new JsonSerializerOptions
             {
-                Season = TermSeason.Fall,
-                Year = 2026,
-                AvailableToRegisterClasses = true,
-            };
+                PropertyNameCaseInsensitive = true
+            });
 
-            var termTwo = new Term()
+        Degree degree = new() // Create Degree
+        {
+            Name = "Software Engineering",
+            Description = "Software Engineering is the finnest dicipline.",
+            Courses = [],
+        };
+        foreach (string code in degreeDefinition!.Courses) // Add all courses
+        {
+            var course = db.CourseDb.Single(c => c.Code == code);
+            degree.Courses.Add(course);
+        }
+        await degreeService.CreateDegree(degree); // Save
+
+
+        // Create Course Sessions
+        var jsonSessions = File.ReadAllText("Database/JSON/ClassSessions.Json");
+        var classSessionDefinition = JsonSerializer.Deserialize<List<JsonClassSessions>>(
+            jsonSessions, new JsonSerializerOptions
             {
-                Season = TermSeason.Spring,
-                Year = 2027,
-                AvailableToRegisterClasses = true,
-            };
-            await termService.CreateTerm(termOne);
-            await termService.CreateTerm(termTwo);
+                PropertyNameCaseInsensitive = true
+            });
 
-            // Create Course
-            Course course = new()
+        foreach (var session in classSessionDefinition!)
+        {
+            var course = db.CourseDb.Single(s => s.Code == session.CourseCode);
+            var term = db.TermDb.Single(s => s.Season.ToString() + s.Year.ToString() == $"{session.Term}");
+
+            var createdSession = new ClassSession()
             {
-                Name = "Calculous",
-                Credits = 4,
-                Code = "MATH201",
-            };
-            await courseService.CreateCourse(course);
+                Course = course,
+                Instructor = session.Instructor,
+                Location = session.Location,
+                Capacity = session.Capacity,
+                CurrentCount = session.CurrentCount,
+                StartDate = session.StartDate,
+                StartTime = session.StartTime,
+                EndDate = session.EndDate,
+                EndTime = session.EndTime,
+                Description = session.Description,
+                Term = term,
 
-            // Create Default Degree
-            Degree degree = new()
+            };
+
+            await classSessionService.CreateClassSession(createdSession);
+        }
+
+        // Create default admin role
+        UserEmergencyContactModel emergencyContactNumber = new()
+        {
+            ContactName = "Angie",
+            Phone = "330-333-3333",
+            Relationship = "Mother",
+        };
+        var admin = new UserModel()
+        {
+            FirstName = "Admin",
+            LastName = "User",
+            Email = "richardsbrandon4@gmail.com",
+            DateOfBirth = new DateOnly(2001, 6, 26),
+            ContactDetails = new()
             {
-                Name = "Software Engineering",
-                Description = "Software Engineering is the finnest dicipline.",
-                Courses = [course],
-            };
-            await degreeService.CreateDegree(degree);
+                Phone = "111-222-3333"
+            },
+            EmergencyContact = [emergencyContactNumber],
+            MyProgram = new()
+            {
+                MyDegree = degree,
+            },
+            IdentityUserId = null!,
+            FinalApplicationId = null,
+            OriginalFinalApplication = null,
+        };
+        await userService.CreateAdmin(admin, "Brandoniscool1234$");
 
 
-
-            return "Database reset";
+        return "Database reset";
     });
 }
 

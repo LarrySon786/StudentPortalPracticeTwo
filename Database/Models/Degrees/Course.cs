@@ -8,9 +8,6 @@ public class Course
     [Key]
     public int Id { get; set; }
 
-    [Required]
-    public List<int> DegreeId { get; set; } = [];
-
     public List<Degree> Degrees { get; set; } = [];
 
     // Class Attributes

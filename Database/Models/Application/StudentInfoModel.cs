@@ -47,10 +47,9 @@ public class StudentInfoModel
     [StringLength(200, ErrorMessage = "Street address cannot exceed 200 characters")]
     public required string StreetOneAddress { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Street address is required")]
     [Display(Name = "Street Address 2")]
     [StringLength(200, ErrorMessage = "Street address cannot exceed 200 characters")]
-    public required string StreetTwoAddress { get; set; } = string.Empty;
+    public string? StreetTwoAddress { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "City is required")]
     [Display(Name = "City")]

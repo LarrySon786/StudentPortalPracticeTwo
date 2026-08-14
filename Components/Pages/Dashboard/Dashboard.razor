@@ -1,40 +1,16 @@
-@using System.Security.Claims
-@using Microsoft.AspNetCore.Authorization
-
 @page "/dashboard"
 @attribute [Authorize]
 @rendermode InteractiveServer
-@inject StudentPortalPracticeTwo.Components.Services.Authentication.AuthLogin auth;
-@inject NavigationManager navigationManager;
+@using Microsoft.AspNetCore.Authorization
 
 
 
 
 
-<form method="post" action="/account/logout">
-    <button type="submit" class="btn btn-primary">
-        Logout
-    </button>
-</form>
 
-@if (authState != null && authState.User.IsInRole("Admin")) {
-    <a class="btn btn-primary" href="/admin">Admin Portal</a>
-}
 
 
 @code {
-    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
-    AuthenticationState? authState;
 
-    protected override async Task OnInitializedAsync() {
-        authState = await AuthenticationStateTask!;
-        if (authState == null)
-        {
-            navigationManager.NavigateTo("/login", forceLoad: true);
-            return;
-        }
-        var user = authState.User;
-        Console.WriteLine(user.Identity!.IsAuthenticated);
-    }
 }
 

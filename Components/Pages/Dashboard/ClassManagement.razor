@@ -1,0 +1,36 @@
+@* This page is where students Register class for next term. View existing classes. And drop classes *@
+@page "/dashboard/class-management"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Students
+
+
+@* Existing Classes *@
+<div>
+
+</div>
+
+@* Upcoming Classes *@
+<div>
+
+</div>
+
+
+
+@code {
+    public UserModel? user { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await authService.GetCurrentUserAsync();
+    }
+}
+
+
+
+
+
+
+
+
+

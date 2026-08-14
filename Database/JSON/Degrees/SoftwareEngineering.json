@@ -1,0 +1,53 @@
+{
+  "name": "Bachelor of Science in Software Engineering",
+  "description": "The Bachelor of Science in Software Engineering prepares students to design, develop, test, deploy, and maintain modern software systems. Students gain experience in programming, software architecture, databases, operating systems, networking, cybersecurity, cloud computing, and collaborative software development through a comprehensive curriculum culminating in a two-semester capstone project.",
+
+  "courses": [
+    "ENG101",
+    "ENG102",
+    "MAT151",
+    "MAT152",
+    "MAT250",
+    "STA201",
+
+    "PHY201",
+    "PHY202",
+    "CHE101",
+
+    "CSC101",
+    "CSC102",
+    "CSC201",
+    "CSC202",
+    "CSC220",
+    "CSC230",
+    "CSC240",
+    "CSC250",
+
+    "SWE201",
+    "SWE301",
+    "SWE302",
+    "SWE303",
+    "SWE304",
+    "SWE305",
+    "SWE401",
+    "SWE402",
+
+    "CYB201",
+    "WEB201",
+    "MOB301",
+    "CLD301",
+    "DEV301",
+    "AI301",
+
+    "COM101",
+    "ECO101",
+    "ETH101",
+    "HIS101",
+    "PSY101",
+
+    "ELE101",
+    "ELE102",
+    "ELE103",
+    "ELE104"
+  ]
+}

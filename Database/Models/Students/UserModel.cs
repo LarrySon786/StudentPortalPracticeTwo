@@ -24,6 +24,14 @@ public class UserModel
     public required string LastName { get; set; }
     public required DateOnly DateOfBirth { get; set; }
     public required string Email { get; set; }
+
+    // Other Account Details
     public required UserContactModel ContactDetails { get; set; }
+    public required List<UserEmergencyContactModel> EmergencyContact { get; set; }
+    public required UserProgramModel MyProgram { get; set; }
+
+
+
+
     
 }

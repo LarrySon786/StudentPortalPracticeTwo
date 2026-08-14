@@ -1,4 +1,4 @@
-
+@inject NavigationManager navigationManager
 
 
 <div class="left-tab @(NavOpen ? "" : "closed")">
@@ -46,6 +46,27 @@
         </div>
     </nav>
 
+    @* Logout | Admin Portal Link *@
+    <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <form method="post" action="/account/logout">
+                    <button type="submit" class="btn btn-link">
+                        Logout
+                    </button>
+                </form>
+                <a class="btn btn-link"  href="/admin">Admin Portal</a>
+            </Authorized>
+            <NotAuthorized>
+                <form method="post" action="/account/logout">
+                    <button type="submit" class="btn btn-link">
+                        Logout
+                    </button>
+                </form>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+    
     @* Button to open and close navigation *@
     <button class="btn nav-open-close-button" @onclick="HandleToggle">@(NavOpen ? "⮜" : "⮞")</button>
 </div>
@@ -57,6 +78,7 @@
     public async Task HandleToggle() {
         await ToggleNav.InvokeAsync();
     }
+
 }
 
 

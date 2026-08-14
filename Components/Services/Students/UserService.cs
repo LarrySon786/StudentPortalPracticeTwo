@@ -84,6 +84,18 @@ public class UserService
         else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
 
         // Create user in Database
+        List<UserEmergencyContactModel> emergencyContacts = new();
+        foreach (EmergencyContactModel contact in finalApplication.EmergencyContact)
+        {
+            var newContact = new UserEmergencyContactModel()
+            {
+                ContactName = contact.ContactName,
+                Phone = contact.Phone,
+                Relationship = contact.Relationship,
+            };
+            emergencyContacts.Add(newContact);
+        }
+
         UserModel entity = new()
         {
             FirstName = finalApplication.StudentInfo.FirstName,
@@ -93,6 +105,11 @@ public class UserService
             ContactDetails = new()
             {
                 Phone = finalApplication.StudentContact.Phone
+            },
+            EmergencyContact = emergencyContacts,
+            MyProgram = new()
+            {
+                
             },
             // Link final application to this user account
             OriginalFinalApplication = finalApplication,

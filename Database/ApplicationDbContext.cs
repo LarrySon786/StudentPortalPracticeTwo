@@ -18,6 +18,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     // USER Accounts - created after final application is approved
     public DbSet<UserModel> UserDb { get; set; }
     public DbSet<UserContactModel> UserContactDb { get; set; }
+    public DbSet<UserEmergencyContactModel> UserEmergencyDb { get; set; }
+    public DbSet<UserProgramModel> UserProgram { get; set; }
 
     // FINAL Application - created after student submits DRAFT application
     public DbSet<ApplicationModel> ApplicationDb { get; set; }
@@ -65,6 +67,24 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(x => x.IdentityUserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserModel>()
+            .HasMany(x => x.EmergencyContact)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserModel>()
+            .HasOne(x => x.MyProgram)
+            .WithOne(x => x.User)
+            .HasForeignKey<UserProgramModel>(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserProgramModel>()
+            .HasOne(x => x.MyDegree)
+            .WithMany(x => x.StudentPrograms)
+            .HasForeignKey(x => x.DegreeId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         
         // Final
