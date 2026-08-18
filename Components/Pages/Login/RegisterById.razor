@@ -32,6 +32,7 @@
 
     protected override async Task OnInitializedAsync() {
         @* GET user for page *@
+        Console.WriteLine($"RECEIVED TOKEN LENGTH: {Token?.Length}");
         user = await userService.GetUserById(int.Parse(UserId));
         if (user == null) navigationManager.NavigateTo("/login");
     }
@@ -39,7 +40,7 @@
     public async Task HandleSubmit() {
         try {
             @* RESET / SET user password *@
-            await userService.SetPassword(registerInfo.Password, Token, user);
+            await userService.SetPassword(registerInfo.Password, Token, user!);
             navigationManager.NavigateTo("/login");
         }
         catch (Exception ex) {

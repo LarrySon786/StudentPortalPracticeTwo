@@ -1,46 +1,48 @@
+@using StudentPortalPracticeTwo.Database.Models.Students
 @inject NavigationManager navigationManager
 
 
 <div class="left-tab @(NavOpen ? "" : "closed")">
     <nav>
         @* Student Profile *@
-        <div class="account-container">
-            <div class="profile-pic">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
-                    <!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
-                    <path d="M0 64C0 28.7 28.7 0 64 0L320 0c35.3 0 
-                    64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 
-                    64zM80 368c0 8.8 7.2 16 16 16l192 0c8.8 0 16-7.2 16-16 0-44.2-35.8-80-80-80l-64 
-                    0c-44.2 0-80 35.8-80 80zM192 248a56 56 0 1 0 0-112 56 56 0 1 0 0 112z" />
-                </svg>
-            </div>
+        @if (user != null) {
+            <div class="account-container">
+                <div class="profile-pic">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+                        <!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                        <path d="M0 64C0 28.7 28.7 0 64 0L320 0c35.3 0 
+                        64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 
+                        64zM80 368c0 8.8 7.2 16 16 16l192 0c8.8 0 16-7.2 16-16 0-44.2-35.8-80-80-80l-64 
+                        0c-44.2 0-80 35.8-80 80zM192 248a56 56 0 1 0 0-112 56 56 0 1 0 0 112z" />
+                    </svg>
+                </div>
 
-            <div class="account-name-container">
-                <h2 class="account-name">Welcome</h2>
-                <h2 class="account-name">TestName</h2>
+                <div class="account-name-container">
+                    <h2 class="account-name">Welcome</h2>
+                    <h2 class="account-name">@user.FirstName @user.LastName</h2>
+                </div>
             </div>
-        </div>
-
+        }
         @* Navigation Links *@
         <div class="nav-group">
             <div class="nav-item" style="border-top:1px solid var(--text);">
                 <NavLink href="/dashboard">
-                    Dashboard
+                    Student Dashboard
                 </NavLink>
             </div>
             <div class="nav-item">
-                <NavLink href="/my-degree-progress">
+                <NavLink href="/dashboard/class-management">
+                    My Classes
+                </NavLink>
+            </div>
+            <div class="nav-item">
+                <NavLink href="/dashboard/degree-progress">
                     Degree Progress
                 </NavLink>
             </div>
             <div class="nav-item">
-                <NavLink href="/register-classes">
-                    Register Classes
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink href="/my-schedule">
-                    My Schedule
+                <NavLink href="/dashboard/support">
+                    Student Support
                 </NavLink>
             </div>
         </div>
@@ -66,7 +68,7 @@
             </NotAuthorized>
         </AuthorizeView>
     </div>
-    
+
     @* Button to open and close navigation *@
     <button class="btn nav-open-close-button" @onclick="HandleToggle">@(NavOpen ? "⮜" : "⮞")</button>
 </div>
@@ -74,9 +76,16 @@
 @code {
     [Parameter] public bool NavOpen { get; set; } = true;
     [Parameter] public EventCallback ToggleNav { get; set; }
+    public UserModel? user { get; set; } 
+
+    protected override async Task OnInitializedAsync() {
+        user = await authService.GetCurrentUserAsync(); // Get user for navigation account details
+        if (user == null) navigationManager.NavigateTo("/login"); //Return to login if null user
+    }
 
     public async Task HandleToggle() {
         await ToggleNav.InvokeAsync();
+
     }
 
 }

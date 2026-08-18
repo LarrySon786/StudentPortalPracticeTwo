@@ -8,67 +8,129 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin;
 
 public class TermService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IDbContextFactory<ApplicationDbContext> _context;
 
-    public TermService(ApplicationDbContext context)
+    public TermService(IDbContextFactory<ApplicationDbContext> context)
     {
         _context = context;
     }
 
 
     // GET all terms
-    public async Task<List<Term>> GetAllTerms()
+    public async Task<List<Term>> GetAllTerms(ApplicationDbContext? context = null)
     {
-        Console.WriteLine(_context.GetHashCode());
-        var existing = await _context.TermDb.ToListAsync();
-        return existing;
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            var existing = await context.TermDb.ToListAsync();
+            return existing;
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // Get Term by Id
-    public async Task<Term> GetTermById(int? id)
+    public async Task<Term> GetTermById(int? id, ApplicationDbContext? context = null)
     {
-        if (id == null) throw new Exception("Could not get term by Id. Id is null");
-        var existing = await _context.TermDb
-            .Where(x => x.Id == id)
-            .Include(x => x.ClassSessions)
-            .FirstOrDefaultAsync();
-        if (existing != null) return existing;
-        else throw new Exception("No existing term was found.");
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            if (id == null) throw new Exception("Could not get term by Id. Id is null");
+            var existing = await context.TermDb
+                .Where(x => x.Id == id)
+                .Include(x => x.ClassSessions)
+                .FirstOrDefaultAsync();
+                if (existing != null) return existing;
+                else throw new Exception("No existing term was found.");
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // Create Term
-    public async Task<Term> CreateTerm(Term term)
+    public async Task<Term> CreateTerm(Term term, ApplicationDbContext? context = null)
     {
-        _context.Add(term);
-        await _context.SaveChangesAsync();
-        return term;
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            context.Add(term);
+            await context.SaveChangesAsync();
+            return term;
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // Update Term
-    public async Task<Term> UpdateTerm(Term updated)
+    public async Task<Term> UpdateTerm(Term updated, ApplicationDbContext? context = null)
     {
-        var existing = await GetTermById(updated.Id);
-        if (existing == null) throw new Exception("No term found with this Id. Could not update");
-        existing.Season = updated.Season;
-        existing.Year = updated.Year;
-        existing.ClassSessions = updated.ClassSessions;
-        existing.AvailableToRegisterClasses = updated.AvailableToRegisterClasses;
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            var existing = await GetTermById(updated.Id);
+            if (existing == null) throw new Exception("No term found with this Id. Could not update");
+            existing.Season = updated.Season;
+            existing.Year = updated.Year;
+            existing.ClassSessions = updated.ClassSessions;
+            existing.AvailableToRegisterClasses = updated.AvailableToRegisterClasses;
 
-        await _context.SaveChangesAsync();
-        return existing;
+            await context.SaveChangesAsync();
+            return existing;
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // Delete Term | Must NOT have any contigent classes
-    public async Task DeleteTerm(int id)
+    public async Task DeleteTerm(int id, ApplicationDbContext? context = null)
     {
-        var existing = await GetTermById(id);
-        // Verify that NO Class sessions remain in the term
-        if (existing.ClassSessions.Count > 0) throw new Exception("Cannot delete this term as long as it has active class sessions attached to it");
-        // Delete Term
-        else await _context.TermDb.Where(x => x.Id == id).ExecuteDeleteAsync();
-        
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            var existing = await GetTermById(id);
+            // Verify that NO Class sessions remain in the term
+            if (existing.ClassSessions.Count > 0) throw new Exception("Cannot delete this term as long as it has active class sessions attached to it");
+            // Delete Term
+            else await context.TermDb.Where(x => x.Id == id).ExecuteDeleteAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
+
     }
-
-
 
 }

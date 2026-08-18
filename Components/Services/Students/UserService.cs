@@ -6,18 +6,19 @@ using StudentPortalPracticeTwo.Database.Models.Students;
 using Microsoft.AspNetCore.Identity;
 using StudentPortalPracticeTwo.Components.Services.Interfaces;
 using Superpower.Model;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 
 namespace StudentPortalPracticeTwo.Components.Services.Students;
 
 public class UserService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IDbContextFactory<ApplicationDbContext> _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly IWebHostEnvironment _environment;
     private readonly IConfiguration _configuration;
 
-    public UserService(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService,
+    public UserService(IDbContextFactory<ApplicationDbContext> context, UserManager<ApplicationUser> userManager, IEmailService emailService,
         IWebHostEnvironment environment, IConfiguration configuration)
     {
         _context = context;
@@ -28,143 +29,236 @@ public class UserService
     }
 
     // GET ALL STUDENTS
-    public async Task<List<UserModel>> GetAllUsers()
+    public async Task<List<UserModel>> GetAllUsers(ApplicationDbContext? context = null)
     {
-        return await _context.UserDb
-            .Include(x => x.ContactDetails)
-            .Include(x => x.OriginalFinalApplication)
-            .Include(x => x.IdentityUser)
-            .ToListAsync();
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+
+        try
+        {
+            return await context.UserDb
+                .Include(x => x.ContactDetails)
+                .Include(x => x.OriginalFinalApplication)
+                .Include(x => x.IdentityUser)
+                .ToListAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
+        
     }
 
     // GET STUDENT BY EMAIL
-    public async Task<UserModel?> GetUserByEmail(string email)
+    public async Task<UserModel?> GetUserByEmail(string email, ApplicationDbContext? context = null)
     {
-        return await _context.UserDb
-            .Include(x => x.ContactDetails)
-            .Include(x => x.OriginalFinalApplication)
-            .Include(x => x.IdentityUser)
-            .Where(x => x.Email == email)
-            .FirstOrDefaultAsync();
+        bool disposeContext = false;
+
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            disposeContext = true;
+        }
+
+        try
+        {
+            return  await context.UserDb
+                .Include(x => x.ContactDetails)
+                .Include(x => x.OriginalFinalApplication)
+                .Include(x => x.IdentityUser)
+                .Where(x => x.Email == email)
+                .FirstOrDefaultAsync();
+        }
+        finally
+        {
+            if (disposeContext == true) await context.DisposeAsync();
+        }
     }
 
     // GET STUDENT BY ID
-    public async Task<UserModel?> GetUserById(int id)
+    public async Task<UserModel?> GetUserById(int id, ApplicationDbContext? context = null)
     {
-        return await _context.UserDb
-            .Include(x => x.ContactDetails)
-            .Include(x => x.OriginalFinalApplication)
-            .Include(x => x.IdentityUser)
-            .Where(x => x.Id == id)
-            .FirstOrDefaultAsync();
-    }
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            return await context.UserDb
+                .Include(x => x.ContactDetails)
+                .Include(x => x.OriginalFinalApplication)
+                .Include(x => x.IdentityUser)
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
+        }
 
     // CREATE NEW STUDENT | by finalApplication approval
-    public async Task<UserModel> CreateUserByApplication(ApplicationModel finalApplication)
+    public async Task<CreateUserResultHelper> CreateUserByApplication(ApplicationModel finalApplication, ApplicationDbContext? context = null)
     {
-        // Check for existing user FIRST
-        var existingUser = await _userManager.FindByEmailAsync(finalApplication.Email);
-        if (existingUser != null) throw new Exception($"An account already exists for {finalApplication.Email}");
-
-        // Create User Identity for Authorization
-        var applicationUser = new ApplicationUser()
+        bool dispose = false;
+        if (context == null)
         {
-            Email = finalApplication.Email,
-            UserName = finalApplication.Email,
-            EmailConfirmed = true
-        };
-
-        // Creates the identity User
-        var result = await _userManager.CreateAsync(applicationUser);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(x => x.Description));
-            throw new Exception($"Could not create identity user. {errors}");
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
         }
-        else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
 
-        // Create user in Database
-        List<UserEmergencyContactModel> emergencyContacts = new();
-        foreach (EmergencyContactModel contact in finalApplication.EmergencyContact)
+        try
         {
-            var newContact = new UserEmergencyContactModel()
+            // Check for existing user FIRST
+            var existingUser = await _userManager.FindByEmailAsync(finalApplication.Email);
+            if (existingUser != null) throw new Exception($"An account already exists for {finalApplication.Email}");
+
+            // Create User Identity for Authorization
+            var applicationUser = new ApplicationUser()
             {
-                ContactName = contact.ContactName,
-                Phone = contact.Phone,
-                Relationship = contact.Relationship,
+                Email = finalApplication.Email,
+                UserName = finalApplication.Email,
+                EmailConfirmed = true
             };
-            emergencyContacts.Add(newContact);
+
+            // Creates the identity User
+            var result = await _userManager.CreateAsync(applicationUser);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+                throw new Exception($"Could not create identity user. {errors}");
+            }
+
+            // Create User ROLE
+            var roleResult = await _userManager.AddToRoleAsync(applicationUser, "Student");
+            if (!roleResult.Succeeded)
+            {
+                var errors = string.Join(", ", roleResult.Errors.Select(x => x.Description));
+                throw new Exception($"Could not assign Student role. {errors}");
+            }
+
+            // Create user in Database
+            List<UserEmergencyContactModel> emergencyContacts = new();
+            foreach (EmergencyContactModel contact in finalApplication.EmergencyContact)
+            {
+                var newContact = new UserEmergencyContactModel()
+                {
+                    ContactName = contact.ContactName,
+                    Phone = contact.Phone,
+                    Relationship = contact.Relationship,
+                };
+                emergencyContacts.Add(newContact);
+            }
+
+            UserModel entity = new()
+            {
+                FirstName = finalApplication.StudentInfo.FirstName,
+                LastName = finalApplication.StudentInfo.LastName,
+                DateOfBirth = finalApplication.StudentInfo.DateOfBirth,
+                Email = finalApplication.Email,
+                ContactDetails = new()
+                {
+                    Phone = finalApplication.StudentContact.Phone
+                },
+                EmergencyContact = emergencyContacts,
+                MyProgram = new()
+                {
+                    DegreeId = finalApplication.StudentProgram.SelectedProgram.Id,
+                },
+                // Link final application to this user account
+                FinalApplicationId = finalApplication.Id,
+                OriginalFinalApplication = finalApplication,
+                // Link identity user to this user account
+                IdentityUserId = applicationUser.Id,
+            };
+
+            context.UserDb.Add(entity);
+            await context.SaveChangesAsync();
+            return new CreateUserResultHelper
+            {
+                User = entity,
+                ApplicationUser = applicationUser
+            };
         }
-
-        UserModel entity = new()
+        finally
         {
-            FirstName = finalApplication.StudentInfo.FirstName,
-            LastName = finalApplication.StudentInfo.LastName,
-            DateOfBirth = finalApplication.StudentInfo.DateOfBirth,
-            Email = finalApplication.Email,
-            ContactDetails = new()
-            {
-                Phone = finalApplication.StudentContact.Phone
-            },
-            EmergencyContact = emergencyContacts,
-            MyProgram = new()
-            {
-                
-            },
-            // Link final application to this user account
-            OriginalFinalApplication = finalApplication,
-            FinalApplicationId = finalApplication.Id,
-            // Link identity user to this user account
-            IdentityUser = applicationUser,
-            IdentityUserId = applicationUser.Id
-        };
-
-        _context.UserDb.Add(entity);
-        await _context.SaveChangesAsync();
-        return entity;
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // CREATE NEW STUDENT | by manual creation
-    public async Task CreateUserManually(UserModel user)
+    public async Task CreateUserManually(UserModel user, ApplicationDbContext? context = null)
     {
-        var existingUser = await _userManager.FindByEmailAsync(user.Email);
-        if (existingUser != null) throw new Exception($"An account already exists for {user.Email}");
-
-        // Create User Identity for Authorization
-        var applicationUser = new ApplicationUser()
+        bool dispose = false;
+        if (context == null)
         {
-            Email = user.Email,
-            UserName = user.Email,
-            EmailConfirmed = true
-        };
-
-        // Creates the identity User
-        var result = await _userManager.CreateAsync(applicationUser);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(x => x.Description));
-            throw new Exception($"Could not create identity user. {errors}");
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
         }
-        else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
+        try
+        {
+            var existingUser = await _userManager.FindByEmailAsync(user.Email);
+            if (existingUser != null) throw new Exception($"An account already exists for {user.Email}");
 
-        // Create user in Database
-        _context.UserDb.Add(user);
-        await _context.SaveChangesAsync();
+            // Create User Identity for Authorization
+            var applicationUser = new ApplicationUser()
+            {
+                Email = user.Email,
+                UserName = user.Email,
+                EmailConfirmed = true
+            };
+
+            // Creates the identity User
+            var result = await _userManager.CreateAsync(applicationUser);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+                throw new Exception($"Could not create identity user. {errors}");
+            }
+            else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
+
+            // Create user in Database
+            context.UserDb.Add(user);
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // UPDATE STUDENT
-    public async Task UpdateUser(UserModel updated)
+    public async Task UpdateUser(UserModel updated, ApplicationDbContext? context = null)
     {
-        UserModel? existing = await GetUserById(updated.Id);
-        if (existing == null) throw new Exception("Could not find an existing user to update");
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            UserModel? existing = await GetUserById(updated.Id, context);
+            if (existing == null) throw new Exception("Could not find an existing user to update");
 
-        existing.FirstName = updated.FirstName;
-        existing.LastName = updated.LastName;
-        existing.DateOfBirth = updated.DateOfBirth;
-        existing.Email = updated.Email;
-        existing.ContactDetails.Phone = updated.ContactDetails.Phone;
+            existing.FirstName = updated.FirstName;
+            existing.LastName = updated.LastName;
+            existing.DateOfBirth = updated.DateOfBirth;
+            existing.Email = updated.Email;
+            existing.ContactDetails.Phone = updated.ContactDetails.Phone;
 
-        await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // Password Reset Email
@@ -191,9 +285,18 @@ public class UserService
     // Reset user password (or set password for first time)
     public async Task SetPassword(string password, string token, UserModel user)
     {
+        Console.WriteLine($"RESETTING PASSWORD");
+        Console.WriteLine($"Identity ID: {user.IdentityUser!.Id}");
+        Console.WriteLine($"Security Stamp: {user.IdentityUser.SecurityStamp}");
+        Console.WriteLine($"Email: {user.IdentityUser.Email}");
+        Console.WriteLine($"Token Length: {token.Length}");
+        
+        // Find Identity User
+        var identityUser = await _userManager.FindByIdAsync(user.IdentityUserId);
+
         // Confirm user exists
-        if (user.IdentityUser == null) throw new Exception("Cannot reset password. User not found.");
-        var result = await _userManager.ResetPasswordAsync(user.IdentityUser, token, password); // reset password
+        if (identityUser == null) throw new Exception("Cannot reset password. User not found.");
+        var result = await _userManager.ResetPasswordAsync(identityUser, token, password); // reset password
 
         // Handle errors if result was NOT successful
         if (!result.Succeeded)
@@ -204,54 +307,90 @@ public class UserService
     }
 
     // Disable / Re-enable Student Account
-    public async Task DisableUserToggle(int id)
+    public async Task DisableUserToggle(int id, ApplicationDbContext? context = null)
     {
-        UserModel? existing = await GetUserById(id);
-        if (existing == null) throw new Exception("Could not find a user with that Id");
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            UserModel? existing = await GetUserById(id, context);
+            if (existing == null) throw new Exception("Could not find a user with that Id");
 
-        existing.IsDisabled = !existing.IsDisabled;
+            existing.IsDisabled = !existing.IsDisabled;
 
-        await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // DELETE STUDENT | Primarily for testing purposes
-    public async Task DeleteUser(int id)
+    public async Task DeleteUser(int id, ApplicationDbContext? context = null)
     {
-        await _context.UserDb
-            .Where(x => x.Id == id)
-            .ExecuteDeleteAsync();
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            await context.UserDb
+                .Where(x => x.Id == id)
+                .ExecuteDeleteAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
 
     // ADMINS
-    public async Task CreateAdmin(UserModel admin, string? password)
+    public async Task CreateAdmin(UserModel admin, string? password, ApplicationDbContext? context = null)
     {
-        var response = await GetUserByEmail(admin.Email);
-        if (response != null) throw new Exception("Cannot create admin. This email already exists with a student or admin account.");
-
-        // Set Identity User Values
-        var identityUser = new ApplicationUser()
+        bool dispose = false;
+        if (context == null)
         {
-            Email = admin.Email,
-            UserName = admin.Email,
-            EmailConfirmed = true
-        };
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            var response = await GetUserByEmail(admin.Email, context);
+            if (response != null) throw new Exception("Cannot create admin. This email already exists with a student or admin account.");
 
-        // Generate email to set password
-        if (password == null) password = "1234"; // CHANGE LATER
+            // Set Identity User Values
+            var identityUser = new ApplicationUser()
+            {
+                Email = admin.Email,
+                UserName = admin.Email,
+                EmailConfirmed = true
+            };
 
-        // Create Identitty User
-        var result = await _userManager.CreateAsync(identityUser, password);
-        if (!result.Succeeded) throw new Exception("Could not create admin account. Failed to create identity User");
-        else await _userManager.AddToRoleAsync(identityUser, "Admin"); // Set Admin Roles
+            // Generate email to set password
+            if (password == null) password = "1234"; // CHANGE LATER
 
-        admin.IdentityUserId = identityUser.Id;
-        admin.IdentityUser = identityUser;
+            // Create Identitty User
+            var result = await _userManager.CreateAsync(identityUser, password);
+            if (!result.Succeeded) throw new Exception("Could not create admin account. Failed to create identity User");
+            else await _userManager.AddToRoleAsync(identityUser, "Admin"); // Set Admin Roles
 
-        _context.Add(admin);
-        await _context.SaveChangesAsync();
+            admin.IdentityUserId = identityUser.Id;
+
+            context.Add(admin);
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
-
-
 
 }

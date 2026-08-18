@@ -9,60 +9,125 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin;
 
 public class CourseService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IDbContextFactory<ApplicationDbContext> _context;
 
-    public CourseService(ApplicationDbContext context)
+    public CourseService(IDbContextFactory<ApplicationDbContext> context)
     {
         _context = context;
     }
 
     // GET ALL COURSES
-    public async Task<List<Course>> GetAllCourses()
+    public async Task<List<Course>> GetAllCourses(ApplicationDbContext? context = null)
     {
-        var result = await _context.CourseDb
-            .Include(x => x.Degrees)
-            .Include(x => x.Sessions)
-            .ToListAsync();
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            var result = await context.CourseDb
+                .Include(x => x.Degrees)
+                .Include(x => x.Sessions)
+                .ToListAsync();
 
-        return result;
+            return result;
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // GET course by Id
-    public async Task<Course?> GetCourseById(int id)
+    public async Task<Course?> GetCourseById(int id, ApplicationDbContext? context = null)
     {
-        return await _context.CourseDb
-            .Include(x => x.Degrees)
-            .Include(x => x.Sessions)
-            .Where(x => x.Id == id)
-            .FirstOrDefaultAsync();
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            return await context.CourseDb
+                .Include(x => x.Degrees)
+                .Include(x => x.Sessions)
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // POST Course
-    public async Task CreateCourse(Course course)
+    public async Task CreateCourse(Course course, ApplicationDbContext? context = null)
     {
-        _context.CourseDb.Add(course);
-        await _context.SaveChangesAsync();
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            context.CourseDb.Add(course);
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     // PUT Course
-    public async Task UpdateCourse(Course updated)
+    public async Task UpdateCourse(Course updated, ApplicationDbContext? context = null)
     {
-        Course? existing = await GetCourseById(updated.Id);
-        if (existing == null) throw new Exception("No existing course found. Updating course failed.");
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            Course? existing = await GetCourseById(updated.Id);
+            if (existing == null) throw new Exception("No existing course found. Updating course failed.");
 
-        existing.Code = updated.Code;
-        existing.Credits = updated.Credits;
-        existing.Degrees = updated.Degrees;
-        existing.Name = updated.Name;
-        existing.Sessions = updated.Sessions;
+            existing.Code = updated.Code;
+            existing.Credits = updated.Credits;
+            existing.Degrees = updated.Degrees;
+            existing.Name = updated.Name;
+            existing.Sessions = updated.Sessions;
 
-        await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
-    public async Task DeleteCourse(int id)
+    public async Task DeleteCourse(int id, ApplicationDbContext? context = null)
     {
-        _context.CourseDb
-            .Where(x => x.Id == id)
-            .ExecuteDelete();
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            context.CourseDb
+                .Where(x => x.Id == id)
+                .ExecuteDelete();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 }

@@ -1,5 +1,5 @@
 @page "/admin/applicants"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using StudentPortalPracticeTwo.Database.Models.Application;
 @inject StudentPortalPracticeTwo.Components.Services.Application.FinalApplicationDb studentApplication;
 @inject NavigationManager navigationManager;
@@ -34,8 +34,11 @@
             <th>Date Received</th>
         </thead>
         <tbody>
-            @if (applicationsReceived == null || applicationsReceived.Count == 0) {
+            @if (isLoading) {
                 <p>Loading Pending Applications...</p>
+            }
+            else if (!filteredApplications.Any()) {
+                <p>No applications found</p>
             }
             else {
                 @foreach (ApplicationModel application in filteredApplications!) {
@@ -81,6 +84,7 @@
 
 @code {
     public List<ApplicationModel> applicationsReceived { get; set; } = new();
+    public bool isLoading { get; set; } = true;
     public int currPage { get; set; } = 1;
     public int pageSize { get; set; } = 10; // Edit to change size of pages
     public int totalPages { get; set; }
@@ -99,6 +103,7 @@
                                         a.StudentInfo.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                                         a.StudentInfo.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                                         a.Email.Contains(query, StringComparison.OrdinalIgnoreCase)));
+    private readonly Guid _instanceId = Guid.NewGuid();
 
     public IEnumerable<ApplicationModel> filteredApplications => // This filter handles pagination
             filteredResults
@@ -109,12 +114,15 @@
     protected override async Task OnInitializedAsync() {
         try {
             applicationsReceived = await studentApplication.GetAllApplications();
+            Console.WriteLine($"Loaded {applicationsReceived.Count} applications.");
+            UpdateTotalPages();
         }
         catch (Exception ex) {
             Console.WriteLine($"Could not load existing applicants. Ex: {ex}");
         }
-
-        UpdateTotalPages();
+        finally {
+            isLoading = false;
+        }
     }
 
     @* Review a student's application ID *@

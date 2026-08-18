@@ -42,6 +42,7 @@ else
         }
     </div>
 
+    <p>@message</p>
     <div class="bottom-bar">
         <button class="btn btn-secondary" type="button" @onclick="() => finalApplicationService.DownloadPdf(applicationId)">
             Download Application PDF
@@ -74,6 +75,7 @@ else
     [Parameter] public int applicationId { get; set; }
     public ApplicationModel? studentApplication { get; set; }
     public StudentTab tab { get; set; }
+    public string message { get; set; } = "";
 
     public bool approvalLoading { get; set; } = false;
 
@@ -112,6 +114,7 @@ else
         }
         catch (Exception ex) {
             Console.WriteLine($"Could not create student account. Ex: {ex}");
+            message = $"{ex.Message}";
         }
         finally {
             approvalLoading = false; 

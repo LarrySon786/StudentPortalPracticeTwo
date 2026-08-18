@@ -6,19 +6,20 @@ using StudentPortalPracticeTwo.Database.Models.Application;
 using StudentPortalPracticeTwo.Database.Models.Students;
 using StudentPortalPracticeTwo.Components.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 
 namespace StudentPortalPracticeTwo.Components.Services.Application;
 
 public class FinalApplicationDb
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IDbContextFactory<ApplicationDbContext> _context;
     private readonly UserService _userService;
     private readonly IEmailService _emailService; // 
     private readonly IWebHostEnvironment _environment; // Allows tracing back to root of project
     private readonly IConfiguration _configuration; // Gets base URL for the project 
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public FinalApplicationDb(ApplicationDbContext context, UserService userService,
+    public FinalApplicationDb(IDbContextFactory<ApplicationDbContext> context, UserService userService,
         IEmailService emailService, IWebHostEnvironment environment, IConfiguration configuration,
         UserManager<ApplicationUser> userManager)
     {
@@ -32,192 +33,275 @@ public class FinalApplicationDb
 
 
     // GET all applications (includes denied, approved, or pending)
-    public async Task<List<ApplicationModel>> GetAllApplications()
+    public async Task<List<ApplicationModel>> GetAllApplications(ApplicationDbContext? context = null)
     {
-        return await _context.ApplicationDb
-            .Include(x => x.StudentInfo)
-            .Include(y => y.StudentContact)
-            .Include(x => x.EmergencyContact)
-            .Include(x => x.StudentProgram)
-            .Include(x => x.AcademicHistory)
-            .Include(x => x.Essays)
-            .ToListAsync();
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            return await context.ApplicationDb
+                .Include(x => x.StudentInfo)
+                .Include(y => y.StudentContact)
+                .Include(x => x.EmergencyContact)
+                .Include(x => x.StudentProgram)
+                .Include(x => x.AcademicHistory)
+                .Include(x => x.Essays)
+                .ToListAsync();
+        }  
+         finally
+        {
+            if (dispose) await context.DisposeAsync();
+        } 
     }
 
     // GET all PENDING applciations (applications that need reviewed and then approved by admins)
-    public async Task<List<ApplicationModel>> GetAllPendingApplications()
+    public async Task<List<ApplicationModel>> GetAllPendingApplications(ApplicationDbContext? context = null)
     {
-        return await _context.ApplicationDb
-            .Where(x => x.ApprovedStatus == Status.Pending)
-            .Include(x => x.StudentInfo)
-            .Include(y => y.StudentContact)
-            .Include(x => x.EmergencyContact)
-            .Include(x => x.StudentProgram)
-            .Include(x => x.AcademicHistory)
-            .Include(x => x.Essays)
-            .ToListAsync();
-    }
-
-    public async Task<ApplicationModel?> GetByEmail(string email)
-    {
-        var entity = await _context.ApplicationDb
-            .Include(x => x.StudentInfo)
-            .Include(x => x.StudentContact)
-            .Include(x => x.EmergencyContact)
-            .Include(x => x.StudentProgram)
-            .Include(x => x.AcademicHistory)
-            .Include(x => x.Essays)
-            .FirstOrDefaultAsync(x => x.Email == email);
-
-        return entity;
-    }
-
-    public async Task<ApplicationModel?> GetById(int id)
-    {
-        var entity = await _context.ApplicationDb
-            .Include(x => x.StudentInfo)
-            .Include(x => x.StudentContact)
-            .Include(x => x.EmergencyContact)
-            .Include(x => x.StudentProgram)
-            .Include(x => x.AcademicHistory)
-            .Include(x => x.Essays)
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        return entity;
-    }
-
-    public async Task<ApplicationModel> CreateApplication(DraftApplicationModel draft)
-    {
-        // VALIDATE the Draft ApplicationModel Required fields first. Identify if any fields are NULL
-        // To display validation errors, please use a try{} catch{} statement to catch and update UI.
-        List<string> errors = new();
-
-        ValidateRequiredFields(draft, errors);
-
-        // SERVER SIDE VALIDATION
-        //Declare a list to hold Validation errors 
-        var validationResults = new List<ValidationResult>();
-        ServerSideValidation(draft, validationResults);
-
-        // Add server-side errors to UI errors
-        errors.AddRange(validationResults
-            .Where(v => !string.IsNullOrWhiteSpace(v.ErrorMessage))
-            .Select(v => v.ErrorMessage!)
-        );
-
-        // BLOCK SAVE AND THROW ERRORS IF ANY
-        if (errors.Any())
-            throw new ValidationException(string.Join(Environment.NewLine, errors));
-
-        // Create Emergency Contacts for final application
-        var EmergencyContactList = new List<EmergencyContactModel>();
-        foreach (DraftEmergencyContactModel contact in draft.DraftEmergencyContact!)
+        bool dispose = false;
+        if (context == null)
         {
-            EmergencyContactModel EmergencyContact = new()
-            {
-                ContactName = contact.ContactName,
-                Relationship = contact.Relationship,
-                Phone = contact.Phone,
-            };
-            EmergencyContactList.Add(EmergencyContact);
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
         }
-        // CREATE FINAL DRAFT FROM existing draft
-        ApplicationModel entity = new()
+        try
         {
-            Email = draft.Email,
-            StudentInfo = new StudentInfoModel()
-            {
-                FirstName = draft.DraftStudentInfo!.FirstName!,
-                MiddleName = draft.DraftStudentInfo!.MiddleName!,
-                LastName = draft.DraftStudentInfo!.LastName!,
-                DateOfBirth = draft.DraftStudentInfo.DateOfBirth,
-                Race = draft.DraftStudentInfo.Race!.Value,
-                Gender = draft.DraftStudentInfo.Gender!.Value,
-                CitizenshipCountry = draft.DraftStudentInfo.CitizenshipCountry!.Value,
-                StreetOneAddress = draft.DraftStudentInfo.StreetOneAddress!,
-                StreetTwoAddress = draft.DraftStudentInfo.StreetTwoAddress ?? string.Empty,
-                City = draft.DraftStudentInfo.City!,
-                StateOrProvince = draft.DraftStudentInfo.StateOrProvince!,
-                Zipcode = draft.DraftStudentInfo.Zipcode!.Value,
-            },
-            StudentContact = new StudentContactModel()
-            {
-                Phone = draft.DraftStudentContact!.Phone!,
-                AltPhone = draft.DraftStudentContact.AltPhone,
-            },
-            EmergencyContact = EmergencyContactList, // Emergency Contact List created above
-            StudentProgram = new StudentProgram()
-            {
-                SelectedProgram = draft.DraftProgramSelection.SelectedProgram!,
-                StartTerm = draft.DraftProgramSelection.StartTerm!
-            },
-            AcademicHistory = new AcademicHistoryModel()
-            {
-                HighschoolTranscriptFileName = draft.DraftAcademicHistory.HighschoolTranscriptFileName,
-                HighschoolTranscript = draft.DraftAcademicHistory.HighschoolTranscript!,
-                CollegeTranscriptFileName = draft.DraftAcademicHistory.CollegeTranscriptFileName,
-                CollegeTranscript = draft.DraftAcademicHistory.CollegeTranscript
-            },
-            Essays = new StudentEssayModel()
-            {
-                ResponseOne = draft.DraftEssays.ResponseOne,
-                ResponseTwo = draft.DraftEssays.ResponseTwo,
-                ResponseThree = draft.DraftEssays.ResponseThree
-            },
 
-            ApprovedStatus = Status.Pending
-        };
-        // Validate Final Draft
-        ValidateFinalDraft(entity, validationResults);
-
-        // Add server-side errors to UI errors
-        errors.AddRange(validationResults
-            .Where(v => !string.IsNullOrWhiteSpace(v.ErrorMessage))
-            .Select(v => v.ErrorMessage!)
-        );
-
-        // BLOCK SAVE AND THROW ERRORS IF ANY
-        if (errors.Any())
-            throw new ValidationException(string.Join(Environment.NewLine, errors));
-
-
-        _context.ApplicationDb.Add(entity);
-        await _context.SaveChangesAsync();
-
-        return entity;
+            return await context.ApplicationDb
+                .Where(x => x.ApprovedStatus == Status.Pending)
+                .Include(x => x.StudentInfo)
+                .Include(y => y.StudentContact)
+                .Include(x => x.EmergencyContact)
+                .Include(x => x.StudentProgram)
+                .Include(x => x.AcademicHistory)
+                .Include(x => x.Essays)
+                .ToListAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
-    public async Task UpdateApplication(ApplicationModel updated)
+    public async Task<ApplicationModel?> GetByEmail(string email, ApplicationDbContext? context = null)
     {
-        ApplicationModel? entity = await _context.ApplicationDb
-            .Include(x => x.StudentContact)
-            .Include(x => x.StudentInfo)
-            .Include(x => x.EmergencyContact)
-            .Include(x => x.StudentProgram)
-            .Include(x => x.AcademicHistory)
-            .Include(x => x.Essays)
-            .FirstOrDefaultAsync(x => x.Id == updated.Id);
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            var entity = await context.ApplicationDb
+                .Include(x => x.StudentInfo)
+                .Include(x => x.StudentContact)
+                .Include(x => x.EmergencyContact)
+                .Include(x => x.StudentProgram)
+                .Include(x => x.AcademicHistory)
+                .Include(x => x.Essays)
+                .FirstOrDefaultAsync(x => x.Email == email);
 
-        if (entity == null)
-            throw new Exception("No application found");
+            return entity;
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
+    }
 
-        entity.Email = updated.Email;
-        entity.StudentInfo.FirstName = updated.StudentInfo.FirstName;
-        entity.StudentInfo.MiddleName = updated.StudentInfo.MiddleName;
-        entity.StudentInfo.LastName = updated.StudentInfo.LastName;
-        entity.StudentInfo.Race = updated.StudentInfo.Race;
-        entity.StudentInfo.Gender = updated.StudentInfo.Gender;
-        entity.StudentInfo.CitizenshipCountry = updated.StudentInfo.CitizenshipCountry;
-        entity.StudentInfo.StreetOneAddress = updated.StudentInfo.StreetOneAddress;
-        entity.StudentInfo.StreetTwoAddress = updated.StudentInfo.StreetTwoAddress;
-        entity.StudentInfo.City = updated.StudentInfo.City;
-        entity.StudentInfo.StateOrProvince = updated.StudentInfo.StateOrProvince;
-        entity.StudentInfo.Zipcode = updated.StudentInfo.Zipcode;
+    public async Task<ApplicationModel?> GetById(int id, ApplicationDbContext? context = null)
+    {
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
 
-        entity.StudentContact.Phone = updated.StudentContact.Phone;
-        entity.StudentContact.AltPhone = updated.StudentContact.AltPhone;
+            var entity = await context.ApplicationDb
+                .Include(x => x.StudentInfo)
+                .Include(x => x.StudentContact)
+                .Include(x => x.EmergencyContact)
+                .Include(x => x.StudentProgram)
+                .Include(x => x.StudentProgram.SelectedProgram)
+                .Include(x => x.StudentProgram.StartTerm)
+                .Include(x => x.AcademicHistory)
+                .Include(x => x.Essays)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
-        await _context.SaveChangesAsync();
+            return entity;
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
+    }
+
+    public async Task<ApplicationModel> CreateApplication(DraftApplicationModel draft, ApplicationDbContext? context = null)
+    {
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+
+            // VALIDATE the Draft ApplicationModel Required fields first. Identify if any fields are NULL
+            // To display validation errors, please use a try{} catch{} statement to catch and update UI.
+            List<string> errors = new();
+
+            ValidateRequiredFields(draft, errors);
+
+            // SERVER SIDE VALIDATION
+            //Declare a list to hold Validation errors 
+            var validationResults = new List<ValidationResult>();
+            ServerSideValidation(draft, validationResults);
+
+            // Determine if email already exists on a user.
+            var existing = await GetByEmail(draft.Email, context);
+            if (existing != null) errors.Add("A student already has this email. Please use a different email");
+
+            // Add server-side errors to UI errors
+            errors.AddRange(validationResults
+                .Where(v => !string.IsNullOrWhiteSpace(v.ErrorMessage))
+                .Select(v => v.ErrorMessage!)
+            );
+
+            // BLOCK SAVE AND THROW ERRORS IF ANY
+            if (errors.Any()) throw new ValidationException(string.Join(Environment.NewLine, errors));
+
+            // Create Emergency Contacts for final application
+            var EmergencyContactList = new List<EmergencyContactModel>();
+            foreach (DraftEmergencyContactModel contact in draft.DraftEmergencyContact!)
+            {
+                EmergencyContactModel EmergencyContact = new()
+                {
+                    ContactName = contact.ContactName,
+                    Relationship = contact.Relationship,
+                    Phone = contact.Phone,
+                };
+                EmergencyContactList.Add(EmergencyContact);
+            }
+            // Create start Term
+            var startTerm = await context.TermDb.SingleAsync(x => x.Id == draft.DraftProgramSelection.StartTerm!.Id);
+            // Create selected Program
+            var selectedProgram = await context.DegreeDb.SingleAsync(x => x.Id == draft.DraftProgramSelection.SelectedProgram!.Id);
+
+            // CREATE FINAL DRAFT FROM existing draft
+            ApplicationModel entity = new()
+            {
+                Email = draft.Email,
+                StudentInfo = new StudentInfoModel()
+                {
+                    FirstName = draft.DraftStudentInfo!.FirstName!,
+                    MiddleName = draft.DraftStudentInfo!.MiddleName!,
+                    LastName = draft.DraftStudentInfo!.LastName!,
+                    DateOfBirth = draft.DraftStudentInfo.DateOfBirth,
+                    Race = draft.DraftStudentInfo.Race!.Value,
+                    Gender = draft.DraftStudentInfo.Gender!.Value,
+                    CitizenshipCountry = draft.DraftStudentInfo.CitizenshipCountry!.Value,
+                    StreetOneAddress = draft.DraftStudentInfo.StreetOneAddress!,
+                    StreetTwoAddress = draft.DraftStudentInfo.StreetTwoAddress ?? string.Empty,
+                    City = draft.DraftStudentInfo.City!,
+                    StateOrProvince = draft.DraftStudentInfo.StateOrProvince!,
+                    Zipcode = draft.DraftStudentInfo.Zipcode!.Value,
+                },
+                StudentContact = new StudentContactModel()
+                {
+                    Phone = draft.DraftStudentContact!.Phone!,
+                    AltPhone = draft.DraftStudentContact.AltPhone,
+                },
+                EmergencyContact = EmergencyContactList, // Emergency Contact List created above
+                StudentProgram = new StudentProgram()
+                {
+                    SelectedProgram = selectedProgram,
+                    StartTerm = startTerm
+                },
+                AcademicHistory = new AcademicHistoryModel()
+                {
+                    HighschoolTranscriptFileName = draft.DraftAcademicHistory.HighschoolTranscriptFileName,
+                    HighschoolTranscript = draft.DraftAcademicHistory.HighschoolTranscript!,
+                    CollegeTranscriptFileName = draft.DraftAcademicHistory.CollegeTranscriptFileName,
+                    CollegeTranscript = draft.DraftAcademicHistory.CollegeTranscript
+                },
+                Essays = new StudentEssayModel()
+                {
+                    ResponseOne = draft.DraftEssays.ResponseOne,
+                    ResponseTwo = draft.DraftEssays.ResponseTwo,
+                    ResponseThree = draft.DraftEssays.ResponseThree
+                },
+
+                ApprovedStatus = Status.Pending
+            };
+            // Validate Final Draft
+            ValidateFinalDraft(entity, validationResults);
+
+            // Add server-side errors to UI errors
+            errors.AddRange(validationResults
+                .Where(v => !string.IsNullOrWhiteSpace(v.ErrorMessage))
+                .Select(v => v.ErrorMessage!)
+            );
+
+            // BLOCK SAVE AND THROW ERRORS IF ANY
+            if (errors.Any()) throw new ValidationException(string.Join(Environment.NewLine, errors));
+
+            context.ApplicationDb.Add(entity);
+            await context.SaveChangesAsync();
+
+            return entity;
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
+    }
+
+    public async Task UpdateApplication(ApplicationModel updated, ApplicationDbContext? context = null)
+    {
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+
+            ApplicationModel? entity = await GetById(updated.Id, context);
+
+            if (entity == null)
+                throw new Exception("No application found");
+
+            entity.Email = updated.Email;
+            entity.StudentInfo.FirstName = updated.StudentInfo.FirstName;
+            entity.StudentInfo.MiddleName = updated.StudentInfo.MiddleName;
+            entity.StudentInfo.LastName = updated.StudentInfo.LastName;
+            entity.StudentInfo.Race = updated.StudentInfo.Race;
+            entity.StudentInfo.Gender = updated.StudentInfo.Gender;
+            entity.StudentInfo.CitizenshipCountry = updated.StudentInfo.CitizenshipCountry;
+            entity.StudentInfo.StreetOneAddress = updated.StudentInfo.StreetOneAddress;
+            entity.StudentInfo.StreetTwoAddress = updated.StudentInfo.StreetTwoAddress;
+            entity.StudentInfo.City = updated.StudentInfo.City;
+            entity.StudentInfo.StateOrProvince = updated.StudentInfo.StateOrProvince;
+            entity.StudentInfo.Zipcode = updated.StudentInfo.Zipcode;
+
+            entity.StudentContact.Phone = updated.StudentContact.Phone;
+            entity.StudentContact.AltPhone = updated.StudentContact.AltPhone;
+
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
     public bool ValidateRequiredFields(DraftApplicationModel draft, List<string>? errors)
@@ -449,80 +533,138 @@ public class FinalApplicationDb
 
         return isValid;
     }
-    public async Task DownloadPdf(int id)
+    public async Task DownloadPdf(int id, ApplicationDbContext? context = null)
     {
-        var application = await GetById(id);
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            var application = await GetById(id, context);
 
-        // Download the PDF to the user's PC.
-        // ...
-        // ...
-        // ...
+            // Download the PDF to the user's PC.
+            // ...
+            // ...
+            // ...
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
 
     }
 
-    public async Task ApproveApplication(int id)
+    public async Task ApproveApplication(int id, ApplicationDbContext? context = null)
     {
-        var application = await GetById(id);
-        if (application == null) throw new Exception("No application could be found to approve.");
-        if (application.ApprovedStatus == Status.Approved) return;
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
 
-        // Update student application to be marked as accepted
-        application.ApprovedStatus = Status.Approved;
+            var application = await GetById(id, context);
+            if (application == null) throw new Exception("No application could be found to approve.");
+            if (application.ApprovedStatus == Status.Approved) return;
 
-        // Create new student user + Create user Identity for Authorization / Authentication
-        UserModel user = await _userService.CreateUserByApplication(application);
-        await _context.SaveChangesAsync();
+            // Update student application to be marked as accepted
+            application.ApprovedStatus = Status.Approved;
 
-        // CREATE EMAIL | Email Subject | HTML Body
-        var firstLastName = $"{application.StudentInfo.FirstName} {application.StudentInfo.LastName}";
-        var htmlTemplatePath = Path.Combine(_environment.ContentRootPath, "Components", "Ui", "EmailTemplates", "Approved.html"); // Approved Email Template
-        var baseUrl = _configuration["AppSettings:BaseUrl"]; //Gets the base URL of the website
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user.IdentityUser!); // Create token for link
-        token = Uri.EscapeDataString(token); // Encodes the token
-        var registrationLink = $"{baseUrl}/register?userId={user.Id}&token={token}";
-        var subject = "Welcome to CSU";
-        var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template for approved letters
+            // Create new student user + Create user Identity for Authorization / Authentication
+            CreateUserResultHelper user = await _userService.CreateUserByApplication(application, context);
+            if (user.User == null || user.ApplicationUser == null) throw new Exception("Could not create user.");
+            await context.SaveChangesAsync();
 
-        html = html.Replace("{{Link_To_Register}}", registrationLink);
-        html = html.Replace("{{Student_First_And_Last_Name}}", firstLastName);
+            // CREATE EMAIL | Email Subject | HTML Body
+            var firstLastName = $"{application.StudentInfo.FirstName} {application.StudentInfo.LastName}";
+            var htmlTemplatePath = Path.Combine(_environment.ContentRootPath, "Components", "Ui", "EmailTemplates", "Approved.html"); // Approved Email Template
+            var baseUrl = _configuration["AppSettings:BaseUrl"]; //Gets the base URL of the website
+            Console.WriteLine($"GENERATING TOKEN");
+            Console.WriteLine($"Identity ID: {user.ApplicationUser.Id}");
+            Console.WriteLine($"Security Stamp: {user.ApplicationUser.SecurityStamp}");
+            Console.WriteLine($"Email: {user.ApplicationUser.Email}");
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user.ApplicationUser!); // Create token for link
+            // token = Uri.EscapeDataString(token); // Encodes the token
+            var registrationLink = $"{baseUrl}/register?userId={user.User!.Id}&token={token}";
+            var subject = "Welcome to CSU";
+            var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template for approved letters
 
-        // SEND NEW USER EMAIL TO REGISTER ACCOUNT
-        await _emailService.SendEmailAsync(application.Email, firstLastName, subject, html);
+            html = html.Replace("{{Link_To_Register}}", registrationLink);
+            html = html.Replace("{{Student_First_And_Last_Name}}", firstLastName);
+
+            // SEND NEW USER EMAIL TO REGISTER ACCOUNT
+            await _emailService.SendEmailAsync(application.Email, firstLastName, subject, html);
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
-    public async Task DeclineApplication(int id)
+    public async Task DeclineApplication(int id, ApplicationDbContext? context = null)
     {
-        var application = await GetById(id);
-        if (application == null) throw new Exception("No application could be found to deny.");
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            var application = await GetById(id, context);
+            if (application == null) throw new Exception("No application could be found to deny.");
 
-        // Mark application as denied
-        application.ApprovedStatus = Status.Denied;
+            // Mark application as denied
+            application.ApprovedStatus = Status.Denied;
 
-        // SAVE denied status
-        await _context.SaveChangesAsync();
+            // SAVE denied status
+            await context.SaveChangesAsync();
 
-        // Send email to notify student
-        // CREATE EMAIL | Email Subject | HTML Body
-        var firstLastName = $"{application.StudentInfo.FirstName} {application.StudentInfo.LastName}";
-        var htmlTemplatePath = Path.Combine(_environment.ContentRootPath, "Components", "Ui", "EmailTemplates", "Denied.html");
-        var subject = "CSU Admissions Decision";
-        var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template for approved letters
+            // Send email to notify student
+            // CREATE EMAIL | Email Subject | HTML Body
+            var firstLastName = $"{application.StudentInfo.FirstName} {application.StudentInfo.LastName}";
+            var htmlTemplatePath = Path.Combine(_environment.ContentRootPath, "Components", "Ui", "EmailTemplates", "Denied.html");
+            var subject = "CSU Admissions Decision";
+            var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template for approved letters
 
-        html = html.Replace("{{student_name}}", firstLastName);
+            html = html.Replace("{{student_name}}", firstLastName);
 
-        // SEND NEW USER EMAIL TO REGISTER ACCOUNT
-        await _emailService.SendEmailAsync(application.Email, firstLastName, subject, html);
+            // SEND NEW USER EMAIL TO REGISTER ACCOUNT
+            await _emailService.SendEmailAsync(application.Email, firstLastName, subject, html);
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 
-    public async Task PendingApplication(int id)
+    public async Task PendingApplication(int id, ApplicationDbContext? context = null)
     {
-        var application = await GetById(id);
-        if (application == null) throw new Exception("No application could be found to change to pending.");
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            var application = await GetById(id, context);
+            if (application == null) throw new Exception("No application could be found to change to pending.");
 
-        // Mark application as declined
-        application.ApprovedStatus = Status.Pending;
+            // Mark application as declined
+            application.ApprovedStatus = Status.Pending;
 
-        await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
     }
 }
 

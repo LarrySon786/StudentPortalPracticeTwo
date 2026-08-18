@@ -5,6 +5,7 @@
 @using StudentPortalPracticeTwo.Database.Models.Application
 @inject NavigationManager NavigationManager
 @inject DraftApplicationDb data
+@inject FinalApplicationDb finalApplication
 
 
 <div class="preapply-page">
@@ -54,7 +55,11 @@
 
         try {
             isSubmitting = true;
-
+            var duplicateEmail = await finalApplication.GetByEmail(preapply.Email);
+            if (duplicateEmail != null) {
+                message = "This email already has a student account. Please use a diffferent email";
+                return;
+            }
             DraftApplicationModel? existing = await data.GetByEmail(preapply.Email);
             if (existing == null) {
                 DraftApplicationModel newApplication = await data.CreateApplication(preapply.Email);

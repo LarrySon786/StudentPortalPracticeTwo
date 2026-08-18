@@ -86,6 +86,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(x => x.DegreeId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<UserProgramModel>()
+            .HasMany(x => x.CompletedCourses)
+            .WithMany();
+
+        modelBuilder.Entity<UserProgramModel>()
+            .HasMany(x => x.CurrentSessions)
+            .WithMany(x => x.StudentProgramModels);
+
+        modelBuilder.Entity<UserProgramModel>()
+            .HasMany(x => x.RegisteredSessions)
+            .WithMany(x => x.RegisteredStudentProgramModels);
+
         
         // Final
         modelBuilder.Entity<ApplicationModel>()

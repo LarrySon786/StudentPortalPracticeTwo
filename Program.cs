@@ -15,6 +15,9 @@ using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Enums;
 using System.Text.Json;
 using StudentPortalPracticeTwo.Database.Models.DTOs;
+using StudentPortalPracticeTwo.Database.Models.Application;
+using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +44,8 @@ builder.Services.ConfigureApplicationCookie(options => // Cookie configurations
 // Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContextFactory<ApplicationDbContext>( options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Scoped);
 
 // Scoped Services
 builder.Services.AddScoped<DraftApplicationDb>(); // Student Application
@@ -148,8 +153,8 @@ if (app.Environment.IsDevelopment())
             Year = 2027,
             AvailableToRegisterClasses = true,
         };
-        await termService.CreateTerm(termOne);
-        await termService.CreateTerm(termTwo);
+        await termService.CreateTerm(termOne, db);
+        await termService.CreateTerm(termTwo, db);
 
 
        // Create Courses
@@ -165,7 +170,7 @@ if (app.Environment.IsDevelopment())
                 Code = courseItem.Code,
                 Credits = courseItem.Credits,
             };
-            await courseService.CreateCourse(course); // Save
+            await courseService.CreateCourse(course, db); // Save
         }
 
         // Create Default Degree
@@ -187,7 +192,7 @@ if (app.Environment.IsDevelopment())
             var course = db.CourseDb.Single(c => c.Code == code);
             degree.Courses.Add(course);
         }
-        await degreeService.CreateDegree(degree); // Save
+        await degreeService.CreateDegree(degree, db); // Save
 
 
         // Create Course Sessions
@@ -219,7 +224,7 @@ if (app.Environment.IsDevelopment())
 
             };
 
-            await classSessionService.CreateClassSession(createdSession);
+            await classSessionService.CreateClassSession(createdSession, db);
         }
 
         // Create default admin role
@@ -248,9 +253,107 @@ if (app.Environment.IsDevelopment())
             FinalApplicationId = null,
             OriginalFinalApplication = null,
         };
-        await userService.CreateAdmin(admin, "Brandoniscool1234$");
+        await userService.CreateAdmin(admin, "Brandoniscool1234$", db);
+
+        // Create Submited Application
+        var file = File.ReadAllText("Database/JSON/Applications/FinalApplication.json");
+        try
+        {
+            var applicationDefinition = JsonSerializer.Deserialize<List<JsonFinalApplication>>(file, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new JsonStringEnumConverter() }
+            });
 
 
+        
+        foreach ( var student in applicationDefinition!)
+        {
+            // Get existing Degree and Term from database
+            var identifiedDegree = await degreeService.GetDegreeById(student.StudentProgram.DegreeId, db);
+            var identifiedTerm = await termService.GetTermById(student.StudentProgram.TermId, db);
+            
+
+            ApplicationModel newApplication = new()
+            {
+                Email = student.Email,
+                ApprovedStatus = student.ApprovedStatus,
+
+                // Student Information
+                StudentInfo = new StudentInfoModel()
+                {
+                    FirstName = student.StudentInfo.FirstName,
+                    MiddleName = student.StudentInfo.MiddleName,
+                    LastName = student.StudentInfo.LastName,
+                    DateOfBirth = student.StudentInfo.DateOfBirth,
+                    Race = student.StudentInfo.Race,
+                    Gender = student.StudentInfo.Gender,
+                    CitizenshipCountry = student.StudentInfo.CitizenshipCountry,
+                    StreetOneAddress = student.StudentInfo.StreetOneAddress,
+                    StreetTwoAddress = student.StudentInfo.StreetTwoAddress,
+                    City = student.StudentInfo.City,
+                    StateOrProvince = student.StudentInfo.StateOrProvince,
+                    Zipcode = student.StudentInfo.Zipcode
+                },
+
+                // Student Contact
+                StudentContact = new StudentContactModel()
+                {
+                    Phone = student.StudentContact.Phone,
+                    AltPhone = student.StudentContact.AltPhone
+                },
+
+                // Emergency Contacts
+                EmergencyContact = student.EmergencyContacts
+                    .Select(contact => new EmergencyContactModel()
+                    {
+                        ContactName = contact.ContactName,
+                        Relationship = contact.Relationship,
+                        Phone = contact.Phone
+                    })
+                    .ToList(),
+
+                // Student Program
+                StudentProgram = new StudentProgram()
+                {
+                    SelectedProgram = identifiedDegree!,
+                    StartTerm = identifiedTerm
+                },
+
+                // Academic History
+                AcademicHistory = new AcademicHistoryModel()
+                {
+                    HighschoolTranscriptFileName = student.AcademicHistory.HighschoolTranscriptFileName,
+
+                    HighschoolTranscript = Convert.FromBase64String(student.AcademicHistory.HighschoolTranscript),
+
+                    CollegeTranscriptFileName = student.AcademicHistory.CollegeTranscriptFileName,
+
+                    CollegeTranscript = student.AcademicHistory.CollegeTranscript == null
+                            ? null
+                            : Convert.FromBase64String( student.AcademicHistory.CollegeTranscript )
+                },
+
+                // Essays
+                Essays = new StudentEssayModel()
+                {
+                    ResponseOne = student.Essays.ResponseOne,
+                    ResponseTwo = student.Essays.ResponseTwo,
+                    ResponseThree = student.Essays.ResponseThree
+                }
+            };
+            db.ApplicationDb.Add(newApplication);
+        }}
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"JSON ERROR: {ex.Message}");
+            Console.WriteLine($"PATH: {ex.Path}");
+            Console.WriteLine($"LINE: {ex.LineNumber}");
+            Console.WriteLine($"POSITION: {ex.BytePositionInLine}");
+
+            throw;
+        }
+        await db.SaveChangesAsync(); // Save added final Applications
         return "Database reset";
     });
 }

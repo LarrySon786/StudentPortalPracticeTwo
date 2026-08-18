@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using StudentPortalPracticeTwo.Database.Models.Students;
 
 namespace StudentPortalPracticeTwo.Database.Models.Degrees;
 
@@ -9,8 +10,15 @@ public class ClassSession
     public int Id { get; set; }
 
     public int CourseId { get; set; }
-
     public Course Course { get; set; } = null!;
+
+    public int TermId { get; set; } // Term Relationship for database
+
+    [Required(ErrorMessage = "Term is required")]
+    public Term? Term { get; set; }
+
+    public List<UserProgramModel> StudentProgramModels { get; set; } = new();
+    public List<UserProgramModel> RegisteredStudentProgramModels { get; set; } = new();
 
     // Session attributes
     [Required]
@@ -25,10 +33,7 @@ public class ClassSession
     public string Description { get; set; } = string.Empty;
 
     // Assign dates and times to the class (and school block)
-    public int TermId { get; set; } // Term Relationship for database
-
-    [Required(ErrorMessage = "Term is required")]
-    public Term? Term { get; set; }
+    
 
     [DataType(DataType.Date)]
     public DateOnly StartDate { get; set; }
@@ -43,9 +48,9 @@ public class ClassSession
     public TimeOnly EndTime { get; set; }
 
 
-    // Count how many students are registered for this class
+
     [Range(0, int.MaxValue)]
-    public int CurrentCount { get; set; }
+    public int CurrentCount { get; set; } // TO DO: Make this property calculated by counting Users[]
 
     [Range(1, int.MaxValue)]
     public int Capacity { get; set; }

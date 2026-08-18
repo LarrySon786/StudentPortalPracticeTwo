@@ -1,6 +1,27 @@
 
 
 LEFT off
+- I added a seed data for a pending application and approved application. Fixed bugs of ENUMS on JSON file not matching models
+
+-Sendgrid emails need fixed after all refactoring I did.
+
+- I refactored the way the DbContext worked for my database. Now it uses IDbContextFactory which makes it so the lifespan
+of each database connection only lasts for the existing method and is disposed afterwards. This prevents DbContext lifespan
+issues from happening.
+
+- I have designed the student Degree Progress Page. It has tables and performs READ operations to get all data.
+- This still needs to have registeration feature completed
+- I have not tested dotnet watch in a minute. May want to do that
+
+- Consider adding a faculty portal where teachers can submit grades, pass students in their class, 
+report grade percentage, and more. This could allow for calculating GPA, marking classes complete, 
+Then removing classes from student's current courses
+
+- I created relationships between User.MyProgram => current [ClassSessions], Registered [ClassSessions], [CompletedCourses]
+With these relationships, I may need to add a new ClassSession.List<UserModels> RegisteredId and RegisteredUsers
+for the modelBuilder to work properly. I am unsure what is best. I need to build more before deciding. Jotting
+this note down to remind me this may cause a bug later (Right now current [classSessions] and Registered [ClassSessions]
+point to the same navigation property)... SCRATCH THAT => I had to add it for modelBuilder to accept a migration
 
 - I added auto-populating sample DATA. May want to practice writing JSON, deserializing it, and 
 setting up DTOs to transfer data from JSON to models.

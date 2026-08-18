@@ -41,3 +41,5 @@ Traceable trail:
 - I was trying to fix AddSession and ran into a bunch of issues with courseService.GetAllCourses. That file and reset-db were 
 changes quite a bit in trouble shooting. Also CreateSessionDialog.razor was changed quite a bit. COMPLETED
 - I created Sample Data from JSON files using deserializers and Data Transfer Object classes (DTOs)
+- I added a logout link to navigation as well as an authorized view link
+

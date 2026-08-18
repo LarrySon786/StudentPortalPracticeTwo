@@ -1,0 +1,118 @@
+[
+  {
+    "Email": "richardsbrandon3@gmail.com",
+
+    "ApprovedStatus": "Pending",
+
+    "StudentInfo": {
+      "FirstName": "Jane",
+      "MiddleName": "Marie",
+      "LastName": "Doe",
+      "DateOfBirth": "2004-05-15",
+      "Race": "CaucasionWhite",
+      "Gender": "Female",
+      "CitizenshipCountry": "UnitedStates",
+      "StreetOneAddress": "123 College Ave",
+      "StreetTwoAddress": "",
+      "City": "Columbus",
+      "StateOrProvince": "Ohio",
+      "Zipcode": 43215
+    },
+
+    "StudentContact": {
+      "Phone": "6145551234",
+      "AltPhone": "6145559999"
+    },
+
+    "EmergencyContacts": [
+      {
+        "ContactName": "John Doe",
+        "Relationship": "Father",
+        "Phone": "6145551111"
+      },
+      {
+        "ContactName": "Mary Doe",
+        "Relationship": "Mother",
+        "Phone": "6145552222"
+      }
+    ],
+
+    "StudentProgram": {
+      "DegreeId": 1,
+      "TermId": 1
+    },
+
+    "AcademicHistory": {
+      "HighschoolTranscriptFileName": "Transcript.pdf",
+      "HighschoolTranscript": "VGhpcyBpcyBhIGR1bW15IHRyYW5zY3JpcHQu",
+      "CollegeTranscriptFileName": "",
+      "CollegeTranscript": null
+    },
+
+    "Essays": {
+      "ResponseOne": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed feugiat, lorem nec bibendum tincidunt, orci arcu gravida erat, sit amet luctus augue augue nec nibh. Vestibulum vitae lectus sed ligula placerat interdum.",
+
+      "ResponseTwo": "My academic interests have always centered around technology and solving real-world problems. Throughout high school I enjoyed mathematics, computer science, and collaborating on projects that challenged my critical thinking skills. I hope to continue developing these abilities while contributing to the university community.",
+
+      "ResponseThree": "I believe perseverance and curiosity are two of my strongest qualities. Whether working independently or with a team, I enjoy learning new concepts and applying them to meaningful projects. I hope to use my education to make a positive impact in my career and community."
+    }
+  },
+  {
+    "Email": "kingjulian@gmail.com",
+
+    "ApprovedStatus": "Approved",
+
+    "StudentInfo": {
+      "FirstName": "King",
+      "MiddleName": "J",
+      "LastName": "Julian",
+      "DateOfBirth": "2004-05-15",
+      "Race": "CaucasionWhite",
+      "Gender": "Male",
+      "CitizenshipCountry": "UnitedStates",
+      "StreetOneAddress": "123 College Ave",
+      "StreetTwoAddress": "",
+      "City": "Columbus",
+      "StateOrProvince": "Ohio",
+      "Zipcode": 43215
+    },
+
+    "StudentContact": {
+      "Phone": "6145551234",
+      "AltPhone": "6145559999"
+    },
+
+    "EmergencyContacts": [
+      {
+        "ContactName": "John Doe",
+        "Relationship": "Father",
+        "Phone": "6145551111"
+      },
+      {
+        "ContactName": "Mary Doe",
+        "Relationship": "Mother",
+        "Phone": "6145552222"
+      }
+    ],
+
+    "StudentProgram": {
+      "DegreeId": 1,
+      "TermId": 1
+    },
+
+    "AcademicHistory": {
+      "HighschoolTranscriptFileName": "Transcript.pdf",
+      "HighschoolTranscript": "VGhpcyBpcyBhIGR1bW15IHRyYW5zY3JpcHQu",
+      "CollegeTranscriptFileName": "",
+      "CollegeTranscript": null
+    },
+
+    "Essays": {
+      "ResponseOne": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed feugiat, lorem nec bibendum tincidunt, orci arcu gravida erat, sit amet luctus augue augue nec nibh. Vestibulum vitae lectus sed ligula placerat interdum.",
+
+      "ResponseTwo": "My academic interests have always centered around technology and solving real-world problems. Throughout high school I enjoyed mathematics, computer science, and collaborating on projects that challenged my critical thinking skills. I hope to continue developing these abilities while contributing to the university community.",
+
+      "ResponseThree": "I believe perseverance and curiosity are two of my strongest qualities. Whether working independently or with a team, I enjoy learning new concepts and applying them to meaningful projects. I hope to use my education to make a positive impact in my career and community."
+    }
+  }
+]

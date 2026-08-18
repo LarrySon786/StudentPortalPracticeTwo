@@ -12,13 +12,16 @@ public class UserProgramModel
     public UserModel? User { get; set; }
 
     public int DegreeId { get; set; }
-    public Degree? MyDegree { get; set; }
+    public Degree? MyDegree { get; set; } // Track Student's selected Program
 
-    // Track Completed Courses
+    public List<ClassSession> CurrentSessions { get; set; } = new(); // Track Students Concurrent Class Sessions
 
-    // Track Current Courses
+    public List<Course> CompletedCourses { get; set; } = new(); // Track Completed Courses
 
-    // Upcoming Registered Courses
+    public List<ClassSession> RegisteredSessions { get; set; } = new(); // Tracks Student's upcoming registered classSessions for next term
 
-    // Methods to figure out current progress || In a service
+    public double PercentageComplete =>// Methods to figure out current progress on degree
+        MyDegree == null || MyDegree.Courses.Count() == 0
+            ? 0
+            : CompletedCourses.Sum(c => c.Credits) / MyDegree.Courses.Sum(c => c.Credits) * 100;
 }
