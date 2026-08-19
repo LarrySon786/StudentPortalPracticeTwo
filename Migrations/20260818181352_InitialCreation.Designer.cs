@@ -12,8 +12,8 @@ using StudentPortalPracticeTwo.Database;
 namespace StudentPortalPracticeTwo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260814185836_CalculateDegreeProgress")]
-    partial class CalculateDegreeProgress
+    [Migration("20260818181352_InitialCreation")]
+    partial class InitialCreation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

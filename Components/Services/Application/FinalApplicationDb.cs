@@ -589,7 +589,7 @@ public class FinalApplicationDb
             Console.WriteLine($"Security Stamp: {user.ApplicationUser.SecurityStamp}");
             Console.WriteLine($"Email: {user.ApplicationUser.Email}");
             var token = await _userManager.GeneratePasswordResetTokenAsync(user.ApplicationUser!); // Create token for link
-            // token = Uri.EscapeDataString(token); // Encodes the token
+            token = Uri.EscapeDataString(token); // Encodes the token
             var registrationLink = $"{baseUrl}/register?userId={user.User!.Id}&token={token}";
             var subject = "Welcome to CSU";
             var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template for approved letters

@@ -93,7 +93,7 @@ public class TermService
         }
         try
         {
-            var existing = await GetTermById(updated.Id);
+            var existing = await GetTermById(updated.Id, context);
             if (existing == null) throw new Exception("No term found with this Id. Could not update");
             existing.Season = updated.Season;
             existing.Year = updated.Year;

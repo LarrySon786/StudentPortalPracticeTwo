@@ -16,6 +16,8 @@ Preapply page to load student form
 Email to accepted student to set up login credentials
 Email to denied students
 Admin management of pending applications, approved applications, denied applications.
+Switch to IDbContextFactory instead of normal DbContext
+
 
 
 
@@ -42,4 +44,10 @@ Traceable trail:
 changes quite a bit in trouble shooting. Also CreateSessionDialog.razor was changed quite a bit. COMPLETED
 - I created Sample Data from JSON files using deserializers and Data Transfer Object classes (DTOs)
 - I added a logout link to navigation as well as an authorized view link
+- I refactored the way the DbContext worked for my database. Now it uses IDbContextFactory which makes it so the lifespan
+of each database connection only lasts for the existing method and is disposed afterwards. This prevents DbContext lifespan
+issues from happening.
+- I added a seed data for a pending application and approved application. Fixed bugs of ENUMS on JSON file not matching models
+- Fixed SendgridEmails after refactoring the DbContext code.
+
 
