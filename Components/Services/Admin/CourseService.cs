@@ -35,6 +35,8 @@ public class CourseService
                     .ThenInclude(x => x.RegisteredStudentProgramModels)
                 .Include(x => x.Sessions)
                     .ThenInclude(x => x.StudentProgramModels)
+                .Include(x => x.Sessions)
+                    .ThenInclude(x => x.Instructor)
                 .ToListAsync();
 
             return result;
@@ -59,6 +61,13 @@ public class CourseService
             return await context.CourseDb
                 .Include(x => x.Degrees)
                 .Include(x => x.Sessions)
+                    .ThenInclude(x => x.Term)
+                .Include(x => x.Sessions)
+                    .ThenInclude(x => x.RegisteredStudentProgramModels)
+                .Include(x => x.Sessions)
+                    .ThenInclude(x => x.StudentProgramModels)
+                .Include(x => x.Sessions)
+                    .ThenInclude(x => x.Instructor)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
         }

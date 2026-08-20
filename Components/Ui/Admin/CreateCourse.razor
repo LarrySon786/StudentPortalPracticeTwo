@@ -43,7 +43,7 @@
                         <li class="dialog-lists">
                             @foreach (ClassSession session in course.Sessions)
                             {
-                                <ul>@session.Term | @session.StartDate - @session.EndDate | @session.Instructor</ul>
+                                <ul>@session.Term!.DisplayName | @session.StartDate - @session.EndDate | @session.Instructor!.FirstName @session.Instructor.LastName</ul>
                             }
                         </li>
 

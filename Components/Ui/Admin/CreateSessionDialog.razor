@@ -49,12 +49,13 @@
                 @* Instructor *@
                 <div class="form-group">
                     <label class="form-label">Instructor</label>
-                    <InputSelect class="form-control" @bind-Value="editableSession.Instructor!.Id">
+                    <InputSelect class="form-control" @bind-Value="editableSession.InstructorId">
+                        <option value="0" disabled>-- Select Instructor --</option>
                         @foreach(Faculty instructor in faculty) {
                             <option value=@instructor.Id>@instructor.FirstName @instructor.LastName</option>
                         }
                     </InputSelect> 
-                    <ValidationMessage For="(() => editableSession!.Instructor)"/>
+                    <ValidationMessage For="(() => editableSession!.InstructorId)"/>
                 </div>
 
                 @* Description *@
@@ -74,13 +75,13 @@
                 @* Term *@
                 <div class="form-group">
                     <label class="form-label">Term</label>
-                    <InputSelect class="form-select" @bind-Value="editableSession.Term!.Id" >
+                    <InputSelect class="form-select" @bind-Value="editableSession.TermId">
                         <option value="" disabled> -- Select Term --</option>
                         @foreach(Term term in terms) {
                             <option value="@term.Id">@term.DisplayName</option>
                         }
                     </InputSelect>
-                    <ValidationMessage For="(() => editableSession!.Term.Id)" />
+                    <ValidationMessage For="(() => editableSession!.TermId)" />
                 </div>
                 
                 @* Start / End Dates *@
@@ -153,10 +154,12 @@
                 {
                     Id = session.Id,
                     CourseId = session.CourseId,
-                    Instructor = session.Instructor ?? null,
+                    InstructorId = session.InstructorId,
                     Description = session.Description,
                     Location = session.Location,
-                    Term = session.Term ?? terms.FirstOrDefault()!,
+                    TermId = session.TermId != 0
+                        ? session.TermId
+                        : terms.FirstOrDefault()?.Id ?? 0,
                     StartDate = session.StartDate,
                     StartTime = session.StartTime,
                     EndDate = session.EndDate,
@@ -167,8 +170,6 @@
             
                 @* Populate all existing courses for form 'select' input field *@
                 availableCourses = await courseService.GetAllCourses();
-                
-                StateHasChanged();
             } 
             catch (Exception ex) {
                 Console.WriteLine($"No existing courses could be obtained. Ex: {ex}");

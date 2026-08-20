@@ -108,6 +108,7 @@ public class StudentService
                 .Include(x => x.IdentityUser)
                 .Include(x => x.MyProgram)
                     .ThenInclude(x => x.MyDegree)
+                    .ThenInclude(x => x!.Courses)
                 .Include(x => x.MyProgram)
                     .ThenInclude(x => x.RegisteredSessions)
                 .Include(x => x.MyProgram)

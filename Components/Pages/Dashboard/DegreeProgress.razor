@@ -144,7 +144,6 @@ else {
                         }
                     </tbody>
                 </table>
-                <button class="btn btn-primary" type="button" @onclick="RegisterCourses">Save Registered Courses</button>
             </div>
 
             @* CLASSES SELECTED FOR REGISTERATION *@
@@ -167,7 +166,7 @@ else {
                             <tr>
                                 <td>@session.Course.Code</td>
                                 <td>@session.Course.Name</td>
-                                <td>@session.Instructor</td>
+                                <td>@session.Instructor!.FirstName @session.Instructor.LastName</td>
                                 <td>@session.StartDate - @session.EndDate</td>
                                 <td>@session.StartTime - @session.EndTime</td>
                                 <td>
@@ -208,7 +207,7 @@ else {
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>Instructor: @session.Instructor</td>
+                                        <td>Instructor: @session.Instructor!.FirstName @session.Instructor.LastName</td>
                                         <td>Term: @session.Term!.DisplayName</td>
                                         <td>Start/End Date: @session.StartDate - @session.EndDate</td>
                                         <td>Start/End Time: @session.StartTime - @session.EndTime</td>
@@ -255,7 +254,7 @@ else {
     protected override async Task OnInitializedAsync() {
         try {
             auth = await authService.GetCurrentUserAsync(); // Get logged in User Details
-            if (user == null)
+            if (auth == null)
             {
                 navigationManager.NavigateTo("/login");
                 return;
