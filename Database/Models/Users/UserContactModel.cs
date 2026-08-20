@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace StudentPortalPracticeTwo.Database.Models.Students;
+namespace StudentPortalPracticeTwo.Database.Models.Users;
 
 public class UserContactModel
 {

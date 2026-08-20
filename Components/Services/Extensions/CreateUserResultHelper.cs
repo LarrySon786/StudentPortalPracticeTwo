@@ -1,9 +1,10 @@
-using StudentPortalPracticeTwo.Database.Models.Students;
+using StudentPortalPracticeTwo.Database.Models.Users;
+using StudentPortalPracticeTwo.Database.Models.Users.Students;
 
 namespace StudentPortalPracticeTwo.Components.Services.Extensions;
 
-public class CreateUserResultHelper
+public class CreateStudentResultHelper
 {
-    public UserModel? User { get; set; } = null;
+    public Student? User { get; set; } = null;
     public ApplicationUser? ApplicationUser { get; set; } = null;
 }

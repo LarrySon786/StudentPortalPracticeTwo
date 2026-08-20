@@ -1,9 +1,12 @@
 @page "/dashboard/degree-progress"
 @attribute [Authorize]
 @rendermode InteractiveServer
-@using StudentPortalPracticeTwo.Database.Models.Students
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
 @using StudentPortalPracticeTwo.Database.Models.Degrees
-
+@inject StudentPortalPracticeTwo.Components.Services.Users.Students.RegisterCourses registerCourses
+@inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService
+@inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService
 
 @* This page is to view all Degree Progress *@
 @if (user == null || user.MyProgram == null) {
@@ -36,7 +39,8 @@ else {
 
         @* My Completed Classes *@
         <div>
-            <table>
+            <h3>Completed Courses</h3>
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Course Code</th>
@@ -62,7 +66,8 @@ else {
 
         @* Incomplete Courses *@
         <div>
-            <table>
+            <h3>Incomplete Courses</h3>
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Course Code</th>
@@ -84,36 +89,186 @@ else {
         </div>
 
         @* Button to begin Registering courses *@
-        <button class="btn btn-primary" type="button" @onclick="ToggleBeginRegisteration">Register Courses</button>
+        <button class="btn btn-primary" type="button" @onclick="ToggleBeginRegisteration">@(!IsRegistering ? "Register Courses" : "Cancel Registration")</button>
 
         @if (IsRegistering) {
             @* REGISTER NEW CLASSES TABLE *@
             <div>
-                @*  *@
-                <div>
+                <h3>Course Available For Registration</h3>
+                @* Populates courses NOT sessions. Sessions are selected after course population *@
+                <label>
+                    <InputCheckbox @bind-Value="displayAllCourses" />
+                    Courses In My Program ONLY
+                </label>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Course</th>
+                            <th>Available Sessions</th>
+                            <th>Choose Session</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (displayAllCourses && coursesInProgram != null) {
+                                @foreach(Course course in coursesInProgram) {
+                                    <tr>
+                                        <td>@course.Code</td>
+                                        <td>@course.Name</td>
+                                        <td>@course.Code</td>
+                                        <td>
+                                            <button type="button" class="btn btn-link" @onclick="() => ChooseSessionsDialog(course)">
+                                                Choose Session
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                        }
+                        else if (!displayAllCourses && allCourses != null) {
+                            @foreach (Course course in allCourses)
+                            {
+                                <tr>
+                                    <td>@course.Code</td>
+                                    <td>@course.Name</td>
+                                    <td>@course.Code</td>
+                                    <td>
+                                        <button type="button" class="btn btn-link" @onclick="() => ChooseSessionsDialog(course)">
+                                            Choose Session
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else {
+                            <p>Could not load any available courses</p>
+                        }
+                    </tbody>
+                </table>
+                <button class="btn btn-primary" type="button" @onclick="RegisterCourses">Save Registered Courses</button>
+            </div>
 
-                </div>
+            @* CLASSES SELECTED FOR REGISTERATION *@
+            <h3>Classes Selected for Registeration</h3>
+            <div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Instructor</th>
+                            <th>Start/End Date</th>
+                            <th>Start/End Time</th>
+                            <th></th>
 
-                @* Selected Courses *@
-                <div>
-
-                </div>
-                <button class="btn btn-primary" type="button" @onclikc="RegisterCourses">Register</button>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(ClassSession session in sessions) {
+                            <tr>
+                                <td>@session.Course.Code</td>
+                                <td>@session.Course.Name</td>
+                                <td>@session.Instructor</td>
+                                <td>@session.StartDate - @session.EndDate</td>
+                                <td>@session.StartTime - @session.EndTime</td>
+                                <td>
+                                    <button class="btn btn-danger" type="button" @onclick="() => RemoveSession(session)">Remove Session</button>
+                                </td>
+                                
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button class="btn btn-primary" type="button" @onclick="RegisterCourses">
+                    Confirm Registeration
+                </button>
             </div>
         }
-
-
     </div>
+    @* CHOOSE SESSION DIALOG *@
+    @if (chooseSessions) {
+        <div class="overlay">
+            <div class="overlay-container">
+                <div class="standard-card standard-dialog">
+                    @if (selectedCourse == null) {
+                        <p>No course found</p>
+                    }
+                    else if (selectedCourse.Sessions.Count == 0) {
+                        <p>No sessions found</p>
+                    }
+                    else {
+                        @foreach(ClassSession session in selectedCourse!.Sessions) {
+                            <h4>@session.Course.Name Sessions</h4>
+                            <table class="table">
+                                <thead>
+                                    <th>Instructor</th>
+                                    <th>Term</th>
+                                    <th>Start/End Date</th>
+                                    <th>Start/End Time</th>
+                                    <th>Seats Available</th>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Instructor: @session.Instructor</td>
+                                        <td>Term: @session.Term!.DisplayName</td>
+                                        <td>Start/End Date: @session.StartDate - @session.EndDate</td>
+                                        <td>Start/End Time: @session.StartTime - @session.EndTime</td>
+                                        <td>@session.CurrentCount / @session.Capacity</td>
+                                        <td>
+                                            @if (sessions.Contains(session)) {
+                                                <button class="btn btn-secondary" type="button" disabled>
+                                                    Added
+                                                </button>
+                                            } 
+                                            else {
+                                                <button class="btn btn-link" type="button" @onclick="() => sessions.Add(session)">
+                                                    Add Session
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                        }
+                    }
+                    <button class="btn btn-secondary" type="button" @onclick="CloseChooseSessionDialog">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
 }
 
 @code {
-    public UserModel? user { get; set; }
+    public UserModel? auth { get; set; }
+    public Student? user { get; set; }
+    public IEnumerable<Course>? allCourses { get; set; }
+    public IEnumerable<Course>? coursesInProgram => allCourses?
+        .Where(x => user!.MyProgram.MyDegree!.Courses.Any(c => c.Code == x.Code));
+    public List<ClassSession> sessions { get; set; } = new();
     public bool IsRegistering { get; set; } = false;
+    public bool displayAllCourses { get; set; } = false;
+    public bool chooseSessions { get; set; }
+    public Course? selectedCourse { get; set; }
 
     protected override async Task OnInitializedAsync() {
         try {
-            user = await authService.GetCurrentUserAsync();
-            if (user == null) navigationManager.NavigateTo("/login");
+            auth = await authService.GetCurrentUserAsync(); // Get logged in User Details
+            if (user == null)
+            {
+                navigationManager.NavigateTo("/login");
+                return;
+            }
+
+            user = await studentService.GetStudentById(auth!.Id); // Get Student Details
+            if (user == null) {
+                navigationManager.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            allCourses = await courseService.GetAllCourses(); // Load all courses for registeration
+            sessions = user!.MyProgram.RegisteredSessions ?? []; // Set student's current session plans
         }
         catch (Exception ex) {
             Console.WriteLine(ex);
@@ -123,8 +278,30 @@ else {
         IsRegistering = !IsRegistering;
     }
 
-    public void RegisterCourses() { // This will finalize and save a student's selected courses they want to register.
+    public async Task RegisterCourses() { // This will finalize and save a student's selected courses they want to register.
+        try
+        {
+            await registerCourses.RegisterNewCourses(user!, sessions);
+            sessions = [];
+            IsRegistering = false;
 
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not register classes. {ex}");
+        }
+    }
+
+    public void ChooseSessionsDialog(Course course) {
+        selectedCourse = course;
+        chooseSessions = true;
+    }
+
+    public void CloseChooseSessionDialog() {
+        chooseSessions = false;
+        selectedCourse = null;
+    }
+    public void RemoveSession(ClassSession session) {
+        sessions.Remove(session);
     }
 
 }

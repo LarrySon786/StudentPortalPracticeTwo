@@ -1,6 +1,6 @@
 @using StudentPortalPracticeTwo.Database.Models.Enums
-@using StudentPortalPracticeTwo.Database.Models.Students
-@inject StudentPortalPracticeTwo.Components.Services.Students.UserService userServices;
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+@inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentServices;
 
 @* This component displays all demographics of a single student. Can be set to editable mode. *@
 <div>
@@ -56,8 +56,8 @@
 
 @code {
     [Parameter] public EditMode Mode { get; set; } = EditMode.View;
-    [Parameter] required public UserModel Student { get; set; }
-    public UserModel EditableStudent { get; set; } = null!;
+    [Parameter] required public Student Student { get; set; }
+    public Student EditableStudent { get; set; } = null!;
     [Parameter] public EventCallback OnSavedEdits { get; set; }
     public string AlertMessage { get; set; } = "";
 
@@ -70,7 +70,7 @@
         @* Attempt to save the edited user *@
         try {
             if (Mode == EditMode.View) return;
-            await userServices.UpdateUser(EditableStudent);
+            await studentServices.UpdateUser(EditableStudent);
             AlertMessage = "Save Successful";
             await OnSavedEdits.InvokeAsync();
         } 

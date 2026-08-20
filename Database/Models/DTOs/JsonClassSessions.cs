@@ -6,7 +6,7 @@ namespace StudentPortalPracticeTwo.Database.Models.DTOs;
 public class JsonClassSessions
 {
     public string CourseCode { get; set; } = null!;
-    public string Instructor { get; set; } = string.Empty;
+    public string InstructorEmail { get; set; } = null!;
     public string Location { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Term { get; set; } = string.Empty;

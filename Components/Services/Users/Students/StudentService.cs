@@ -2,34 +2,28 @@
 using StudentPortalPracticeTwo.Database.Models.Application;
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Database;
-using StudentPortalPracticeTwo.Database.Models.Students;
+using StudentPortalPracticeTwo.Database.Models.Users;
 using Microsoft.AspNetCore.Identity;
-using StudentPortalPracticeTwo.Components.Services.Interfaces;
-using Superpower.Model;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
+using StudentPortalPracticeTwo.Database.Models.Users.Students;
 
-namespace StudentPortalPracticeTwo.Components.Services.Students;
+namespace StudentPortalPracticeTwo.Components.Services.Users.Students;
 
-public class UserService
+public class StudentService
 {
     private readonly IDbContextFactory<ApplicationDbContext> _context;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IEmailService _emailService;
-    private readonly IWebHostEnvironment _environment;
-    private readonly IConfiguration _configuration;
 
-    public UserService(IDbContextFactory<ApplicationDbContext> context, UserManager<ApplicationUser> userManager, IEmailService emailService,
-        IWebHostEnvironment environment, IConfiguration configuration)
+
+    public StudentService(IDbContextFactory<ApplicationDbContext> context, UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _userManager = userManager;
-        _emailService = emailService;
-        _environment = environment;
-        _configuration = configuration;
+
     }
 
     // GET ALL STUDENTS
-    public async Task<List<UserModel>> GetAllUsers(ApplicationDbContext? context = null)
+    public async Task<List<Student>> GetAllStudents(ApplicationDbContext? context = null)
     {
         bool dispose = false;
         if (context == null)
@@ -40,21 +34,30 @@ public class UserService
 
         try
         {
-            return await context.UserDb
+            return await context.StudentDb
                 .Include(x => x.ContactDetails)
                 .Include(x => x.OriginalFinalApplication)
                 .Include(x => x.IdentityUser)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.MyDegree)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.RegisteredSessions)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.CompletedCourses)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.CurrentSessions)
+                .Include(x => x.EmergencyContact)
                 .ToListAsync();
         }
         finally
         {
             if (dispose) await context.DisposeAsync();
         }
-        
+
     }
 
     // GET STUDENT BY EMAIL
-    public async Task<UserModel?> GetUserByEmail(string email, ApplicationDbContext? context = null)
+    public async Task<Student?> GetStudentByEmail(string email, ApplicationDbContext? context = null)
     {
         bool disposeContext = false;
 
@@ -66,10 +69,19 @@ public class UserService
 
         try
         {
-            return  await context.UserDb
+            return await context.StudentDb
                 .Include(x => x.ContactDetails)
                 .Include(x => x.OriginalFinalApplication)
                 .Include(x => x.IdentityUser)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.MyDegree)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.RegisteredSessions)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.CompletedCourses)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.CurrentSessions)
+                .Include(x => x.EmergencyContact)
                 .Where(x => x.Email == email)
                 .FirstOrDefaultAsync();
         }
@@ -80,7 +92,7 @@ public class UserService
     }
 
     // GET STUDENT BY ID
-    public async Task<UserModel?> GetUserById(int id, ApplicationDbContext? context = null)
+    public async Task<Student?> GetStudentById(int id, ApplicationDbContext? context = null)
     {
         bool dispose = false;
         if (context == null)
@@ -90,10 +102,19 @@ public class UserService
         }
         try
         {
-            return await context.UserDb
+            return await context.StudentDb
                 .Include(x => x.ContactDetails)
                 .Include(x => x.OriginalFinalApplication)
                 .Include(x => x.IdentityUser)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.MyDegree)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.RegisteredSessions)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.CompletedCourses)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.CurrentSessions)
+                .Include(x => x.EmergencyContact)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
         }
@@ -101,10 +122,10 @@ public class UserService
         {
             if (dispose) await context.DisposeAsync();
         }
-        }
+    }
 
     // CREATE NEW STUDENT | by finalApplication approval
-    public async Task<CreateUserResultHelper> CreateUserByApplication(ApplicationModel finalApplication, ApplicationDbContext? context = null)
+    public async Task<CreateStudentResultHelper> CreateStudentByApplication(ApplicationModel finalApplication, ApplicationDbContext? context = null)
     {
         bool dispose = false;
         if (context == null)
@@ -156,7 +177,7 @@ public class UserService
                 emergencyContacts.Add(newContact);
             }
 
-            UserModel entity = new()
+            Student entity = new()
             {
                 FirstName = finalApplication.StudentInfo.FirstName,
                 LastName = finalApplication.StudentInfo.LastName,
@@ -178,9 +199,9 @@ public class UserService
                 IdentityUserId = applicationUser.Id,
             };
 
-            context.UserDb.Add(entity);
+            context.StudentDb.Add(entity);
             await context.SaveChangesAsync();
-            return new CreateUserResultHelper
+            return new CreateStudentResultHelper
             {
                 User = entity,
                 ApplicationUser = applicationUser
@@ -193,7 +214,7 @@ public class UserService
     }
 
     // CREATE NEW STUDENT | by manual creation
-    public async Task CreateUserManually(UserModel user, ApplicationDbContext? context = null)
+    public async Task CreateStudentManually(Student user, ApplicationDbContext? context = null)
     {
         bool dispose = false;
         if (context == null)
@@ -224,7 +245,7 @@ public class UserService
             else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
 
             // Create user in Database
-            context.UserDb.Add(user);
+            context.StudentDb.Add(user);
             await context.SaveChangesAsync();
         }
         finally
@@ -234,7 +255,7 @@ public class UserService
     }
 
     // UPDATE STUDENT
-    public async Task UpdateUser(UserModel updated, ApplicationDbContext? context = null)
+    public async Task<Student> UpdateUser(Student updated, ApplicationDbContext? context = null)
     {
         bool dispose = false;
         if (context == null)
@@ -244,7 +265,7 @@ public class UserService
         }
         try
         {
-            UserModel? existing = await GetUserById(updated.Id, context);
+            Student? existing = await GetStudentById(updated.Id, context);
             if (existing == null) throw new Exception("Could not find an existing user to update");
 
             existing.FirstName = updated.FirstName;
@@ -254,75 +275,7 @@ public class UserService
             existing.ContactDetails.Phone = updated.ContactDetails.Phone;
 
             await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
-    }
-
-    // Password Reset Email
-    public async Task EmailPasswordReset(string email)
-    {
-        var existing = await GetUserByEmail(email);
-        if (existing == null) throw new Exception("No user found with this email. Plese try again");
-
-        // Create Email
-        var htmlTemplatePath = Path.Combine(_environment.ContentRootPath, "Components", "Ui", "EmailTemplates", "ResetPassword.html"); // Approved Email Template
-        var baseUrl = _configuration["AppSettings:BaseUrl"]; //Gets the base URL of the website
-        var token = await _userManager.GeneratePasswordResetTokenAsync(existing.IdentityUser!); // Create token for link
-        token = Uri.EscapeDataString(token); // Encodes the token
-        var resetLink = $"{baseUrl}/register?userId={existing.Id}&token={token}";
-        var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template for approved letters
-
-        html = html.Replace("{{reset_link}}", resetLink);
-        html = html.Replace("{{first_name}}", existing.FirstName);
-
-        // Send Email
-        await _emailService.SendEmailAsync(existing.Email, existing.FirstName, "Password Reset", html);
-    }
-
-    // Reset user password (or set password for first time)
-    public async Task SetPassword(string password, string token, UserModel user)
-    {
-        Console.WriteLine($"RESETTING PASSWORD");
-        Console.WriteLine($"Identity ID: {user.IdentityUser!.Id}");
-        Console.WriteLine($"Security Stamp: {user.IdentityUser.SecurityStamp}");
-        Console.WriteLine($"Email: {user.IdentityUser.Email}");
-        Console.WriteLine($"Token Length: {token.Length}");
-        
-        // Find Identity User
-        var identityUser = await _userManager.FindByIdAsync(user.IdentityUserId);
-
-        // Confirm user exists
-        if (identityUser == null) throw new Exception("Cannot reset password. User not found.");
-        var result = await _userManager.ResetPasswordAsync(identityUser, token, password); // reset password
-
-        // Handle errors if result was NOT successful
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(x => x.Description));
-            throw new Exception($"User was found in system, but password failed to be set/reset. {errors}");
-        }
-    }
-
-    // Disable / Re-enable Student Account
-    public async Task DisableUserToggle(int id, ApplicationDbContext? context = null)
-    {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            UserModel? existing = await GetUserById(id, context);
-            if (existing == null) throw new Exception("Could not find a user with that Id");
-
-            existing.IsDisabled = !existing.IsDisabled;
-
-            await context.SaveChangesAsync();
+            return existing;
         }
         finally
         {
@@ -331,7 +284,7 @@ public class UserService
     }
 
     // DELETE STUDENT | Primarily for testing purposes
-    public async Task DeleteUser(int id, ApplicationDbContext? context = null)
+    public async Task DeleteStudent(int id, ApplicationDbContext? context = null)
     {
         bool dispose = false;
         if (context == null)
@@ -341,51 +294,9 @@ public class UserService
         }
         try
         {
-            await context.UserDb
+            await context.StudentDb
                 .Where(x => x.Id == id)
                 .ExecuteDeleteAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
-    }
-
-
-    // ADMINS
-    public async Task CreateAdmin(UserModel admin, string? password, ApplicationDbContext? context = null)
-    {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var response = await GetUserByEmail(admin.Email, context);
-            if (response != null) throw new Exception("Cannot create admin. This email already exists with a student or admin account.");
-
-            // Set Identity User Values
-            var identityUser = new ApplicationUser()
-            {
-                Email = admin.Email,
-                UserName = admin.Email,
-                EmailConfirmed = true
-            };
-
-            // Generate email to set password
-            if (password == null) password = "1234"; // CHANGE LATER
-
-            // Create Identitty User
-            var result = await _userManager.CreateAsync(identityUser, password);
-            if (!result.Succeeded) throw new Exception("Could not create admin account. Failed to create identity User");
-            else await _userManager.AddToRoleAsync(identityUser, "Admin"); // Set Admin Roles
-
-            admin.IdentityUserId = identityUser.Id;
-
-            context.Add(admin);
-            await context.SaveChangesAsync();
         }
         finally
         {

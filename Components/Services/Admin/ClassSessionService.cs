@@ -94,7 +94,7 @@ public class ClassSessionService
             ClassSession? existing = await GetClassSessionById(updated.Id, context);
             if (existing == null) throw new Exception("No existing class session was found. Update failed");
 
-            existing.Instructor = updated.Instructor;
+            existing.Instructor!.Id = updated.Instructor!.Id;
             existing.Capacity = updated.Capacity;
             existing.CurrentCount = updated.CurrentCount;
             existing.Description = updated.Description;

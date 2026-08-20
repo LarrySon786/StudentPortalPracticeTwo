@@ -1,9 +1,11 @@
 
 @rendermode InteractiveServer
 @using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
 @inject StudentPortalPracticeTwo.Components.Services.Admin.ClassSessionService classSessionService;
 @inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService;
 @inject StudentPortalPracticeTwo.Components.Services.Admin.TermService termService
+@inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
 
 
 @* Background for Dialog *@
@@ -47,7 +49,11 @@
                 @* Instructor *@
                 <div class="form-group">
                     <label class="form-label">Instructor</label>
-                    <InputText class="form-control" @bind-Value="editableSession!.Instructor" />
+                    <InputSelect class="form-control" @bind-Value="editableSession.Instructor!.Id">
+                        @foreach(Faculty instructor in faculty) {
+                            <option value=@instructor.Id>@instructor.FirstName @instructor.LastName</option>
+                        }
+                    </InputSelect> 
                     <ValidationMessage For="(() => editableSession!.Instructor)"/>
                 </div>
 
@@ -133,19 +139,21 @@
     [Parameter] public EventCallback OnSessionCreated { get; set; }
     [Parameter] public Course courseSelected { get; set; } = null!; // This is the course the created Session is attached to. 
     [Parameter] public bool isEdit { get; set; } = false;
+    public List<Faculty> faculty { get; set; } = new();
     public List<Course>? availableCourses { get; set; } = new();
     public List<Term> terms { get; set; } = new();
 
     protected override async Task OnInitializedAsync() {
         try {
                 terms = await termService.GetAllTerms();
+                faculty = await facultyService.GetAllFaculty();
 
                 @* Create and editable session for form *@
                 editableSession = new ClassSession
                 {
                     Id = session.Id,
                     CourseId = session.CourseId,
-                    Instructor = session.Instructor,
+                    Instructor = session.Instructor ?? null,
                     Description = session.Description,
                     Location = session.Location,
                     Term = session.Term ?? terms.FirstOrDefault()!,
@@ -203,7 +211,7 @@
 
     public async Task HandleClose() {
         await CloseDialog.InvokeAsync();
-    }
+    } 
 
     public async Task HandleAddSession() {
         @* Create a new Session *@

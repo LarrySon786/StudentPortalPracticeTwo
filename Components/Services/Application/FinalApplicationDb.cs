@@ -1,34 +1,34 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using StudentPortalPracticeTwo.Components.Services.Students;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Application;
-using StudentPortalPracticeTwo.Database.Models.Students;
+using StudentPortalPracticeTwo.Database.Models.Users;
 using StudentPortalPracticeTwo.Components.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
+using StudentPortalPracticeTwo.Components.Services.Users.Students;
 
 namespace StudentPortalPracticeTwo.Components.Services.Application;
 
 public class FinalApplicationDb
 {
     private readonly IDbContextFactory<ApplicationDbContext> _context;
-    private readonly UserService _userService;
+    private readonly StudentService _studentService;
     private readonly IEmailService _emailService; // 
     private readonly IWebHostEnvironment _environment; // Allows tracing back to root of project
     private readonly IConfiguration _configuration; // Gets base URL for the project 
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public FinalApplicationDb(IDbContextFactory<ApplicationDbContext> context, UserService userService,
+    public FinalApplicationDb(IDbContextFactory<ApplicationDbContext> context,
         IEmailService emailService, IWebHostEnvironment environment, IConfiguration configuration,
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager, StudentService studentService)
     {
         _context = context;
-        _userService = userService;
         _emailService = emailService;
         _environment = environment;
         _configuration = configuration;
         _userManager = userManager;
+        _studentService = studentService;
     }
 
 
@@ -567,7 +567,6 @@ public class FinalApplicationDb
         }
         try
         {
-
             var application = await GetById(id, context);
             if (application == null) throw new Exception("No application could be found to approve.");
             if (application.ApprovedStatus == Status.Approved) return;
@@ -576,7 +575,7 @@ public class FinalApplicationDb
             application.ApprovedStatus = Status.Approved;
 
             // Create new student user + Create user Identity for Authorization / Authentication
-            CreateUserResultHelper user = await _userService.CreateUserByApplication(application, context);
+            CreateStudentResultHelper user = await _studentService.CreateStudentByApplication(application, context);
             if (user.User == null || user.ApplicationUser == null) throw new Exception("Could not create user.");
             await context.SaveChangesAsync();
 

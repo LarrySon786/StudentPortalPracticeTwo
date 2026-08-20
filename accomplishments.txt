@@ -49,5 +49,9 @@ of each database connection only lasts for the existing method and is disposed a
 issues from happening.
 - I added a seed data for a pending application and approved application. Fixed bugs of ENUMS on JSON file not matching models
 - Fixed SendgridEmails after refactoring the DbContext code.
+- I created a Software Testing project to create unit tests and integration tests from this point forward.
+- I created a few practice unit tests an integration tests for TermService
+- I returned to my main project and fully developed the back-end for Degree Progress. A few tweaks and adjustments will needed
+made to polish it
 
 

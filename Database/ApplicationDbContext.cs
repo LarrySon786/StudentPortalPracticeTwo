@@ -4,7 +4,10 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Database.Models.Application;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
-using StudentPortalPracticeTwo.Database.Models.Students;
+using StudentPortalPracticeTwo.Database.Models.Users.Admin;
+using StudentPortalPracticeTwo.Database.Models.Users.Faculty;
+using StudentPortalPracticeTwo.Database.Models.Users.Students;
+using StudentPortalPracticeTwo.Database.Models.Users;
 
 namespace StudentPortalPracticeTwo.Database;
 
@@ -17,9 +20,15 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     // USER Accounts - created after final application is approved
     public DbSet<UserModel> UserDb { get; set; }
+    public DbSet<Student> StudentDb { get; set; }
+    public DbSet<Faculty> FacultyDb { get; set; }
+    public DbSet<AdminModel> AdminDb { get; set; }
     public DbSet<UserContactModel> UserContactDb { get; set; }
     public DbSet<UserEmergencyContactModel> UserEmergencyDb { get; set; }
     public DbSet<UserProgramModel> UserProgram { get; set; }
+
+    // Faculty
+    public DbSet<Faculty> FacultyUsers { get; set; }
 
     // FINAL Application - created after student submits DRAFT application
     public DbSet<ApplicationModel> ApplicationDb { get; set; }
@@ -58,11 +67,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<UserModel>()
-            .HasOne(x => x.OriginalFinalApplication)
-            .WithMany()
-            .HasForeignKey(x => x.FinalApplicationId);
-
-        modelBuilder.Entity<UserModel>()
             .HasOne(x => x.IdentityUser)
             .WithMany()
             .HasForeignKey(x => x.IdentityUserId)
@@ -74,7 +78,15 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<UserModel>()
+
+
+        // Students
+        modelBuilder.Entity<Student>()
+            .HasOne(x => x.OriginalFinalApplication)
+            .WithMany()
+            .HasForeignKey(x => x.FinalApplicationId);
+
+        modelBuilder.Entity<Student>()
             .HasOne(x => x.MyProgram)
             .WithOne(x => x.User)
             .HasForeignKey<UserProgramModel>(x => x.UserId)
@@ -98,7 +110,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasMany(x => x.RegisteredSessions)
             .WithMany(x => x.RegisteredStudentProgramModels);
 
+        // Faculty
+        modelBuilder.Entity<Faculty>()
+            .HasMany(x => x.ClassSessions)
+            .WithOne(x => x.Instructor)
+            .HasForeignKey(x => x.InstructorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Admins
         
+
         // Final
         modelBuilder.Entity<ApplicationModel>()
             .HasOne(x => x.StudentInfo)

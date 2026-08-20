@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using StudentPortalPracticeTwo.Database.Models.Students;
+using StudentPortalPracticeTwo.Database.Models.Users.Students;
+using StudentPortalPracticeTwo.Database.Models.Users.Faculty;
 
 namespace StudentPortalPracticeTwo.Database.Models.Degrees;
 
@@ -20,11 +21,10 @@ public class ClassSession
     public List<UserProgramModel> StudentProgramModels { get; set; } = new();
     public List<UserProgramModel> RegisteredStudentProgramModels { get; set; } = new();
 
-    // Session attributes
-    [Required]
-    [StringLength(100)]
-    public string Instructor { get; set; } = string.Empty;
+    public int InstructorId { get; set; }
+    public Faculty? Instructor { get; set; }
 
+    // Session attributes
     [Required]
     [StringLength(200)]
     public string Location { get; set; } = string.Empty;

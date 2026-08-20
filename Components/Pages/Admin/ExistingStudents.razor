@@ -1,7 +1,7 @@
 @page "/admin/students"
 @rendermode InteractiveServer
-@using StudentPortalPracticeTwo.Database.Models.Students
-@inject StudentPortalPracticeTwo.Components.Services.Students.UserService userService;
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+@inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService;
 @inject NavigationManager navigationManager;
 
 @* This page should be dedicated so admins can review all existing students *@
@@ -29,7 +29,7 @@
     </thead>
     <tbody>
         @* ITERATES THROUGH ALL USERS IN EXISTING STUDENTS *@
-        @foreach (UserModel user in paginatedFilteredResults) {
+        @foreach (Student user in paginatedFilteredResults) {
             <tr>
                 <td>@user.FirstName @user.LastName</td>
                 <td>@user.Email</td>
@@ -54,26 +54,26 @@
 
 
 @code {
-    public List<UserModel> users { get; set; } = new(); // DB query to get all USERS
+    public List<Student> users { get; set; } = new(); // DB query to get all USERS
     public string query { get; set; } = String.Empty; // Search query received on user input
     public int pageSize { get; set; } = 9; // Can change to display more/less students on each table page
     public int currPage { get; set; } = 1; // Default starting page is 1
     public int totalPages { get; set; } // Total pages is calculated by method 'UpdateTotalPages()'
 
-    public IEnumerable<UserModel> filteredResultsByQuery => // Filtered by search query
+    public IEnumerable<Student> filteredResultsByQuery => // Filtered by search query
         users.Where(a => query == "" ||
                 a.Email.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 a.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 a.LastName.Contains(query, StringComparison.OrdinalIgnoreCase)
             );
-    public IEnumerable<UserModel> paginatedFilteredResults => // Filtered by page selected
+    public IEnumerable<Student> paginatedFilteredResults => // Filtered by page selected
         filteredResultsByQuery.Skip((currPage - 1) * pageSize).Take(pageSize);
 
 
 
     protected async override Task OnInitializedAsync() {
         try {
-            users = await userService.GetAllUsers(); // Requests all USERS from DB
+            users = await studentService.GetAllStudents(); // Requests all STUDENTS from DB
         }
         catch (Exception ex) {
             Console.WriteLine($"The users could not be fetched from the database. Ex: {ex}");

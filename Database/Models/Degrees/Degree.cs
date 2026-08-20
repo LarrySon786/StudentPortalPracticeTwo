@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using StudentPortalPracticeTwo.Database.Models.Students;
+using StudentPortalPracticeTwo.Database.Models.Users.Students;
 
 namespace StudentPortalPracticeTwo.Database.Models.Degrees;
 

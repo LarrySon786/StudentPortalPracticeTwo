@@ -3,11 +3,16 @@ using Microsoft.AspNetCore.Identity;
 using StudentPortalPracticeTwo.Components;
 using StudentPortalPracticeTwo.Components.Services.Application;
 using StudentPortalPracticeTwo.Database;
-using StudentPortalPracticeTwo.Database.Models.Students;
+using StudentPortalPracticeTwo.Database.Models.Users;
+using StudentPortalPracticeTwo.Database.Models.Users.Faculty;
+using StudentPortalPracticeTwo.Database.Models.Users.Admin;
+using StudentPortalPracticeTwo.Database.Models.Users.Students;
 using StudentPortalPracticeTwo.Components.Services.Admin;
 using StudentPortalPracticeTwo.Components.Services.Interfaces;
 using StudentPortalPracticeTwo.Components.Services.EmailServices;
-using StudentPortalPracticeTwo.Components.Services.Students;
+using StudentPortalPracticeTwo.Components.Services.Users;
+using StudentPortalPracticeTwo.Components.Services.Users.Students;
+using StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 using DotNetEnv;
 using StudentPortalPracticeTwo.Components.Services.Authentication;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
@@ -56,7 +61,11 @@ builder.Services.AddScoped<ClassSessionService>(); // Admin Service - create cla
 builder.Services.AddScoped<TermService>(); // Term Service - create and manage terms for students to register in
 builder.Services.AddScoped<IEmailService, EmailService>(); // Email services | Used in approval / declined application letters
 builder.Services.AddScoped<UserService>(); // Service to manage Users, reset passwords, and more
+builder.Services.AddScoped<StudentService>(); // Service to manage creation of Students
+builder.Services.AddScoped<FacultyService>(); // Service to manage creation of faculty members
+builder.Services.AddScoped<AdminService>(); // Service to manage creation of Admin members
 builder.Services.AddScoped<AuthLogin>(); // Login, logout, and other auth methods
+builder.Services.AddScoped<RegisterCourses>(); // Allows students to register, drop, and manage their courses
 builder.Services.AddScoped<TermServiceHelper>();
 DotNetEnv.Env.Load();
 
@@ -117,8 +126,13 @@ if (app.Environment.IsDevelopment())
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         var signInManager = scope.ServiceProvider.GetRequiredService<SignInManager<ApplicationUser>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+
+        var facultyService = scope.ServiceProvider.GetRequiredService<FacultyService>();
+
+        var adminService = scope.ServiceProvider.GetRequiredService<AdminService>();
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
@@ -194,6 +208,57 @@ if (app.Environment.IsDevelopment())
         }
         await degreeService.CreateDegree(degree, db); // Save
 
+        // Create Instructors
+        var jsonInstructors = File.ReadAllText("Database/JSON/Users/Faculty/Faculty.Json");
+        var facultyDefinition = JsonSerializer.Deserialize<List<JsonFaculty>>(
+            jsonInstructors, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }
+        );
+
+        foreach (JsonFaculty faculty in facultyDefinition!)
+        {
+            // Create faculty member's user Identity
+            var identity = new ApplicationUser()
+            {
+                UserName = faculty.Email,
+                Email = faculty.Email,
+            };
+
+            var result = await userManager.CreateAsync(identity);
+            if (!result.Succeeded) throw new Exception("Could not create Instructor's user Identity in database seeding");
+
+            List<UserEmergencyContactModel> emergencyContacts = new(); // Prepare emergency contacts
+            foreach (var contact in faculty.EmergencyContact)
+            {
+                var newContact = new UserEmergencyContactModel()
+                {
+                    ContactName = contact.ContactName,
+                    Relationship = contact.Relationship,
+                    Phone = contact.Phone,
+                };
+                emergencyContacts.Add(newContact);
+            }
+
+            var entity = new Faculty() // Create each faculty member
+            {
+                FirstName = faculty.FirstName,
+                MiddleName = faculty.MiddleName,
+                LastName = faculty.LastName,
+                Email = faculty.Email,
+                DateOfBirth = faculty.DateOfBirth,
+                ContactDetails = new()
+                {
+                    Phone = faculty.ContactDetails.Phone
+                },
+                EmergencyContact = emergencyContacts,
+                IdentityUserId = identity.Id
+            };
+            await facultyService.CreateFaculty(entity, db);
+        }
+
+
 
         // Create Course Sessions
         var jsonSessions = File.ReadAllText("Database/JSON/ClassSessions.Json");
@@ -201,17 +266,20 @@ if (app.Environment.IsDevelopment())
             jsonSessions, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
-            });
+            }
+        );
 
         foreach (var session in classSessionDefinition!)
         {
             var course = db.CourseDb.Single(s => s.Code == session.CourseCode);
             var term = db.TermDb.Single(s => s.Season.ToString() + s.Year.ToString() == $"{session.Term}");
+            var instructor = db.FacultyDb.Single(s => s.Email == session.InstructorEmail);
+
 
             var createdSession = new ClassSession()
             {
                 Course = course,
-                Instructor = session.Instructor,
+                Instructor = instructor,
                 Location = session.Location,
                 Capacity = session.Capacity,
                 CurrentCount = session.CurrentCount,
@@ -234,7 +302,7 @@ if (app.Environment.IsDevelopment())
             Phone = "330-333-3333",
             Relationship = "Mother",
         };
-        var admin = new UserModel()
+        var admin = new AdminModel()
         {
             FirstName = "Admin",
             LastName = "User",
@@ -245,15 +313,9 @@ if (app.Environment.IsDevelopment())
                 Phone = "111-222-3333"
             },
             EmergencyContact = [emergencyContactNumber],
-            MyProgram = new()
-            {
-                MyDegree = degree,
-            },
             IdentityUserId = null!,
-            FinalApplicationId = null,
-            OriginalFinalApplication = null,
         };
-        await userService.CreateAdmin(admin, "Brandoniscool1234$", db);
+        await adminService.CreateAdmin(admin, "Brandoniscool1234$", db);
 
         // Create Submited Application
         var file = File.ReadAllText("Database/JSON/Applications/FinalApplication.json");

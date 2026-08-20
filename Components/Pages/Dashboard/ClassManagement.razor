@@ -2,7 +2,9 @@
 @page "/dashboard/class-management"
 @attribute [Authorize]
 @rendermode InteractiveServer
-@using StudentPortalPracticeTwo.Database.Models.Students
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+@inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService
 
 
 @* Existing Classes *@
@@ -19,10 +21,14 @@
 
 @code {
     public UserModel? user { get; set; }
+    public Student? student { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         user = await authService.GetCurrentUserAsync();
+        if (user != null) student = await studentService.GetStudentById(user.Id);
+        else navigationManager.NavigateTo("/login", forceLoad: true);
+        
     }
 }
 

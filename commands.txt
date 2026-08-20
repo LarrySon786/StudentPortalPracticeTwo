@@ -1,10 +1,15 @@
 
 
 LEFT off
+- TO DO
+- Create Faculty Accounts and set-up
+- Set up search bar for courses on degree progress pages
 
-- I have designed the student Degree Progress Page. It has tables and performs READ operations to get all data.
-- This still needs to have registeration feature completed
-- I have not tested dotnet watch in a minute. May want to do that
+- I created the faculty service. It broke the classSession and reset-db, so I will need to change those and the sample
+data to reflect the changes made.
+- I finished designing the basis of the degreeProgress page. Will need polished
+- I created a test Project for software testing
+
 
 - Consider adding a faculty portal where teachers can submit grades, pass students in their class, 
 report grade percentage, and more. This could allow for calculating GPA, marking classes complete, 

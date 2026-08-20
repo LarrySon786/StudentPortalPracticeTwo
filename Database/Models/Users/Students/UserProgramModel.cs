@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
+using StudentPortalPracticeTwo.Database.Models.Users;
 
-namespace StudentPortalPracticeTwo.Database.Models.Students;
+namespace StudentPortalPracticeTwo.Database.Models.Users.Students;
 
 public class UserProgramModel
 {
@@ -9,7 +10,7 @@ public class UserProgramModel
     public int Id { get; set; }
 
     public int UserId { get; set; }
-    public UserModel? User { get; set; }
+    public Student? User { get; set; }
 
     public int DegreeId { get; set; }
     public Degree? MyDegree { get; set; } // Track Student's selected Program

@@ -1,0 +1,134 @@
+[
+  {
+    "firstName": "Sarah",
+    "middleName": null,
+    "lastName": "Mitchell",
+    "dateOfBirth": "1981-04-12",
+    "email": "sarah.mitchell@college.edu",
+    "contactDetails": {
+      "phoneNumber": "555-1001",
+      "street": "100 College Ave",
+      "city": "Springfield",
+      "state": "OH",
+      "zipCode": "45501"
+    },
+    "emergencyContact": [
+      {
+        "firstName": "James",
+        "lastName": "Mitchell",
+        "relationship": "Spouse",
+        "phoneNumber": "555-9001"
+      }
+    ]
+  },
+  {
+    "firstName": "David",
+    "middleName": null,
+    "lastName": "Anderson",
+    "dateOfBirth": "1978-09-21",
+    "email": "david.anderson@college.edu",
+    "contactDetails": {
+      "phoneNumber": "555-1002",
+      "street": "200 College Ave",
+      "city": "Springfield",
+      "state": "OH",
+      "zipCode": "45501"
+    },
+    "emergencyContact": [
+      {
+        "firstName": "Emily",
+        "lastName": "Anderson",
+        "relationship": "Spouse",
+        "phoneNumber": "555-9002"
+      }
+    ]
+  },
+  {
+    "firstName": "Michael",
+    "middleName": null,
+    "lastName": "Johnson",
+    "dateOfBirth": "1983-02-08",
+    "email": "michael.johnson@college.edu",
+    "contactDetails": {
+      "phoneNumber": "555-1003",
+      "street": "300 College Ave",
+      "city": "Springfield",
+      "state": "OH",
+      "zipCode": "45501"
+    },
+    "emergencyContact": [
+      {
+        "firstName": "Laura",
+        "lastName": "Johnson",
+        "relationship": "Spouse",
+        "phoneNumber": "555-9003"
+      }
+    ]
+  },
+  {
+    "firstName": "Robert",
+    "middleName": null,
+    "lastName": "Williams",
+    "dateOfBirth": "1976-11-15",
+    "email": "robert.williams@college.edu",
+    "contactDetails": {
+      "phoneNumber": "555-1004",
+      "street": "400 College Ave",
+      "city": "Springfield",
+      "state": "OH",
+      "zipCode": "45501"
+    },
+    "emergencyContact": [
+      {
+        "firstName": "Karen",
+        "lastName": "Williams",
+        "relationship": "Spouse",
+        "phoneNumber": "555-9004"
+      }
+    ]
+  },
+  {
+    "firstName": "Jennifer",
+    "middleName": null,
+    "lastName": "Davis",
+    "dateOfBirth": "1985-07-19",
+    "email": "jennifer.davis@college.edu",
+    "contactDetails": {
+      "phoneNumber": "555-1005",
+      "street": "500 College Ave",
+      "city": "Springfield",
+      "state": "OH",
+      "zipCode": "45501"
+    },
+    "emergencyContact": [
+      {
+        "firstName": "Brian",
+        "lastName": "Davis",
+        "relationship": "Brother",
+        "phoneNumber": "555-9005"
+      }
+    ]
+  },
+  {
+    "firstName": "Amanda",
+    "middleName": null,
+    "lastName": "Thompson",
+    "dateOfBirth": "1988-03-26",
+    "email": "amanda.thompson@college.edu",
+    "contactDetails": {
+      "phoneNumber": "555-1006",
+      "street": "600 College Ave",
+      "city": "Springfield",
+      "state": "OH",
+      "zipCode": "45501"
+    },
+    "emergencyContact": [
+      {
+        "firstName": "Daniel",
+        "lastName": "Thompson",
+        "relationship": "Brother",
+        "phoneNumber": "555-9006"
+      }
+    ]
+  }
+]

@@ -3,9 +3,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
-using StudentPortalPracticeTwo.Components.Services.Students;
+using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Database;
-using StudentPortalPracticeTwo.Database.Models.Students;
+using StudentPortalPracticeTwo.Database.Models.Users;
 
 namespace StudentPortalPracticeTwo.Components.Services.Authentication;
 
@@ -85,6 +85,8 @@ public class AuthLogin
 
             return await context.UserDb
                 .Include(x => x.ContactDetails)
+                .Include(x => x.EmergencyContact)
+                .Include(x => x.IdentityUser)
                 .FirstOrDefaultAsync(x => x.IdentityUserId == identity);
         }
         finally

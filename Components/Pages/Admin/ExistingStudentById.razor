@@ -1,9 +1,9 @@
 @page "/admin/students/{studentId:int}"
-@using StudentPortalPracticeTwo.Database.Models.Students
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
 @using StudentPortalPracticeTwo.Database.Models.Enums
 @using StudentPortalPracticeTwo.Components.Ui.Admin.Students;
 
-@inject StudentPortalPracticeTwo.Components.Services.Students.UserService studentService;
+@inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService;
 @inject NavigationManager navigationManager
 
 
@@ -37,14 +37,14 @@ else {
 
 @code {
     [Parameter] public int studentId { get; set; } // received on page initialize
-    public UserModel? student { get; set; }
+    public Student? student { get; set; }
 
     protected async override Task OnInitializedAsync() {
         await GetStudent();
     }
 
     public async Task GetStudent() {
-        student = await studentService.GetUserById(studentId);
+        student = await studentService.GetStudentById(studentId);
         if (student == null) navigationManager.NavigateTo("/admin/students");
     }
 
