@@ -6,6 +6,8 @@ using StudentPortalPracticeTwo.Database.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database.Models.Users.Students;
+using StudentPortalPracticeTwo.Database.Models.DTOs;
+using StudentPortalPracticeTwo.Components.Services.Admin;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users.Students;
 
@@ -247,6 +249,88 @@ public class StudentService
 
             // Create user in Database
             context.StudentDb.Add(user);
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
+    }
+
+    // Create Student from DTO
+    public async Task CreateDTOStudent(JsonStudent student, ApplicationDbContext? context = null)
+    {
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            var existingUser = await _userManager.FindByEmailAsync(student.Email);
+            if (existingUser != null) throw new Exception($"An account already exists for {student.Email}");
+
+            // Create User Identity for Authorization
+            var applicationUser = new ApplicationUser()
+            {
+                Email = student.Email,
+                UserName = student.Email,
+                EmailConfirmed = true
+            };
+
+            // Creates the identity User
+            var result = await _userManager.CreateAsync(applicationUser);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+                throw new Exception($"Could not create identity user. {errors}");
+            }
+            else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
+
+            // Get Degree Id for user
+            var degree = await context.DegreeDb
+                .Where(x => x.Name == student.DegreeName)
+                .FirstOrDefaultAsync();
+
+            if (degree == null)
+                throw new Exception($"Degree '{student.DegreeName}' does not exist.");
+
+            // Create emergency contacts for user
+            var contacts = new List<UserEmergencyContactModel>();
+            foreach (JsonUserEmergencyContact contact in student.EmergencyContact)
+            {
+                UserEmergencyContactModel emergencyContact = new()
+                {
+                    ContactName = contact.ContactName,
+                    Relationship = contact.Relationship,
+                    Phone = contact.Phone,
+                };
+                contacts.Add(emergencyContact);
+            };
+
+            // Create Student Entity
+            var entity = new Student()
+            {
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                MiddleName = student.MiddleName,
+                DateOfBirth = student.DateOfBirth,
+                Email = student.Email,
+                ContactDetails = new()
+                {
+                    Phone = student.ContactDetails.Phone
+                },
+                EmergencyContact = contacts,
+                MyProgram = new ()
+                {
+                    DegreeId = degree.Id,
+                },
+                IdentityUserId = applicationUser.Id,
+            };
+            
+            // Create user in Database
+            context.StudentDb.Add(entity);
             await context.SaveChangesAsync();
         }
         finally

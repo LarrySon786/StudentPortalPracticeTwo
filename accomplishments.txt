@@ -55,5 +55,9 @@ issues from happening.
 - I created a few practice unit tests an integration tests for TermService
 - I returned to my main project and fully developed the back-end for Degree Progress. A few tweaks and adjustments will needed
 made to polish it
+- I began creating the Instructor infrastructure starting with initilizing the Registeration process
+- Admins create instructor by First, Last, and Email. Instructor receives an email to Registeration
+- Instructors register and set password with token based url
+
 
 

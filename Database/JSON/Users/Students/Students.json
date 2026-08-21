@@ -1,0 +1,103 @@
+[
+  {
+    "FirstName": "John",
+    "MiddleName": "Michael",
+    "LastName": "Anderson",
+    "DateOfBirth": "2002-03-15",
+    "Email": "john.anderson@studentportal.com",
+    "ContactDetails": {
+      "Phone": "555-100-1001"
+    },
+    "EmergencyContact": [
+      {
+        "FirstName": "Sarah",
+        "LastName": "Anderson",
+        "Relationship": "Mother",
+        "PhoneNumber": "555-900-1001"
+      }
+    ],
+    "DegreeName": "Software Engineering"
+  },
+  {
+    "FirstName": "Emily",
+    "MiddleName": null,
+    "LastName": "Carter",
+    "DateOfBirth": "2001-07-22",
+    "Email": "emily.carter@studentportal.com",
+    "ContactDetails": {
+      "Phone": "555-100-1002"
+    },
+    "EmergencyContact": [
+      {
+        "FirstName": "David",
+        "LastName": "Carter",
+        "Relationship": "Father",
+        "PhoneNumber": "555-900-1002"
+      }
+    ],
+    "DegreeName": "Software Engineering"
+  },
+  {
+    "FirstName": "Olivia",
+    "MiddleName": "Grace",
+    "LastName": "Martinez",
+    "DateOfBirth": "2003-01-10",
+    "Email": "olivia.martinez@studentportal.com",
+    "ContactDetails": {
+      "Phone": "555-100-1003"
+    },
+    "EmergencyContact": [
+      {
+        "FirstName": "Maria",
+        "LastName": "Martinez",
+        "Relationship": "Mother",
+        "PhoneNumber": "555-900-1003"
+      },
+      {
+        "FirstName": "Carlos",
+        "LastName": "Martinez",
+        "Relationship": "Father",
+        "PhoneNumber": "555-900-1004"
+      }
+    ],
+    "DegreeName": "Software Engineering"
+  },
+  {
+    "FirstName": "Noah",
+    "MiddleName": null,
+    "LastName": "Wilson",
+    "DateOfBirth": "2002-11-05",
+    "Email": "noah.wilson@studentportal.com",
+    "ContactDetails": {
+      "Phone": "555-100-1004"
+    },
+    "EmergencyContact": [
+      {
+        "FirstName": "Linda",
+        "LastName": "Wilson",
+        "Relationship": "Mother",
+        "PhoneNumber": "555-900-1005"
+      }
+    ],
+    "DegreeName": "Software Engineering"
+  },
+  {
+    "FirstName": "Sophia",
+    "MiddleName": "Anne",
+    "LastName": "Brown",
+    "DateOfBirth": "2004-05-18",
+    "Email": "sophia.brown@studentportal.com",
+    "ContactDetails": {
+      "Phone": "555-100-1005"
+    },
+    "EmergencyContact": [
+      {
+        "FirstName": "Thomas",
+        "LastName": "Brown",
+        "Relationship": "Father",
+        "PhoneNumber": "555-900-1006"
+      }
+    ],
+    "DegreeName": "Software Engineering"
+  }
+]

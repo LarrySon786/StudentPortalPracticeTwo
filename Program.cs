@@ -130,6 +130,8 @@ if (app.Environment.IsDevelopment())
 
         var userService = scope.ServiceProvider.GetRequiredService<UserService>();
 
+        var studentService = scope.ServiceProvider.GetRequiredService<StudentService>();
+
         var facultyService = scope.ServiceProvider.GetRequiredService<FacultyService>();
 
         var adminService = scope.ServiceProvider.GetRequiredService<AdminService>();
@@ -298,6 +300,18 @@ if (app.Environment.IsDevelopment())
 
             await classSessionService.CreateClassSession(createdSession, db);
         }
+
+        // Create Students
+        var json = File.ReadAllText("Database/JSON/Users/Students/Students.json");
+        var studentDefinition = JsonSerializer.Deserialize<List<JsonStudent>>(json, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+        foreach (JsonStudent student in studentDefinition!)
+        {
+            await studentService.CreateDTOStudent(student, db);
+        }
+
 
         // Create default admin role
         UserEmergencyContactModel emergencyContactNumber = new()
