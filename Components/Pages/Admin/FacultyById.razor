@@ -1,0 +1,29 @@
+@page "/admin/faculty/{Id:int}"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Components.Ui.Admin.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
+
+
+<div>
+    <UserDashboardAdminView Mode="EditMode.Edit" User="faculty" OnSavedChanges="HandleSavedChanges"/>
+</div>
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+    public Faculty? faculty { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        faculty = await facultyService.GetById(Id);
+        if (faculty == null) {
+            navigationManager.NavigateTo("/admin/faculty");
+            return;
+        }
+    }
+
+    public async Task HandleSavedChanges() {
+
+    }
+}

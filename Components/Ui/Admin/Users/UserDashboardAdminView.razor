@@ -1,5 +1,6 @@
 @using System.Runtime.CompilerServices
 @using StudentPortalPracticeTwo.Database.Models.Enums;
+@using StudentPortalPracticeTwo.Database.Models.Users
 @using StudentPortalPracticeTwo.Database.Models.Users.Students
 
 @* List of all tabs to display *@
@@ -21,7 +22,6 @@
 
 @* Filters page contents based on selected tab *@
 @if (Tab == TabSelected.Demographics) {
-    <StudentDashboardDemographics Mode="Mode" Student="Student" OnSavedEdits="HandleChanges" />
 }
 else if (Tab == TabSelected.EnrolledPrograms) {
     @* RENDER *@
@@ -44,7 +44,7 @@ else if (Tab == TabSelected.Other)
 @code {
     [Parameter] public EditMode Mode { get; set; } = EditMode.View;
     [Parameter] public EventCallback OnSavedChanges { get; set; }
-    [Parameter] required public Student Student { get; set; }
+    [Parameter] required public UserModel User { get; set; }
     public TabSelected Tab{ get; set; } = TabSelected.Demographics;
 
     public enum TabSelected {

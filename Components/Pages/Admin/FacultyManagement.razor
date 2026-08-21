@@ -1,0 +1,140 @@
+@page "/admin/faculty"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
+@inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
+
+@* TODO *@
+
+@* Allow search of faculty members *@
+@* Allow deactivation of faculty member accounts *@
+
+
+@* DONE *@
+@* Display all existing faculty members *@
+@* Allow creation of faculty members *@
+
+
+<div class="standard-card">
+    @* Create New Faculty Member *@
+    <div>
+        <button class="btn btn-primary" type="button" @onclick="ToggleCreateFacultyDialog">Create Faculty</button>
+    </div>
+
+    @if (nullFaculties == false) {
+        @* Search / Edit existing faculty members *@
+        <div>
+            @* Search Feature *@
+            <input class="form-label" placeholder="Search..." @oninput="UpdateQuery" />
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date of Birth</th>
+                    <th>Email</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Faculty faculty in queriedFaculties!) {
+                    <tr>
+                        <td>@faculty.FirstName @faculty.LastName</td>
+                        <td>@faculty.DateOfBirth</td>
+                        <td>@faculty.Email</td>
+                        <td>
+                            <a class="btn btn-link" href="/admin/faculty/@faculty.Id">View Account</a>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    }
+    else {
+        <p>No existing faculty members found.</p>
+    }
+</div>
+
+@* DIALOG *@
+@if (createFacultyDialog == true) {
+    <div class="overlay">
+        <div class="overlay-container">
+            <div class="standard-card standard-dialog">
+                <h3>Create Faculty</h3>
+                <EditForm Model="newFaculty" OnValidSubmit="HandleSubmit" FormName="CreateFacultyForm">
+                    <DataAnnotationsValidator />
+
+                    <label class="form-label">First Name</label>
+                    <InputText class="form-control" @bind-Value="newFaculty!.FirstName"/>
+                    <ValidationMessage For="@(() => newFaculty.FirstName)"/>
+
+                    <label class="form-label">Last Name</label>
+                    <InputText class="form-control" @bind-Value="newFaculty.LastName" />
+                    <ValidationMessage For="@(() => newFaculty.LastName)" />
+
+                    <label class="form-label">Email</label>
+                    <InputText class="form-control" type="email" @bind-Value="newFaculty.Email" />
+                    <ValidationMessage For="@(() => newFaculty.Email)" />
+
+                    <button type="button" class="btn btn-secondary">Close</button>
+                    <button type="submit" class="btn btn-primary">Invite Faculty</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    public List<Faculty>? faculties { get; set; } = new();
+    public IEnumerable<Faculty> queriedFaculties =>
+        String.IsNullOrWhiteSpace(query)
+            ? faculties!
+            : faculties!.Where(x => 
+                x.Email.Contains(query) 
+                || x.DateOfBirth.ToString().Contains(query) 
+                || x.FirstName.Contains(query) 
+                || x.LastName.Contains(query));
+    public bool nullFaculties = false;
+    public bool createFacultyDialog = false;
+    public PendingFaculty newFaculty { get; set; } = new();
+    public string query { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try {
+            faculties = await facultyService.GetAllFaculty();
+            if (faculties == null || faculties.Count() == 0) nullFaculties = true;
+
+
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"An error occured during page initialization. Ex: {ex}");
+        }
+    }
+
+    public void ToggleCreateFacultyDialog() {
+        createFacultyDialog = !createFacultyDialog;
+    }
+
+    public async Task HandleSubmit() {
+        try {
+            await facultyService.InviteFaculty(newFaculty!);
+            HandleClose();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not create faculty. Ex: {ex}");
+        }
+    }
+
+    public void HandleClose() {
+        ToggleCreateFacultyDialog();
+    }
+
+    public void UpdateQuery(ChangeEventArgs e) {
+        if (e.Value == null || String.IsNullOrWhiteSpace(e.Value.ToString()))
+            query = "";
+        else query = e.Value.ToString()!;
+    }
+
+}

@@ -17,6 +17,8 @@ Email to accepted student to set up login credentials
 Email to denied students
 Admin management of pending applications, approved applications, denied applications.
 Switch to IDbContextFactory instead of normal DbContext
+Refactored UserModel into Students, Faculty, and AdminModel (which all inherit from UserModel shared details)
+Fixed bugs related to refactoring including classSession creation faults, course queries from db, and DegreeProgress incomplete courses not rendering
 
 
 

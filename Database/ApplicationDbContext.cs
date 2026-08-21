@@ -29,6 +29,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     // Faculty
     public DbSet<Faculty> FacultyUsers { get; set; }
+    public DbSet<PendingFaculty> PendingFacultyDb { get; set; } // This does NOT have any connection to other tables
 
     // FINAL Application - created after student submits DRAFT application
     public DbSet<ApplicationModel> ApplicationDb { get; set; }

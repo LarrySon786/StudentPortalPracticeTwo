@@ -1,12 +1,11 @@
 
 
 LEFT off
+- I refactored all of my pre-existing code to not just use UserModel but also Students, Faculty, and AdminModel
+
 - TO DO
 - Create Faculty Accounts and set-up
 - Set up search bar for courses on degree progress pages
-
-- I created the faculty service. It broke the classSession and reset-db, so I will need to change those and the sample
-data to reflect the changes made.
 - I finished designing the basis of the degreeProgress page. Will need polished
 - I created a test Project for software testing
 
@@ -26,7 +25,6 @@ NOTE TO SELF - Left off with trying to add user creation via application approva
 
 
 TO DO LIST
-- DONE Complete New Student Application Form
 - Web page pathfindings
 - Student program selection
 - Student Class Registration

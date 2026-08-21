@@ -3,6 +3,9 @@ using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Users.Faculty;
 using StudentPortalPracticeTwo.Database.Models.Users;
+using StudentPortalPracticeTwo.Components.Services.Interfaces;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 
@@ -10,11 +13,18 @@ public class FacultyService
 {
     private readonly IDbContextFactory<ApplicationDbContext> _context;
     private readonly UserService _userService;
+    private readonly IEmailService _emailService;
+    private readonly IWebHostEnvironment _environment; // Allows tracing back to root of project
+    private readonly IConfiguration _configuration; // Gets base URL for the project 
 
-    public FacultyService(IDbContextFactory<ApplicationDbContext> context, UserService userService)
+    public FacultyService(IDbContextFactory<ApplicationDbContext> context, UserService userService,
+        IEmailService emailService, IWebHostEnvironment enviroment, IConfiguration configuration)
     {
         _context = context;
         _userService = userService;
+        _emailService = emailService;
+        _environment = enviroment;
+        _configuration = configuration;
     }
 
     // GET ALL FACULTY
@@ -79,6 +89,46 @@ public class FacultyService
         }
     }
 
+    // INVITE NEW FACULTY || This method sends an email invite to a new faculty member
+    public async Task InviteFaculty(PendingFaculty pending)
+    {
+        // Server side Validation
+
+        // Form Email and Token
+        string firstLastName = $"{pending.FirstName} {pending.LastName}";
+        string subject = "ACTION REQUIRED | New Faculty Registration | CSU Administration";
+        var htmlTemplatePath = Path.Combine(_environment.ContentRootPath, "Components", "Ui", "EmailTemplates", "NewFaculty.html"); // Approved Email Template
+        var baseUrl = _configuration["AppSettings:BaseUrl"]; //Gets the base URL of the website
+        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+            .Replace("+", "-")
+            .Replace("/", "_")
+            .Replace("=", ""); ;
+        pending.HashedInviteToken = Convert.ToHexString(
+            SHA256.HashData(
+                Encoding.UTF8.GetBytes(token))
+        );
+        // Store hash in db
+        ApplicationDbContext? context = null;
+        try
+        {
+            context = await _context.CreateDbContextAsync();
+            context.PendingFacultyDb.Add(pending);
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (context != null) await context.DisposeAsync();
+        }
+        var registrationLink = $"{baseUrl}/faculty/accept-invite?userId={pending.Id}&token={token}";
+        var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template 
+
+        html = html.Replace("{{Faculty_Registration_Link}}", registrationLink);
+        html = html.Replace("{{Faculty_First_And_Last_Name}}", firstLastName);
+
+        // Send Invite via Email
+        await _emailService.SendEmailAsync(pending.Email!, firstLastName, subject, html);
+    }
+
     // CREATE NEW FACULTY
     public async Task<Faculty> CreateFaculty(Faculty faculty, ApplicationDbContext? context = null)
     {
@@ -99,7 +149,7 @@ public class FacultyService
             {
                 emergencyContacts.Add(contact); // Create Emergency Contacts
             }
-            
+
 
             Faculty entity = new() // Create faculty member
             {

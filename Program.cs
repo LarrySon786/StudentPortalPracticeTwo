@@ -150,6 +150,7 @@ if (app.Environment.IsDevelopment())
 
         // Create roles for authorization
         if (!await roleManager.RoleExistsAsync("Admin")) await roleManager.CreateAsync(new IdentityRole("Admin"));
+        if (!await roleManager.RoleExistsAsync("Faculty")) await roleManager.CreateAsync(new IdentityRole("Faculty"));
         if (!await roleManager.RoleExistsAsync("Student")) await roleManager.CreateAsync(new IdentityRole("Student"));
 
 
@@ -227,7 +228,10 @@ if (app.Environment.IsDevelopment())
             };
 
             var result = await userManager.CreateAsync(identity);
-            if (!result.Succeeded) throw new Exception("Could not create Instructor's user Identity in database seeding");
+            if (!result.Succeeded) throw new Exception("Could not create Instructor's user Identity in database seeding.");
+
+            result = await userManager.AddToRoleAsync(identity, "Faculty");
+            if (!result.Succeeded) throw new Exception("Could not set Instructor's role in database seeding.");
 
             List<UserEmergencyContactModel> emergencyContacts = new(); // Prepare emergency contacts
             foreach (var contact in faculty.EmergencyContact)

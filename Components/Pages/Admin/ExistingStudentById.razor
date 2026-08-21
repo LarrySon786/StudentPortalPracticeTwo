@@ -1,7 +1,7 @@
 @page "/admin/students/{studentId:int}"
 @using StudentPortalPracticeTwo.Database.Models.Users.Students
 @using StudentPortalPracticeTwo.Database.Models.Enums
-@using StudentPortalPracticeTwo.Components.Ui.Admin.Students;
+@using StudentPortalPracticeTwo.Components.Ui.Admin.Users;
 
 @inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService;
 @inject NavigationManager navigationManager
@@ -17,7 +17,7 @@ else {
         <a href="" class="btn btn-link"></a>
     </div>
 
-    <StudentDashboardAdminView Mode="EditMode.Edit" Student="student" OnSavedChanges="RefreshComponent" />
+    <UserDashboardAdminView Mode="EditMode.Edit" Student="student" OnSavedChanges="RefreshComponent" />
 
 
 
