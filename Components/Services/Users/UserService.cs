@@ -118,6 +118,7 @@ public class UserService
             if (existing == null) throw new Exception("Could not find an existing user to update");
 
             existing.FirstName = updated.FirstName;
+            existing.MiddleName = updated.MiddleName;
             existing.LastName = updated.LastName;
             existing.DateOfBirth = updated.DateOfBirth;
             existing.Email = updated.Email;
@@ -179,7 +180,7 @@ public class UserService
     }
 
     // Disable / Re-enable Student Account
-    public async Task DisableUserToggle(int id, ApplicationDbContext? context = null)
+    public async Task<bool> DisableUserToggle(int id, ApplicationDbContext? context = null)
     {
         bool dispose = false;
         if (context == null)
@@ -195,6 +196,7 @@ public class UserService
             existing.IsDisabled = !existing.IsDisabled;
 
             await context.SaveChangesAsync();
+            return existing.IsDisabled;
         }
         finally
         {

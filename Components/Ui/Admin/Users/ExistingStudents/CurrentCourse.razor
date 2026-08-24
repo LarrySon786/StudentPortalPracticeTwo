@@ -1,0 +1,27 @@
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+
+<div>
+    @foreach(ClassSession session in student.MyProgram.CurrentSessions) {
+        <div>
+            <p>@session.Course.Name</p>
+            @if (session.Instructor != null) {
+                <p>@session.Instructor.FirstName @session.Instructor.LastName</p>
+            }
+            <p>Credits: @session.Course.Credits</p>
+            <p>Start Date: @session.StartDate</p>
+            <p>End Date: @session.EndDate</p>
+            <p>Time: @session.StartTime - @session.EndTime</p>
+            <button class="btn btn-danger">Remove From Session</button>
+        </div>
+    }
+
+    <button class="btn btn-primary">Add New Session</button>
+</div>
+
+
+
+@code {
+    [Parameter] public Student student { get; set; } = null!;
+
+}

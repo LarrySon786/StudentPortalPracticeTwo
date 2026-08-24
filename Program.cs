@@ -88,7 +88,8 @@ app.UseAuthorization();
 app.UseAntiforgery();
 
 // Login Http Endpoint
-app.MapPost("/account/login", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
+app.MapPost("/account/login", async (HttpContext context, SignInManager<ApplicationUser> signInManager
+    , UserService userService) =>
 {
     var form = await context.Request.ReadFormAsync();
 
@@ -97,6 +98,9 @@ app.MapPost("/account/login", async (HttpContext context, SignInManager<Applicat
 
     if (string.IsNullOrEmpty(email)) return Results.Redirect("/login");
     if (string.IsNullOrEmpty(password)) return Results.Redirect("/login");
+
+    var user = await userService.GetUserByEmail(email);
+    if (user == null || user.IsDisabled == true) return Results.Redirect("/login?error=true");
 
     var result = await signInManager.PasswordSignInAsync(email, password, true, false);
 

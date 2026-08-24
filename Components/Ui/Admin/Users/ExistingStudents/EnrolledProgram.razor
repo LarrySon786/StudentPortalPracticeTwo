@@ -1,0 +1,27 @@
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+
+@* This component displays a student's enrolled program's *@
+
+
+<div>
+    <p>@student.MyProgram.MyDegree!.Name</p>
+    <p>Total Credits Required: @student.MyProgram.MyDegree.Courses.Sum(x => x.Credits)</p>
+    <p>Inital Enrollment Date: [Insert_Start_of_Degree]</p>
+    <p>Expected Graduation Date: [Insert_Expected_Graduation]</p>
+    <p><a href="" class="btn btn-link">Download Student's origional School Application</a></p>
+    <button class="btn btn-danger">Remove From Program</button>
+</div>
+
+
+<button class="btn btn-primary">Add New Program</button>
+
+
+
+
+
+@code {
+    [Parameter] public Student student { get; set; } = null!;
+    
+
+}

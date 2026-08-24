@@ -1,0 +1,23 @@
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
+
+
+
+<div>
+    @foreach (ClassSession session in faculty.ClassSessions) {
+        <div>
+            <p>@session.Course.Name</p>
+            <p>@session.Course.Code</p>
+            <p>@session.Course.Credits</p>
+            <p>@session.Description</p>
+            <p>@session.StartDate - @session.EndDate</p>
+            <p>@session.StartTime - @session.EndTime</p>
+        </div>
+    }
+</div>
+
+
+
+@code {
+    [Parameter] public Faculty faculty { get; set; } = null!;
+}

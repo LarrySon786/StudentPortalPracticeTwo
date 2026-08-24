@@ -231,6 +231,8 @@ public class FacultyService
         return context.FacultyUsers
             .Include(x => x.ClassSessions)
                 .ThenInclude(x => x.Term)
+            .Include(x => x.ClassSessions)
+                .ThenInclude(x => x.Course)
             .Include(x => x.IdentityUser)
             .Include(x => x.ContactDetails)
             .Include(x => x.EmergencyContact);

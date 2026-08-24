@@ -1,4 +1,6 @@
 @using System.Runtime.CompilerServices
+@using StudentPortalPracticeTwo.Components.Ui.Admin.Users.ExistingStudents
+@using StudentPortalPracticeTwo.Components.Ui.Admin.Users.ExistingFaculty
 @using StudentPortalPracticeTwo.Database.Models.Enums;
 @using StudentPortalPracticeTwo.Database.Models.Users
 @using StudentPortalPracticeTwo.Database.Models.Users.Admin
@@ -9,7 +11,13 @@
 @* List of all tabs to display *@
 <div class="tab-nav add-margin-bottom">
     <div>
-        <a href="/admin/students" class="btn btn-link">⬅ Return</a>
+        @if (User is Student) {
+            <a href="/admin/students" class="btn btn-link">⬅ Return</a>
+        }
+        else if (User is Faculty) {
+            <a href="/admin/faculty" class="btn btn-link">⬅ Return</a>
+        }
+        
     </div>
     <button class="btn btn-link @(Tab == TabSelected.Demographics ? "active" : "")" type="button"
             @onclick="() => TabSwitch(TabSelected.Demographics)">Demographics</button>
@@ -33,8 +41,8 @@
         
     <AuthorizeView Roles="Admin">
         <Authorized>
-            <button type="button" class="btn @(User.IsDisabled ? "btn-danger" : "btn-primary")" @onclick="DeactivateUser">
-                @(User.IsDisabled! 
+            <button type="button" class="btn @(User.IsDisabled == false ? "btn-danger" : "btn-primary")" @onclick="ToggleUserDisable">
+                @(User.IsDisabled == false 
                 ? "Deactivate User"
                 : "Reactivate User")
             </button>
@@ -47,21 +55,24 @@
     <UserDemographics user="User" />
 
 }
-else if (Tab == TabSelected.EnrolledPrograms) {
-    @* RENDER *@
+else if (Tab == TabSelected.EnrolledPrograms && User is Student student) {
+    <EnrolledProgram student="student"/>
 }
-else if (Tab == TabSelected.CurrentCourses)
+else if (Tab == TabSelected.CurrentCourses && User is Student studentOne)
 {
-    @* RENDER *@
+    <CurrentCourse student="studentOne"/>
 }
-else if (Tab == TabSelected.DegreeProgress)
+else if (Tab == TabSelected.DegreeProgress && User is Student studentTwo)
 {
-    @* RENDER *@
+    <DegreeProgress student="studentTwo"/>
 }
-else if (Tab == TabSelected.Other)
-{
-    @* RENDER *@
+
+@* Faculty *@
+else if (Tab == TabSelected.ClassSessions && User is Faculty faculty) {
+    <ClassSessions faculty="faculty"/>
 }
+
+
 @* ADD A SECTION TO DISPLAY CHANGES LOG *@
 
 
@@ -90,9 +101,12 @@ else if (Tab == TabSelected.Other)
         StateHasChanged();
     }
 
-    public async Task DeactivateUser() {
-        await userService.DisableUserToggle(User.Id);
+    public async Task ToggleUserDisable() {
+        User.IsDisabled = await userService.DisableUserToggle(User.Id);
+
     }
+
+
 
 }
 
