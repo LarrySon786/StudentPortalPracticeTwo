@@ -1,0 +1,150 @@
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Admin
+@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@inject StudentPortalPracticeTwo.Components.Services.Users.UserService userService
+
+@* This component displays any user's basic information. Includes Students, Instructors, or admins *@
+
+@if (user == null)
+{
+    <p>User not found...</p>
+}
+else
+{
+    <div>
+        <AuthorizeView Roles="Admin">
+            <Authorized Context="AuthState">
+                <EditForm Model="user" OnValidSubmit="HandleSaveChanges" FormName="EditUserDetails">
+                    <DataAnnotationsValidator />
+
+                    <label class="form-label">First Name</label>
+                    <InputText class="form-control" @bind-Value="user.FirstName"/>
+                    <ValidationMessage For="@(() => user.FirstName)"/>
+
+                    <label class="form-label">Middle Name</label>
+                    <InputText class="form-control" @bind-Value="user.MiddleName" />
+                    <ValidationMessage For="@(() => user.MiddleName)" />
+
+                    <label class="form-label">Last Name</label>
+                    <InputText class="form-control" @bind-Value="user.LastName" />
+                    <ValidationMessage For="@(() => user.LastName)" />
+
+                    <label class="form-label">Email</label>
+                    <InputText class="form-control" type="Email" @bind-Value="user.Email" />
+                    <ValidationMessage For="@(() => user.Email)" />
+
+                    <label class="form-label">Date of Birth</label>
+                    <InputDate class="form-control" @bind-Value="user.DateOfBirth" />
+                    <ValidationMessage For="@(() => user.DateOfBirth)" />
+
+                    @if (user?.ContactDetails != null)
+                    {
+                        <label class="form-label">Phone</label>
+                        <InputText class="form-control" type="tel" @bind-Value="user.ContactDetails.Phone" />
+                        <ValidationMessage For="@(() => user.ContactDetails.Phone)" />
+                    }
+
+                    <fieldset>
+                        @if (user?.EmergencyContact != null)
+                        {
+                            @foreach (UserEmergencyContactModel contact in user.EmergencyContact)
+                            {
+                                <legend>Emergency Contact</legend>
+                                <label class="form-label">Name</label>
+                                <InputText class="form-control" @bind-Value="contact.ContactName" />
+                                <ValidationMessage For="@(() => contact.ContactName)" />
+
+                                <label class="form-label">Phone</label>
+                                <InputText class="form-control" @bind-Value="contact.Phone" />
+                                <ValidationMessage For="@(() => contact.Phone)" />
+
+                                <label class="form-label">Relationship</label>
+                                <InputText class="form-control" @bind-Value="contact.Relationship" />
+                                <ValidationMessage For="@(() => contact.Relationship)" />
+                            }
+                        }
+                    </fieldset>
+                    <p>@message</p>
+                    <button class="btn btn-primary" type="submit">Save Changes</button>
+                </EditForm>        
+            </Authorized>
+            <NotAuthorized Context="NonAuthState">
+                <EditForm Model="user" OnValidSubmit="HandleSaveChanges" FormName="UserDetails">
+                    <DataAnnotationsValidator />
+
+                    <label class="form-label">First Name</label>
+                    <InputText class="form-control" @bind-Value="user.FirstName" disabled/>
+                    <ValidationMessage For="@(() => user.FirstName)" />
+
+                    <label class="form-label">Middle Name</label>
+                    <InputText class="form-control" @bind-Value="user.MiddleName" disabled />
+                    <ValidationMessage For="@(() => user.MiddleName)" />
+
+                    <label class="form-label">Last Name</label>
+                    <InputText class="form-control" @bind-Value="user.LastName" disabled />
+                    <ValidationMessage For="@(() => user.LastName)" />
+
+                    <label class="form-label">Email</label>
+                    <InputText class="form-control" type="Email" @bind-Value="user.Email" disabled />
+                    <ValidationMessage For="@(() => user.Email)" />
+
+                    <label class="form-label">Date of Birth</label>
+                    <InputDate class="form-control" @bind-Value="user.DateOfBirth" disabled />
+                    <ValidationMessage For="@(() => user.DateOfBirth)" />
+
+                    <label class="form-label">Phone</label>
+                    <InputText class="form-control" type="tel" @bind-Value="user.ContactDetails.Phone" disabled />
+                    <ValidationMessage For="@(() => user.ContactDetails.Phone)" />
+                    <fieldset>
+                        @foreach (UserEmergencyContactModel contact in user.EmergencyContact)
+                        {
+                            <legend>Emergency Contact</legend>
+                            <label class="form-label">Name</label>
+                            <InputText class="form-control" @bind-Value="contact.ContactName" disabled />
+                            <ValidationMessage For="@(() => contact.ContactName)" />
+
+                            <label class="form-label">Phone</label>
+                            <InputText class="form-control" @bind-Value="contact.Phone" disabled />
+                            <ValidationMessage For="@(() => contact.Phone)" />
+
+                            <label class="form-label">Relationship</label>
+                            <InputText class="form-control" @bind-Value="contact.Relationship" disabled />
+                            <ValidationMessage For="@(() => contact.Relationship)" />
+                        }
+                    </fieldset>
+                    <p>@message</p>
+                </EditForm>
+            </NotAuthorized>
+        </AuthorizeView>
+
+
+    </div>
+}
+
+
+
+
+@code {
+    [Parameter] public UserModel? user { get; set; }
+    public string message { get; set; } = "";
+
+
+    public async Task HandleSaveChanges() {
+        try {
+            await userService.UpdateUser(user!);
+            message = "Changes Saved";
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not save changes on this user. Ex: {ex}");
+        }
+    }
+
+
+
+
+
+}

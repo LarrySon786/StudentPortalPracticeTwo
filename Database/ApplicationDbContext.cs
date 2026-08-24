@@ -37,6 +37,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<StudentContactModel> StudentContactDb { get; set; }
     public DbSet<EmergencyContactModel> EmergencyContactDb { get; set; }
     public DbSet<StudentProgram> StudentProgramDb { get; set; }
+    public DbSet<AcademicHistoryModel> AcademicHistoryDb{ get; set; }
     public DbSet<StudentEssayModel> EssayDb { get; set; }
 
     // DRAFT Application - used to save student progress in their application

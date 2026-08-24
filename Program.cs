@@ -66,6 +66,7 @@ builder.Services.AddScoped<FacultyService>(); // Service to manage creation of f
 builder.Services.AddScoped<AdminService>(); // Service to manage creation of Admin members
 builder.Services.AddScoped<AuthLogin>(); // Login, logout, and other auth methods
 builder.Services.AddScoped<RegisterCourses>(); // Allows students to register, drop, and manage their courses
+builder.Services.AddControllers();
 builder.Services.AddScoped<TermServiceHelper>();
 DotNetEnv.Env.Load();
 
@@ -111,6 +112,9 @@ app.MapPost("/account/logout", async (
 
     return Results.Redirect("/login");
 });
+
+// Download transcripts enpoints
+app.MapControllers();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

@@ -1,0 +1,31 @@
+@using StudentPortalPracticeTwo.Database.Models.Application
+
+@* Students Requested Program *@
+
+<div>
+    <h3>Student Program</h3>
+    <p>Requested Program: @studentApplication.StudentProgram.SelectedProgram.Name</p>
+    <p>Requested Start Term: @studentApplication.StudentProgram.StartTerm.DisplayName</p>
+
+    <h3>Academic History</h3>
+    <p>Highschool Transcript: 
+        <a href="/final-application/transcripts/highschool/@studentApplication.AcademicHistory.Id">
+            Download Highschool Transcript
+        </a>
+    </p>
+    @if (studentApplication.AcademicHistory.CollegeTranscript != null) {
+        <p>College Transcript:
+            <a href="/final-application/transcripts/college/@studentApplication.AcademicHistory.Id">
+                Download College Transcript
+            </a>
+        </p>
+    }
+    else {
+        <p>College Transcript: none</p>
+    }
+</div>
+
+
+@code {
+    [Parameter] public ApplicationModel studentApplication { get; set; } = null!;
+}

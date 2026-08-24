@@ -5,10 +5,20 @@
 @using StudentPortalPracticeTwo.Database.Models.Enums
 @inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
 
+@if (faculty == null) {
+    <p>Loading user information</p>
+}
+else {
+    <div>
+        <h1>@faculty.FirstName @faculty.LastName</h1>
+        <UserDashboardAdminView Mode="EditMode.Edit" User="faculty" OnSavedChanges="RefreshComponent"/>
+    </div>
+}
 
-<div>
-    <UserDashboardAdminView Mode="EditMode.Edit" User="faculty" OnSavedChanges="HandleSavedChanges"/>
-</div>
+
+
+
+
 
 
 @code {
@@ -23,7 +33,9 @@
         }
     }
 
-    public async Task HandleSavedChanges() {
-
+    public async Task RefreshComponent()
+    {
+        await facultyService.GetById(Id);
+        StateHasChanged();
     }
 }

@@ -1,7 +1,10 @@
 @using System.Runtime.CompilerServices
 @using StudentPortalPracticeTwo.Database.Models.Enums;
 @using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Admin
+@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
 @using StudentPortalPracticeTwo.Database.Models.Users.Students
+@inject StudentPortalPracticeTwo.Components.Services.Users.UserService userService
 
 @* List of all tabs to display *@
 <div class="tab-nav add-margin-bottom">
@@ -10,18 +13,39 @@
     </div>
     <button class="btn btn-link @(Tab == TabSelected.Demographics ? "active" : "")" type="button"
             @onclick="() => TabSwitch(TabSelected.Demographics)">Demographics</button>
-    <button class="btn btn-link @(Tab == TabSelected.EnrolledPrograms ? "active" : "")" type="button"
+    
+    
+    @if (User is Student) {
+        <button class="btn btn-link @(Tab == TabSelected.EnrolledPrograms ? "active" : "")" type="button"
             @onclick="() => TabSwitch(TabSelected.EnrolledPrograms)">Enrolled Programs</button>
-    <button class="btn btn-link @(Tab == TabSelected.CurrentCourses ? "active" : "")" type="button"
+        <button class="btn btn-link @(Tab == TabSelected.CurrentCourses ? "active" : "")" type="button"
             @onclick="() => TabSwitch(TabSelected.CurrentCourses)">Current Courses</button>
-    <button class="btn btn-link @(Tab == TabSelected.DegreeProgress ? "active" : "")" type="button"
+        <button class="btn btn-link @(Tab == TabSelected.DegreeProgress ? "active" : "")" type="button"
             @onclick="() => TabSwitch(TabSelected.DegreeProgress)">Degree Progress</button>
-    <button class="btn btn-link @(Tab == TabSelected.Other ? "active" : "")" type="button"
-            @onclick="() => TabSwitch(TabSelected.Other)">Other</button>
+    }
+    else if (User is Faculty) {
+        <button class="btn btn-link @(Tab == TabSelected.ClassSessions ? "active" : "")" type="button"
+                @onclick="() => TabSwitch(TabSelected.ClassSessions)">Class Sessions</button>
+    }
+    else if (User is AdminModel) {
+
+    }
+        
+    <AuthorizeView Roles="Admin">
+        <Authorized>
+            <button type="button" class="btn @(User.IsDisabled ? "btn-danger" : "btn-primary")" @onclick="DeactivateUser">
+                @(User.IsDisabled! 
+                ? "Deactivate User"
+                : "Reactivate User")
+            </button>
+        </Authorized>
+    </AuthorizeView>
 </div>
 
 @* Filters page contents based on selected tab *@
 @if (Tab == TabSelected.Demographics) {
+    <UserDemographics user="User" />
+
 }
 else if (Tab == TabSelected.EnrolledPrograms) {
     @* RENDER *@
@@ -52,7 +76,8 @@ else if (Tab == TabSelected.Other)
         EnrolledPrograms,
         CurrentCourses,
         DegreeProgress,
-        Other
+        Other,
+        ClassSessions
     }
 
 
@@ -63,6 +88,10 @@ else if (Tab == TabSelected.Other)
     public async Task HandleChanges() {
         await OnSavedChanges.InvokeAsync();
         StateHasChanged();
+    }
+
+    public async Task DeactivateUser() {
+        await userService.DisableUserToggle(User.Id);
     }
 
 }

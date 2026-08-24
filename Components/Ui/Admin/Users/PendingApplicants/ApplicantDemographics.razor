@@ -1,0 +1,76 @@
+@using StudentPortalPracticeTwo.Database.Models.Application
+@using StudentPortalPracticeTwo.Components.Services.Application
+
+
+<div>
+    <EditForm Model="studentApplication" FormName="ApplicationOverview">
+
+        <label class="form-label">First Name</label>
+        <InputText class="form-control" @bind-Value="studentApplication.StudentInfo.FirstName" disabled/>
+
+        <label class="form-label">Middle Name</label>
+        <InputText class="form-control" @bind-Value="studentApplication.StudentInfo.MiddleName" disabled />
+
+        <label class="form-label">Last Name</label>
+        <InputText class="form-control" @bind-Value="studentApplication.StudentInfo.LastName" disabled />
+
+        <label class="form-label">Date of Birth</label>
+        <InputDate class="form-control" @bind-Value="studentApplication.StudentInfo.DateOfBirth" disabled />
+
+        <label class="form-label">Email</label>
+        <InputText class="form-control" @bind-Value="studentApplication.Email" disabled />
+
+        <label class="form-label">Phone</label>
+        <InputText class="form-control" @bind-Value="studentApplication.StudentContact.Phone" disabled />
+
+        <label class="form-label">Alternative Phone</label>
+        <InputText class="form-control" @bind-Value="studentApplication.StudentContact.AltPhone" disabled />
+
+        <label class="form-label">Gender</label>
+        <p class="form-control">@studentApplication.StudentInfo.Gender</p>
+
+        <label class="form-label">Race</label>
+        <p class="form-control">@studentApplication.StudentInfo.Race</p>
+
+        <label class="form-label">Country of Citizenship</label>
+        <p class="form-control">@studentApplication.StudentInfo.CitizenshipCountry</p>
+
+        @* Address *@
+        <div>
+            <label class="form-label">Street Address Line One</label>
+            <InputText class="form-control" @bind-Value="studentApplication.StudentInfo.StreetOneAddress" disabled />
+            
+            <label class="form-label">Street Address Line Two</label>
+            <InputText class="form-control" @bind-Value="studentApplication.StudentInfo.StreetTwoAddress" disabled />
+
+            <label class="form-label">City</label>
+            <InputText class="form-control" @bind-Value="studentApplication.StudentInfo.City" disabled />
+
+            <label class="form-label">State</label>
+            <InputText class="form-control" @bind-Value="studentApplication.StudentInfo.StateOrProvince" disabled />
+
+            <label class="form-label">Zip Code</label>
+            <InputNumber class="form-control" @bind-Value="studentApplication.StudentInfo.Zipcode" disabled />
+        </div>
+
+        @foreach (EmergencyContactModel contact in studentApplication.EmergencyContact) {
+            <label class="form-label">Contact Name</label>
+            <InputText class="form-control" @bind-Value="contact.ContactName" disabled />
+
+            <label class="form-label">Relationship</label>
+            <InputText class="form-control" @bind-Value="contact.Relationship" disabled />
+
+            <label class="form-label">Phone</label>
+            <InputText class="form-control" @bind-Value="contact.Phone" disabled />
+        }
+
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter] public ApplicationModel studentApplication { get; set; } = null!;
+
+
+
+}

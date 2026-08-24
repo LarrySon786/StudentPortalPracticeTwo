@@ -34,7 +34,9 @@
                 <td>@user.FirstName @user.LastName</td>
                 <td>@user.Email</td>
                 <td>@user.DateOfBirth</td>
-                <button type="button" class="btn btn-primary"@onclick="() => NavigateToStudent(user.Id)">View/Edit Student Account</button>
+                <td>
+                    <button type="button" class="btn btn-link"@onclick="() => NavigateToStudent(user.Id)">View/Edit Student Account</button>
+                </td>
             </tr>
         }
         @* CREATED PAGINATION AT BOTTOM *@

@@ -1,0 +1,24 @@
+@using StudentPortalPracticeTwo.Database.Models.Application
+@using StudentPortalPracticeTwo.Components.Services.Application
+
+
+<div>
+    <EditForm Model="studentApplication" FormName="ApplicationOverview">
+
+        <label class="form-label">Essay One:</label>
+        <InputTextArea class="form-control" @bind-Value="studentApplication.Essays.ResponseOne" disabled />
+
+        <label class="form-label">Essay Two:</label>
+        <InputTextArea class="form-control" @bind-Value="studentApplication.Essays.ResponseTwo" disabled />
+
+        <label class="form-label">Essay Two:</label>
+        <InputTextArea class="form-control" @bind-Value="studentApplication.Essays.ResponseThree" disabled />
+
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter] public ApplicationModel studentApplication { get; set; } = null!;
+
+}

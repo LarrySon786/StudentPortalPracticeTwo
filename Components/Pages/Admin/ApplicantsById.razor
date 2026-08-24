@@ -1,4 +1,5 @@
 @page "/admin/applicants/{applicationId:int}"
+@using StudentPortalPracticeTwo.Components.Ui.Admin.Users.PendingApplicants
 @using StudentPortalPracticeTwo.Database.Models.Application;
 @using StudentPortalPracticeTwo.Components.Ui.Admin.Users
 @inject StudentPortalPracticeTwo.Components.Services.Application.FinalApplicationDb finalApplicationService;
@@ -12,34 +13,25 @@ else
     <div class="tab-nav add-margin-bottom">
         <a href="/admin/applicants">⬅ Return</a>
         <button class="btn btn-link @(tab == StudentTab.Demographics ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.Demographics)">Demographics</button>
-        <button class="btn btn-link @(tab == StudentTab.EnrolledPrograms ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.EnrolledPrograms)">Enrolled Programs</button>
-        <button class="btn btn-link @(tab == StudentTab.CurrentCourses ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.CurrentCourses)">Current Courses</button>
-        <button class="btn btn-link @(tab == StudentTab.DegreeProgress ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.DegreeProgress)">Degree Progress</button>
-        <button class="btn btn-link @(tab == StudentTab.Other ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.Other)">Other</button>
+        <button class="btn btn-link @(tab == StudentTab.Academics ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.Academics)">Academics</button>
+        <button class="btn btn-link @(tab == StudentTab.Essays ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.Essays)">Essays</button>
     </div>
     
     <div class="page-content">
         @* Display different tabs depending on selected link *@
         @if (tab == StudentTab.Demographics) 
         {
-            <AdminApplicationDisplayDemographics studentApplication="studentApplication"/>
+            <ApplicantDemographics studentApplication="studentApplication"/>
         }
-        else if (tab == StudentTab.EnrolledPrograms) 
+        else if (tab == StudentTab.Academics) 
         {
-            <h4>Display EnrolledPrograms</h4>
+            <ApplicantProgram studentApplication="studentApplication" />
         }
-        else if (tab == StudentTab.CurrentCourses)
+        else if (tab == StudentTab.Essays)
         {
-            <h4>Display CurrentCourses</h4>
+            <ApplicantEssays studentApplication="studentApplication"/>
         }
-        else if (tab == StudentTab.DegreeProgress)
-        {
-            <h4>Display DegreeProgress</h4>
-        }
-        else if (tab == StudentTab.Other)
-        {
-            <h4>Display Other</h4>
-        }
+
     </div>
 
     <p>@message</p>
@@ -81,9 +73,8 @@ else
 
     public enum StudentTab {
         Demographics,
-        EnrolledPrograms,
-        CurrentCourses,
-        DegreeProgress,
+        Academics,
+        Essays,
         Other
     } 
 

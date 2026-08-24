@@ -17,19 +17,7 @@ else {
         <a href="" class="btn btn-link"></a>
     </div>
 
-    <UserDashboardAdminView Mode="EditMode.Edit" Student="student" OnSavedChanges="RefreshComponent" />
-
-
-
-    @* Tab Sections of student details *@
-
-    @* FOR THIS SECTION, move existing tabs and child elements 
-    into there own component. reuse that component But with
-    an edit=true sort of property to enable editing on existing students.
-    
-    See if I can learn how to create a log that tracks edits such as these
-     *@
-
+    <UserDashboardAdminView Mode="EditMode.Edit" User="student" OnSavedChanges="RefreshComponent" />
 
 
 
