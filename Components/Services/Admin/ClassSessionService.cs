@@ -26,8 +26,7 @@ public class ClassSessionService
         }
         try
         {
-            return await context.ClassSessionDb
-                .Include(x => x.Course)
+            return await ClassSessionQuery(context)
                 .ToListAsync();
         }
         finally
@@ -48,10 +47,9 @@ public class ClassSessionService
         try
         {
 
-            return await context.ClassSessionDb
-            .Where(x => x.Id == id)
-            .Include(x => x.Course)
-            .FirstOrDefaultAsync();
+            return await ClassSessionQuery(context)
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
         }
         finally
         {
@@ -60,7 +58,7 @@ public class ClassSessionService
     }
 
     // POST class session
-    public async Task CreateClassSession(ClassSession session, ApplicationDbContext? context = null)
+    public async Task<ClassSession> CreateClassSession(ClassSession session, ApplicationDbContext? context = null)
     {
         bool dispose = false;
         if (context == null)
@@ -72,6 +70,7 @@ public class ClassSessionService
         {
             context.ClassSessionDb.Add(session);
             await context.SaveChangesAsync();
+            return session;
         }
         finally
         {
@@ -94,7 +93,7 @@ public class ClassSessionService
             ClassSession? existing = await GetClassSessionById(updated.Id, context);
             if (existing == null) throw new Exception("No existing class session was found. Update failed");
 
-            existing.Instructor!.Id = updated.Instructor!.Id;
+            existing.InstructorId = updated.InstructorId;
             existing.Capacity = updated.Capacity;
             existing.CurrentCount = updated.CurrentCount;
             existing.Description = updated.Description;
@@ -103,7 +102,8 @@ public class ClassSessionService
             existing.StartTime = updated.StartTime;
             existing.EndTime = updated.EndTime;
             existing.Location = updated.Location;
-            existing.Term!.Id = updated.Term!.Id;
+            existing.TermId = updated.TermId;
+            existing.CourseId = updated.CourseId;
 
             await context.SaveChangesAsync();
         }
@@ -133,4 +133,21 @@ public class ClassSessionService
             if (dispose) await context.DisposeAsync();
         }
     }
+
+    // QUERY for comprehensive GET requests
+    private IQueryable<ClassSession> ClassSessionQuery(ApplicationDbContext context)
+    {
+        return context.ClassSessionDb
+            .Include(x => x.Course)
+            .Include(x => x.StudentProgramModels)
+                .ThenInclude(x => x.User)
+            .Include(x => x.Term)
+            .Include (x => x.RegisteredStudentProgramModels)
+            .Include(x => x.Assignments)
+                .ThenInclude(x => x.Grades)
+                    .ThenInclude(x => x.StudentProgram)
+                        .ThenInclude(x => x.User);
+    }
+
+
 }

@@ -8,6 +8,8 @@ using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database.Models.Users.Students;
 using StudentPortalPracticeTwo.Database.Models.DTOs;
 using StudentPortalPracticeTwo.Components.Services.Admin;
+using StudentPortalPracticeTwo.Database.Models.Degrees;
+using StudentPortalPracticeTwo.Database.Models.Enums;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users.Students;
 
@@ -309,6 +311,38 @@ public class StudentService
                 contacts.Add(emergencyContact);
             };
 
+            // Current Sessions 
+            List<ClassSession> currentSessions = new();
+            foreach (JsonClassSessionReference sessionDto in student.CurrentClassSessions)
+            {
+                string seasonString = new string(
+                    sessionDto.Term.Where(char.IsLetter).ToArray()
+                );
+
+                string yearString = new string(
+                    sessionDto.Term.Where(char.IsDigit).ToArray()
+                );
+
+                TermSeason season = Enum.Parse<TermSeason>(seasonString);
+                int year = int.Parse(yearString);
+
+                ClassSession? classSession = await context.ClassSessionDb
+                    .Where(x => x.StartTime == sessionDto.StartTime && x.Course.Code == sessionDto.CourseCode
+                        && x.Instructor!.Email == sessionDto.InstructorEmail && x.Term!.Year  == year && x.Term.Season == season)
+                    .FirstOrDefaultAsync();
+
+                if (classSession == null) throw new Exception("Class session did not match either start time, course code, instructor email, or existing term.");
+
+                currentSessions.Add(classSession);
+            }
+
+            // Registered Sessions
+
+
+            // Compeleted Sessions
+
+
+
             // Create Student Entity
             var entity = new Student()
             {
@@ -322,9 +356,12 @@ public class StudentService
                     Phone = student.ContactDetails.Phone
                 },
                 EmergencyContact = contacts,
-                MyProgram = new ()
+                MyProgram = new()
                 {
                     DegreeId = degree.Id,
+                    CurrentSessions = currentSessions ?? [],
+                    RegisteredSessions = [],
+                    CompletedCourses = [],
                 },
                 IdentityUserId = applicationUser.Id,
             };

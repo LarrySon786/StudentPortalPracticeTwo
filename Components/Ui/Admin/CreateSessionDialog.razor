@@ -47,16 +47,30 @@
                 </div>
 
                 @* Instructor *@
-                <div class="form-group">
-                    <label class="form-label">Instructor</label>
-                    <InputSelect class="form-control" @bind-Value="editableSession.InstructorId">
-                        <option value="0" disabled>-- Select Instructor --</option>
-                        @foreach(Faculty instructor in faculty) {
-                            <option value=@instructor.Id>@instructor.FirstName @instructor.LastName</option>
+                @if (setFaculty == null)
+                {
+
+                    <div class="form-group">
+                        <label class="form-label">Instructor</label>
+                        <InputSelect class="form-control" @bind-Value="editableSession.InstructorId">
+                            <option value="0" disabled>-- Select Instructor --</option>
+                            @foreach (Faculty instructor in faculty)
+                            {
+                                <option value=@instructor.Id>@instructor.FirstName @instructor.LastName</option>
                         }
-                    </InputSelect> 
-                    <ValidationMessage For="(() => editableSession!.InstructorId)"/>
-                </div>
+                        </InputSelect> 
+                        <ValidationMessage For="(() => editableSession!.InstructorId)"/>
+                    </div>
+                }
+                else {
+                    <div class="form-group">
+                        <label class="form-label">Instructor</label>
+                        <InputSelect class="form-control" @bind-Value="editableSession.InstructorId">                            
+                            <option value=@setFaculty.Id selected>@setFaculty.FirstName @setFaculty.LastName</option>
+                        </InputSelect>
+                        <ValidationMessage For="(() => editableSession!.InstructorId)" />
+                    </div>
+                }
 
                 @* Description *@
                 <div class="form-group">
@@ -140,6 +154,7 @@
     [Parameter] public EventCallback OnSessionCreated { get; set; }
     [Parameter] public Course courseSelected { get; set; } = null!; // This is the course the created Session is attached to. 
     [Parameter] public bool isEdit { get; set; } = false;
+    [Parameter] public Faculty? setFaculty { get; set; } // ONLY pass this parameter if you want to require a certain faculty member be set for the class
     public List<Faculty> faculty { get; set; } = new();
     public List<Course>? availableCourses { get; set; } = new();
     public List<Term> terms { get; set; } = new();
@@ -175,40 +190,6 @@
                 Console.WriteLine($"No existing courses could be obtained. Ex: {ex}");
             }
     }
-    @* This was a recommended fix to my original problem of the _context discontuing in oninitializedasync *@
-    @* protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if (firstRender && !isInitialized) {
-            isInitialized = true;
-            try {
-                terms = await termService.GetAllTerms();
-
-                
-                editableSession = new ClassSession
-                {
-                    Id = session.Id,
-                    CourseId = session.CourseId,
-                    Instructor = session.Instructor,
-                    Description = session.Description,
-                    Location = session.Location,
-                    Term = session.Term ?? terms.FirstOrDefault()!,
-                    StartDate = session.StartDate,
-                    StartTime = session.StartTime,
-                    EndDate = session.EndDate,
-                    EndTime = session.EndTime,
-                    Capacity = session.Capacity,
-                    CurrentCount = session.CurrentCount
-                };
-            
-                
-                availableCourses = await courseService.GetAllCourses();
-                
-                StateHasChanged();
-            } 
-            catch (Exception ex) {
-                Console.WriteLine($"No existing courses could be obtained. Ex: {ex}");
-            }
-        }
-    } *@
 
     public async Task HandleClose() {
         await CloseDialog.InvokeAsync();

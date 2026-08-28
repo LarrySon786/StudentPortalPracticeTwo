@@ -1,3 +1,4 @@
+@using Microsoft.VisualBasic
 @using StudentPortalPracticeTwo.Database.Models.Users
 @inject NavigationManager navigationManager
 
@@ -50,23 +51,29 @@
 
     @* Logout | Admin Portal Link *@
     <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <form method="post" action="/account/logout">
+            <button type="submit" class="btn btn-link">
+                Logout
+            </button>
+        </form>
+        <AuthorizeView Roles="Faculty">
+            <Authorized>
+                <a class="btn btn-link" href="/faculty">Faculty Portal</a>
+            </Authorized>
+        </AuthorizeView>
+        
         <AuthorizeView Roles="Admin">
             <Authorized>
-                <form method="post" action="/account/logout">
-                    <button type="submit" class="btn btn-link">
-                        Logout
-                    </button>
-                </form>
                 <a class="btn btn-link"  href="/admin">Admin Portal</a>
             </Authorized>
-            <NotAuthorized>
-                <form method="post" action="/account/logout">
-                    <button type="submit" class="btn btn-link">
-                        Logout
-                    </button>
-                </form>
-            </NotAuthorized>
         </AuthorizeView>
+
+        @* <AuthorizeView Roles="Admin, Faculty">
+            <Authorized>
+                <a class="btn btn-link" href="/faculty">Faculty Portal</a>
+                <a class="btn btn-link" href="/admin">Admin Portal</a>
+            </Authorized>
+        </AuthorizeView> *@
     </div>
 
     @* Button to open and close navigation *@

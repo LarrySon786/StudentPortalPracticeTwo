@@ -1,0 +1,90 @@
+@using System.Security.Cryptography.X509Certificates
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+
+@inject StudentPortalPracticeTwo.Components.Services.Admin.AssignmentService assignmentService
+
+
+<div class="overlay">
+    <div class="overlay-container">
+        <div class="standard-card standard-dialog">
+            @* Assignments *@
+            <div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Assignment</th>
+                            <th>Score</th>
+                            <th>Total Points</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(Grade grade in grades) {
+                            <tr>
+                                <td>@grade.Assignment.Name</td>
+                                <td>
+                                    <InputNumber class="form-control" @bind-Value="grade.ScoredPoints"/>
+                                </td>
+                                <td>@grade.Assignment.TotalPoints</td>
+                                <td>@grade.PercentageGrade</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @* Student Details and options *@
+            <div>
+                <h3>@student.FirstName @student.LastName</h3>
+                <p>Input_details</p>
+            </div>
+
+            @* Save + Close *@
+            <div>
+                <p class="text-muted">@message</p>
+                <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+                <button class="btn btn-primary" type="button" @onclick="SaveChanges">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+@code {
+    [Parameter] public Student student { get; set; } = null!;
+    [Parameter] public ClassSession? session { get; set; } = null!;
+    [Parameter] public EventCallback OnClose { get; set; }
+    public List<Grade> grades { get; set; } = new();
+    private string message = string.Empty;
+
+
+    protected override async Task OnInitializedAsync() {
+        try {
+            grades = await assignmentService.GetAllAssignmentsByStudentAndClassSession(student, session!.Id);
+
+        }
+        catch(Exception ex) {
+            Console.WriteLine($"Could not load student assignments. Ex: {ex}");
+            message = ex.Message;
+        }
+    }
+
+    public async Task SaveChanges() {
+        message = "";
+        try {
+            await assignmentService.SaveGrades(grades); // Saves all changes to grade
+            message = "Changes Saved";
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not save changes to grades. Ex: {ex}");
+            message = ex.Message;
+        }        
+    }
+
+    public async Task HandleClose() {
+        await OnClose.InvokeAsync();
+    }
+}

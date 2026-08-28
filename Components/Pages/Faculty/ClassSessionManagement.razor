@@ -1,0 +1,155 @@
+@page "/faculty/classes"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Components.Services.Users.Instructors
+@using StudentPortalPracticeTwo.Components.Services.Admin
+@using StudentPortalPracticeTwo.Components.Ui.Admin
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@inject FacultyService facultyService
+@inject ClassSessionService classSessionService
+@inject IJSRuntime JS
+
+@* COMPLETE *@
+@* This page should display all class sessions that the instructor oversees *@
+@* This page should allow instructors to open a link to view a particular Class *@
+@* This page should allow instructors to open a link to grade a particular student *@
+@* This instructor should be able to create assignments for the class *@
+
+
+
+
+@* INCOMPLETE *@
+@* The instructor should be able to start / end terms for each class *@
+@* The instructor should be able to submit final grades for the student (pass or fail the course) *@
+@* The instructor should be able to add grades for the student *@
+
+@if (faculty == null)
+{
+    <p>No faculty data found...</p>
+}
+else
+{
+    <div>
+        @* Create a new class Session for this instructor *@
+        <button class="btn btn-primary" type="button" @onclick="OpenCreateSessionDialog">Create a Class Session</button>
+        <div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Course</th>
+                        <th>Term</th>
+                        <th>Start / End Term</th>
+                        <th>View Students</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (ClassSession session in faculty.ClassSessions)
+                    {
+                        <tr>
+                            <td>@session.Course.Code</td>
+                            <td>@session.Course.Name</td>
+                            <td>@session.Term!.DisplayName</td>
+                            <td>@session.StartDate - @session.EndDate</td>
+                            <td>
+                                <a class="btn btn-link" href="/faculty/classes/class-details/@session.Id">View Students</a>
+                            </td>
+                            <td>
+                                <button class="btn btn-link" type="button" @onclick="() => OpenEditSessionDialog(session)">Edit</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger" type="button" @onclick="() => DeleteSession(session)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (openSessionDialog == true) {
+    <CreateSessionDialog session="selectedSession" CloseDialog="CloseSessionDialog" isEdit="editMode" setFaculty="faculty"/>
+}
+
+
+@code {
+    public UserModel? user { get; set; }
+    public Faculty? faculty { get; set; }
+    public ClassSession selectedSession { get; set; } = new();
+    public string message { get; set; } = string.Empty;
+    public bool openSessionDialog { get; set; } = false;
+    public bool editMode { get; set; } = false;
+
+    protected override async Task OnInitializedAsync() {
+        user = await authService.GetCurrentUserAsync();
+        if (user == null) {
+            navigationManager.NavigateTo("login", forceLoad:true);
+            return;
+        }
+        if (user is Faculty newFaculty)
+        {
+            try {
+                message = string.Empty;
+                faculty = await facultyService.GetById(user.Id);
+            }
+            catch(Exception ex) {
+                Console.WriteLine($"Could not fetch faculty data. Ex: {ex}");
+                message = ex.Message;
+            }
+
+        }
+        else
+        {
+            navigationManager.NavigateTo("login", forceLoad: true);
+            return;
+        }
+
+    }
+
+    public void OpenEditSessionDialog(ClassSession session) {
+        if (session != null) selectedSession = session;
+        else if (session == null) selectedSession = new();
+        editMode = true;
+        openSessionDialog = true;
+    }
+
+    public void OpenCreateSessionDialog() {
+        editMode = false;
+        selectedSession = new();
+        openSessionDialog = true;
+    }
+    public async Task CloseSessionDialog() {
+        selectedSession = new();
+        openSessionDialog = false;
+        await ReloadSessions();
+        editMode = false;
+    }
+
+    public async Task ReloadSessions() {
+        faculty = await facultyService.GetById(user!.Id);
+    }
+
+    public async Task DeleteSession(ClassSession session) {
+        @* CONFIRM DELETE *@
+        bool confirmed = await JS.InvokeAsync<bool>( "confirm",
+                $"Are you sure you want to delete the {session.Course.Name} session?"
+            );
+        if (!confirmed) return;
+
+        @* Ensure that no students are in the session *@
+        var existingStudents = session.StudentProgramModels.Count();
+        if (existingStudents > 0) {
+            message = $"Cannot delete {session.Course.Name} session. This class still has students registered for it.";
+            return;
+        }
+        else {
+            @* HANDLE DELETE *@
+            await classSessionService.DeleteClassSession(session.Id);
+            await ReloadSessions();
+        }
+    }
+}

@@ -1,7 +1,12 @@
 
 
 LEFT off
-- I refactored all of my pre-existing code to not just use UserModel but also Students, Faculty, and AdminModel
+- I finished reworking Reset-Db
+ - I started creating the faculty class management view. Here they can view all students, create assignments,
+Grade assignments, start the term, submit final grades, and more
+- I just finished creating the assignments Model and linked it to the UserProgramModel and the ClassSession.
+- Need to continue to work on the class Management page.
+
 
 - TO DO
 - Create Faculty Accounts and set-up

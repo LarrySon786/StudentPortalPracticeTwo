@@ -1,0 +1,103 @@
+@page "/reset-db"
+@layout ApplicationLayout
+@* @attribute [AllowAnonymous] *@
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase
+@using Microsoft.AspNetCore.Authorization
+@inject ResetDatabase resetDatabaseService
+@inject AdminSeeder adminSeedService
+@inject ApplicationSeeder applicationSeedService
+@inject ClassSessionSeeder classSessionSeedService
+@inject CourseSeeder courseSeedService
+@inject DegreeSeeder degreeSeedService
+@inject FacultySeeder facultySeedService
+@inject RoleSeeder roleSeedService
+@inject TermSeeder termSeedService
+@inject StudentSeeder studentSeedService
+@inject DevSeeder devSeedService
+
+
+<h1>Development Database Seeder</h1>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <div class="alert alert-info">
+        @message
+    </div>
+}
+
+<button class="btn btn-danger" @onclick="HandleReset">
+    Reset Database
+</button>
+
+<hr />
+
+<h3>Reference Data</h3>
+
+<button class="btn btn-primary" @onclick="() => roleSeedService.SeedAsync()">
+    Roles
+</button>
+
+<button class="btn btn-primary" @onclick="() => termSeedService.SeedAsync()">
+    Terms
+</button>
+
+<button class="btn btn-primary" @onclick="() => courseSeedService.SeedAsync()">
+    Courses
+</button>
+
+<button class="btn btn-primary" @onclick="() => degreeSeedService.SeedAsync()">
+    Degrees
+</button>
+
+<hr />
+
+<h3>Users</h3>
+
+<button class="btn btn-primary" @onclick="() => facultySeedService.SeedAsync()">
+    Faculty
+</button>
+
+<button class="btn btn-primary" @onclick="() => studentSeedService.SeedAsync()">
+    Students
+</button>
+
+<button class="btn btn-primary" @onclick="() => adminSeedService.SeedAsync()">
+    Admin
+</button>
+
+<hr />
+
+<h3>Academic</h3>
+
+<button class="btn btn-primary" @onclick="() => classSessionSeedService.SeedAsync()">
+    Class Sessions
+</button>
+
+@* <button class="btn btn-primary" @onclick="() => assignmentSeedService.SeedAsync()">
+    Assignments
+</button> *@
+
+<hr />
+
+<h3>Applications</h3>
+
+<button class="btn btn-primary" @onclick="() => applicationSeedService.SeedAsync()">
+    Applications
+</button>
+
+@code{
+    private string message { get; set; } = string.Empty;
+
+    public async Task HandleReset() {
+        try {
+            message = "";
+            await resetDatabaseService.ResetAsync();
+            message = "Reset Successful";
+        }
+        catch(Exception ex) {
+            Console.WriteLine($"Could not reset database. Ex: {ex}");
+            message = ex.Message;
+        }
+    }
+}

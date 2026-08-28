@@ -9,11 +9,16 @@ public class UserProgramModel
     [Key]
     public int Id { get; set; }
 
+    // Student who owns this program
     public int UserId { get; set; }
     public Student? User { get; set; }
 
+    // Degree this program is a part of
     public int DegreeId { get; set; }
     public Degree? MyDegree { get; set; } // Track Student's selected Program
+
+    // Student Class Assignments (in the assignments table, it is tied to each classSession)
+    public List<Grade> Grade { get; set; } = new(); // These are all student assignments in one storage. To find by class, use .Where(x=> x.SessionId)
 
     public List<ClassSession> CurrentSessions { get; set; } = new(); // Track Students Concurrent Class Sessions
 

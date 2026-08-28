@@ -186,46 +186,4 @@ public class AdminService
         }
     }
 
-
-    // ADMINS | Create admin with set password (used for development)
-    public async Task CreateAdmin(AdminModel admin, string? password, ApplicationDbContext? context = null)
-    {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var response = await GetAdminByEmail(admin.Email, context);
-            if (response != null) throw new Exception("Cannot create admin. This email already exists with a student or admin account.");
-
-            // Set Identity User Values
-            var identityUser = new ApplicationUser()
-            {
-                Email = admin.Email,
-                UserName = admin.Email,
-                EmailConfirmed = true
-            };
-
-            // Generate email to set password
-            if (password == null) password = "1234"; // CHANGE LATER
-
-            // Create Identitty User
-            var result = await _userManager.CreateAsync(identityUser, password);
-            if (!result.Succeeded) throw new Exception("Could not create admin account. Failed to create identity User");
-            else await _userManager.AddToRoleAsync(identityUser, "Admin"); // Set Admin Roles
-
-            admin.IdentityUserId = identityUser.Id;
-
-            context.Add(admin);
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
-    }
-
 }

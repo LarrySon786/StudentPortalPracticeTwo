@@ -145,6 +145,7 @@ public class FacultyService
             if (existing != null) throw new Exception("A faculty or student user already exist with this email");
 
             List<UserEmergencyContactModel> emergencyContacts = new();
+            
             foreach (var contact in faculty.EmergencyContact)
             {
                 emergencyContacts.Add(contact); // Create Emergency Contacts

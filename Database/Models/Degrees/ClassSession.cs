@@ -13,13 +13,15 @@ public class ClassSession
     public int CourseId { get; set; }
     public Course Course { get; set; } = null!;
 
+    [Range(1, int.MaxValue, ErrorMessage = "Please select a term.")]
     public int TermId { get; set; } // Term Relationship for database
-
-    [Required(ErrorMessage = "Term is required")]
     public Term? Term { get; set; }
 
     public List<UserProgramModel> StudentProgramModels { get; set; } = new();
     public List<UserProgramModel> RegisteredStudentProgramModels { get; set; } = new();
+
+    // public Class Assignments
+    public List<Assignments> Assignments { get; set; } = new(); // This list of assignments needs to be looped and created for EACH student
 
     public int InstructorId { get; set; }
     public Faculty? Instructor { get; set; }

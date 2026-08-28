@@ -1,0 +1,74 @@
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Enums
+
+@namespace StudentPortalPracticeTwo.Components.Ui.Admin.Users.FacultyManagement
+
+@inject StudentPortalPracticeTwo.Components.Services.Admin.AssignmentService assignmentService
+
+<div class="overlay">
+    <div class="overlay-container">
+        <div class="standard-card standard-dialog">
+            <EditForm Model="assignment" OnValidSubmit="OnSave" FormName="AssignmentDialog">
+                <DataAnnotationsValidator />
+
+                <label class="form-label">Assignment Name</label>
+                <InputText class="form-control" @bind-Value="assignment.Name"/>
+                <ValidationMessage For="(() => assignment.Name)"/>
+
+                <label class="form-label">Assignment Point Value</label>
+                <InputNumber class="form-control" @bind-Value="assignment.TotalPoints" />
+                <ValidationMessage For="(() => assignment.TotalPoints)" />
+
+                <label class="form-label">Instructions For Students</label>
+                <InputTextArea class="form-control" @bind-Value="assignment.Instructions" />
+                <ValidationMessage For="(() => assignment.Instructions)" />
+
+                <div>
+                    <button class="btn btn-secondary" type="button" @onclick="OnClose">Close</button>
+                    <button class="btn btn-primary" type="submit">Save Assignment</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public Assignments assignment { get; set; } = new(); // The created or edited assignment
+    [Parameter] public int sessionId { get; set; } // This Id is the class session the created / edited belongs to
+    [Parameter] public EditMode mode { get; set; } = EditMode.View; // This decides if creating, editing, or only viewing Assignment
+    [Parameter] public EventCallback onClose { get; set; } // This closes the dialog. Passed from Parent
+    private string message = ""; // Error message
+
+    public async Task OnSave() {
+        try
+        {
+            if (mode == EditMode.Create)
+            {
+                await assignmentService.CreateAssignmentByClassSession(assignment, sessionId);
+                
+            }
+            else if (mode == EditMode.Edit)
+            {
+                await assignmentService.UpdateAssignment(assignment);
+            }
+            else {
+                message = "Could not save changes";
+                return;
+            };
+
+            await OnClose();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not create / edit the assignment. Ex: {ex}");
+            message = ex.Message;
+        }
+    }
+
+    public async Task OnClose() {
+        await onClose.InvokeAsync();
+    }
+
+
+
+}

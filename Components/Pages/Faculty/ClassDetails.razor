@@ -1,0 +1,183 @@
+@page "/faculty/classes/class-details/{Id:int}"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@namespace StudentPortalPracticeTwo.Components.Ui.Admin.Users.FacultyManagement
+@inject StudentPortalPracticeTwo.Components.Services.Admin.ClassSessionService classSessionService
+@inject StudentPortalPracticeTwo.Components.Services.Admin.AssignmentService assignmentService
+
+@if (session == null) {
+    <p>Session details not found</p>
+}
+else {
+    @* Top Bar *@
+    <div>
+        @* 
+        This button should allow instructors to activate their class to be active for the term
+        Students will then see this class appear in their concurrent active classes.
+         *@
+        <button class="btn btn-primary">Begin Class for Term</button> 
+        
+        @* This button will finailize grades for the semester and auto-pass / fail students *@
+        <button class="btn btn-primary">Submit Final Grades</button>
+    </div>
+
+    @* Assignment Management *@
+    <div>
+        <h2>Assignments</h2>
+        <button class="btn btn-primary" type="button" @onclick="OpenCreateDialog">Create New Assignment</button>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Total Points</th>
+                    <th>Edit</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Assignments assignment in allAssignments) {
+                    <tr>
+                        <td>@assignment.Name</td>
+                        <td>@assignment.TotalPoints</td>
+                        <td>
+                            <button class="btn btn-link" type="button" @onclick="() => OpenEditDialog(assignment)">Edit</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" type="button" @onclick="() => DeleteAssignment(assignment.Id)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @* Student Management *@
+    <div>
+        <h2>Students</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (UserProgramModel programModel in session.StudentProgramModels) {
+                    @if (programModel.User != null) {
+                        <tr>
+                            <td>@programModel.User!.FirstName @programModel.User.LastName</td>
+                            <td>
+                                <button>View</button>
+                            </td>
+                        </tr>
+                    }
+                    
+                }
+                
+            </tbody>
+        </table>
+    </div>
+
+    @if (CreateAssignmentDialog == true) {
+        <CreateAssignmentDialog assignment="selectedAssignment" sessionId="session.Id" mode="mode" onClose="CloseDialog"/>
+    } 
+    else if (viewStudentDialog == true) {
+        <StudentGradingDialog student="selectedStudent" session="session" OnClose="CloseStudentDialog"/>
+    }
+}
+
+
+@code {
+    [Parameter] public int Id { get; set; } // Session Id
+    public UserModel? user { get; set; } // Faculty member --> Validates that this faculty member is instructor to this session. Otherwise, redirect
+    public ClassSession? session { get; set; } // Class Session Details
+    private string message = string.Empty; // Error handling
+
+
+    @* ASSIGNMENT MANAGEMENT *@
+    public Assignments selectedAssignment { get; set; } = new();
+    public List<Assignments> allAssignments { get; set; } = new();
+    public bool CreateAssignmentDialog { get; set; } = false;
+    public EditMode mode { get; set; } = EditMode.Create;
+
+
+    protected override async Task OnInitializedAsync() {
+        session = await classSessionService.GetClassSessionById(Id);
+        if (session == null) { // Ensure a class was found
+            navigationManager.NavigateTo("/faculty/classes");
+            return;
+        }
+        user = await authService.GetCurrentUserAsync();
+        if (user == null) // Ensure a user is found
+        {
+            navigationManager.NavigateTo("/faculty/classes");
+            return;
+        }
+        if (user is Faculty newFaculty && session.InstructorId == newFaculty.Id) { // Ensures only the class owning instructor can see these details
+
+        }
+        else {
+            navigationManager.NavigateTo("/faculty/classes");
+            return;
+        }
+        await ReloadAllAssignments();
+
+    }
+
+    public async Task ReloadAllAssignments() {
+        allAssignments = await assignmentService.GetAllAssignmentsByClassSession(session!.Id);
+    }
+
+    public void OpenCreateDialog() {
+        mode = EditMode.Create;
+        selectedAssignment = new();
+        CreateAssignmentDialog = true;
+    }
+
+    public void OpenEditDialog(Assignments assignment) {
+        mode = EditMode.Edit;
+        selectedAssignment = assignment;
+        CreateAssignmentDialog = true;
+    }
+
+    public async Task CloseDialog() {
+        mode = EditMode.Create;
+        selectedAssignment = new();
+        CreateAssignmentDialog = false;
+        await ReloadAllAssignments();
+    }
+
+    public async Task DeleteAssignment(int id) {
+        try {
+            await assignmentService.DeleteAssignment(id);
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not delete assignment. Ex: {ex}");
+            message = $"Failed to delete assignment. {ex.Message}";
+        }
+        await ReloadAllAssignments();
+
+    }
+
+
+    @* STUDENT MANAGEMENT *@
+    public Student? selectedStudent { get; set; }
+    public bool viewStudentDialog { get; set; } = false;
+
+
+    public void OpenStudentDialog(Student student) {
+        if (student == null) return;
+        selectedStudent = student;
+        viewStudentDialog = true;
+    }
+
+    public void CloseStudentDialog() {
+        selectedStudent = null;
+        viewStudentDialog = false;
+    }
+
+}

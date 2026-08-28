@@ -58,6 +58,9 @@ made to polish it
 - I began creating the Instructor infrastructure starting with initilizing the Registeration process
 - Admins create instructor by First, Last, and Email. Instructor receives an email to Registeration
 - Instructors register and set password with token based url
+- I created an overview for Applicant Students, existing students, faculty and set up a future for admin view
+They still need major CSS work but the basic data and concepts are there. Basic feaetures are working
+- I reworked Reset DB so it is not all in program.cs. It now has its own set of services and features for seeding the database
 
 
 

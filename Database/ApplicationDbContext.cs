@@ -54,6 +54,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Course> CourseDb { get; set; }
     public DbSet<ClassSession> ClassSessionDb { get; set; }
     public DbSet<Term> TermDb { get; set; }
+    public DbSet<Assignments> AssignmentsDb { get; set; }
+    public DbSet<Grade> GradeDb{ get; set; }
 
 
     // MODEL BUILDER
@@ -111,6 +113,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<UserProgramModel>()
             .HasMany(x => x.RegisteredSessions)
             .WithMany(x => x.RegisteredStudentProgramModels);
+
+        modelBuilder.Entity<UserProgramModel>()
+            .HasMany(x => x.Grade)
+            .WithOne(x => x.StudentProgram)
+            .HasForeignKey(x => x.StudentProgramId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Faculty
         modelBuilder.Entity<Faculty>()
@@ -226,6 +234,25 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(x => x.TermId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<ClassSession>()
+            .HasMany(x => x.Assignments)
+            .WithOne(x => x.Session)
+            .HasForeignKey(x => x.SessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Grade>()
+            .HasOne(x => x.Assignment)
+            .WithMany(x => x.Grades)
+            .HasForeignKey(x => x.AssignmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Grade>()
+            .HasOne(x => x.Session)
+            .WithMany()
+            .HasForeignKey(x => x.SessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        
     }
 }
 

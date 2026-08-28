@@ -8,6 +8,22 @@
     "ContactDetails": {
       "Phone": "555-100-1001"
     },
+    "CurrentClassSessions": [
+      {
+        "CourseCode": "ENG101",
+        "Term": "Fall2026",
+        "InstructorEmail": "richardsbrandon5@gmail.com",
+        "StartTime": "09:00:00"
+      },
+      {
+        "CourseCode": "MAT151",
+        "Term": "Fall2026",
+        "InstructorEmail": "richardsbrandon5@gmail.com",
+        "StartTime": "10:30:00"
+      }
+    ],
+    "RegisteredClassSessions": [],
+    "CompletedCourses": [],
     "EmergencyContact": [
       {
         "FirstName": "Sarah",
@@ -27,6 +43,16 @@
     "ContactDetails": {
       "Phone": "555-100-1002"
     },
+    "CurrentClassSessions": [
+      {
+        "CourseCode": "ENG101",
+        "Term": "Fall2026",
+        "InstructorEmail": "richardsbrandon5@gmail.com",
+        "StartTime": "09:00:00"
+      }
+    ],
+    "RegisteredClassSessions": [],
+    "CompletedCourses": [],
     "EmergencyContact": [
       {
         "FirstName": "David",
@@ -46,6 +72,22 @@
     "ContactDetails": {
       "Phone": "555-100-1003"
     },
+    "CurrentClassSessions": [
+      {
+        "CourseCode": "MAT151",
+        "Term": "Fall2026",
+        "InstructorEmail": "richardsbrandon5@gmail.com",
+        "StartTime": "10:30:00"
+      },
+      {
+        "CourseCode": "CSC101",
+        "Term": "Fall2026",
+        "InstructorEmail": "michael.johnson@college.edu",
+        "StartTime": "09:00:00"
+      }
+    ],
+    "RegisteredClassSessions": [],
+    "CompletedCourses": [],
     "EmergencyContact": [
       {
         "FirstName": "Maria",
@@ -71,6 +113,22 @@
     "ContactDetails": {
       "Phone": "555-100-1004"
     },
+    "CurrentClassSessions": [
+      {
+        "CourseCode": "CSC101",
+        "Term": "Fall2026",
+        "InstructorEmail": "michael.johnson@college.edu",
+        "StartTime": "09:00:00"
+      },
+      {
+        "CourseCode": "COM101",
+        "Term": "Fall2026",
+        "InstructorEmail": "jennifer.davis@college.edu",
+        "StartTime": "11:00:00"
+      }
+    ],
+    "RegisteredClassSessions": [],
+    "CompletedCourses": [],
     "EmergencyContact": [
       {
         "FirstName": "Linda",
@@ -90,6 +148,22 @@
     "ContactDetails": {
       "Phone": "555-100-1005"
     },
+    "CurrentClassSessions": [
+      {
+        "CourseCode": "CSC102",
+        "Term": "Fall2026",
+        "InstructorEmail": "michael.johnson@college.edu",
+        "StartTime": "13:00:00"
+      },
+      {
+        "CourseCode": "SWE201",
+        "Term": "Fall2026",
+        "InstructorEmail": "robert.williams@college.edu",
+        "StartTime": "14:30:00"
+      }
+    ],
+    "RegisteredClassSessions": [],
+    "CompletedCourses": [],
     "EmergencyContact": [
       {
         "FirstName": "Thomas",
