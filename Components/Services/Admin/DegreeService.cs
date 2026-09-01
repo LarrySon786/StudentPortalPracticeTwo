@@ -25,8 +25,7 @@ public class DegreeService
         }
         try
         {
-            return await context.DegreeDb
-                .Include(x => x.Courses)
+            return await DegreeQuery(context)
                 .ToListAsync();
         }
         finally
@@ -47,7 +46,7 @@ public class DegreeService
         try
         {
             if (id == null) throw new Exception("Could not get degree by id. Id received in parameter is null");
-            return await context.DegreeDb
+            return await DegreeQuery(context)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
         }
@@ -124,6 +123,15 @@ public class DegreeService
         {
             if (dispose) await context.DisposeAsync();
         }
+    }
+
+    private IQueryable<Degree> DegreeQuery(ApplicationDbContext context)
+    {
+        return context.DegreeDb
+            .Include(x => x.Courses)
+                .ThenInclude(x => x.Sessions)
+            .Include(x => x.StudentPrograms)
+                .ThenInclude(x => x.User);
     }
 }
 

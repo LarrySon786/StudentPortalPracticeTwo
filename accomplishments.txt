@@ -61,6 +61,10 @@ made to polish it
 - I created an overview for Applicant Students, existing students, faculty and set up a future for admin view
 They still need major CSS work but the basic data and concepts are there. Basic feaetures are working
 - I reworked Reset DB so it is not all in program.cs. It now has its own set of services and features for seeding the database
-
-
-
+- I created the instructor assignment mangagement system. Instructors can create / grade assignments.
+- Instructors can submit grades at end of the term.
+- Students courses taken are organized into completed courses, failed courses, registered, and current.
+- Instructors can start the class by selecting start term
+- Instructors can create class sessions for themself.
+- Authentication is set up so you can only access a class session content if you are the instructor who created it.
+- I created the basis for catalog pages

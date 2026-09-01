@@ -1,55 +1,23 @@
 
 
 LEFT off
-- I need to create the start term feature where instructors start a term and it auto starts all registered classes for students
-- I finished the submit grades feature and the archiving feature.
-- I left off on creating a submit grades for the end of term submission. I also will need to handle term start (see button on class details page)
- - I started creating the faculty class management view. Here they can view all students, create assignments,
-Grade assignments, start the term, submit final grades, and more
-- I just finished creating the assignments Model and linked it to the UserProgramModel and the ClassSession.
-- Need to continue to work on the class Management page.
+- I finished the entire base Instructor class session management feature. This includes grades, submissions, start term, end term.
 
 
 - TO DO
-- Create Faculty Accounts and set-up
-- Set up search bar for courses on degree progress pages
-- I finished designing the basis of the degreeProgress page. Will need polished
+- Set up search bar for all searchable tables
+- Polish CSS
+- Polish validation throughout site
+- Server side validation on ALL forms
 - I created a test Project for software testing
-
-
-- Consider adding a faculty portal where teachers can submit grades, pass students in their class, 
-report grade percentage, and more. This could allow for calculating GPA, marking classes complete, 
-Then removing classes from student's current courses
-
-- I finished fixing ClassSessions. There is one error where course's reference to class session does not referesh
-after deleting classSession. It does referesh after page reload.
-
-
-
-NOTE TO SELF - Left off with trying to add user creation via application approval. Needs finished and debugged
-- Add Pathfinding on all pages (start with admin pages). Basically the path to your current page appears:
+- Calculate GPA helper
+- Add Pathfinding on all pages. Basically the path to your current page appears:
 /admin/students/{student_name} ||| Users can select 'students' to return to '/admin/students' or 'admin' to return to '/admin'
-
-
-TO DO LIST
-- Web page pathfindings
-- Student program selection
-- Student Class Registration
 - Student Support Tickets
 - Student Update Account Details
-- Student Transcript access 
-- 
-
 - Admin: Logs of edits made on students, courses, and degrees.
 - Admin: Logs of edits made on accounts by students.
-- Admin: Student Transcript creation 
-- 
-
-- Complete Website CSS
-- Authentication + Authorization
-- Server side validation on ALL forms
 - Make EMAIL unique for draft applications and student accounts
-- Email Services
 - Set up PDF Creator | Student Applications | Student Summaries | Student Transcripts (CSU editions)
 - Real DB connection and updates
 - Deploy Website on Azure

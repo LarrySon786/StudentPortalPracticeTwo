@@ -1,0 +1,59 @@
+@page "/catalog/{Id:int}"
+@layout ApplicationLayout
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@inject StudentPortalPracticeTwo.Components.Services.Admin.DegreeService degreeService
+
+@if (degree == null) {
+    <p>No Degree Found...</p>
+}
+else {
+    <div>
+        <h1>@degree.Name</h1>
+        <p>@degree.Description</p>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Course Code</th>
+                    <th>Course Name</th>
+                    <th>Credit Value</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Course course in degree.Courses) {
+                    <tr>
+                        <td>@course.Code</td>
+                        <td>@course.Name</td>
+                        <td>@course.Credits</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+
+
+@code {
+    [Parameter] public int Id { get; set; } // Degree Id
+    public Degree? degree { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            degree = await degreeService.GetDegreeById(Id);
+            if (degree == null) {
+                navigationManager.NavigateTo("/catalog", forceLoad: true);
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not initialize page. Ex: {ex}");
+        }
+    }
+}

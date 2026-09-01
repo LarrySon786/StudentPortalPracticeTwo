@@ -1,0 +1,39 @@
+@page "/catalog"
+@layout ApplicationLayout
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@inject StudentPortalPracticeTwo.Components.Services.Admin.DegreeService degreeService
+
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>View</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(Degree degree in degrees) {
+                <td>@degree.Name</td>
+                <td>
+                    <a href="/catalog/@degree.Id" class="btn btn-link">View</a>
+                </td>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+@code {
+    public List<Degree> degrees { get; set; } = new();
+
+    protected override async Task OnInitializedAsync() {
+        try {
+            degrees = await degreeService.GetAllDegrees();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not initialize page. Ex: {ex}");
+        }
+    }
+}
