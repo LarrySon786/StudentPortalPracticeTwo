@@ -1,6 +1,7 @@
 // This Service Class is to allow students to register for their own courses
 
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Admin;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Users;
@@ -12,12 +13,14 @@ public class RegisterCourses
 {
     private readonly IDbContextFactory<ApplicationDbContext> _context;
     private readonly StudentService _studentService;
+    private readonly ClassSessionService _classSessionService;
 
 
-    public RegisterCourses(IDbContextFactory<ApplicationDbContext> context, StudentService studentService)
+    public RegisterCourses(IDbContextFactory<ApplicationDbContext> context, StudentService studentService, ClassSessionService classSessionService)
     {
         _context = context;
         _studentService = studentService;
+        _classSessionService = classSessionService;
     }
 
     public async Task<List<ClassSession>> RegisterNewCourses(Student user, List<ClassSession> sessions, ApplicationDbContext? context = null)
@@ -41,7 +44,14 @@ public class RegisterCourses
         {
             if (existing == null) throw new Exception("No user found to register courses for.");
 
-            foreach (ClassSession session in sessions)
+            var sessionIds = sessions.Select(x => x.Id).ToList();
+
+            List<ClassSession> existingSessions = await context.ClassSessionDb
+                .Where(x => sessionIds.Contains(x.Id))
+                .Include(x => x.RegisteredStudentProgramModels)
+                .ToListAsync();
+
+            foreach (ClassSession session in existingSessions)
             {
                 existing.MyProgram.RegisteredSessions.Add(session);
             }

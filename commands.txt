@@ -1,6 +1,7 @@
 
 
 LEFT off
+- I left off trying to fix the registering for students to their classes. I might have fixed it but I was in the middle of it.
 - I finished the entire base Instructor class session management feature. This includes grades, submissions, start term, end term.
 
 

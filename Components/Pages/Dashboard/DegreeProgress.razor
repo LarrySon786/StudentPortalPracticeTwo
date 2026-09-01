@@ -32,7 +32,7 @@ else {
         @* My Program Tools *@
         <div>
             @* Link to Recommended course path *@
-            <a href="" class="btn btn-link">My Recommended Path</a>
+            <a href="/catalog/@user.MyProgram.DegreeId" class="btn btn-link">My Recommended Path</a>
             @* View My Initial School Application *@
             <a>My CSU Application</a>
         </div>
@@ -56,8 +56,64 @@ else {
                             <td>@course.Course.Code</td>
                             <td>@course.Course.Name</td>
                             <td>@course.Course.Credits</td>
-                            <td>[INSERT_DATE_COMPLETED]</td>
-                            <td>[INSERT_STUDENT_GPA]</td>
+                            <td>@course.DateCompleted</td>
+                            <td>@course.GPA.ToString("F2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @* Current Courses *@
+        <div>
+            <h3>Current Courses</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Course Name</th>
+                        <th>Credits</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (ClassSession session in user.MyProgram.CurrentSessions)
+                    {
+                        <tr>
+                            <td>@session.Course.Code</td>
+                            <td>@session.Course.Name</td>
+                            <td>@session.Course.Credits</td>
+                            <td>
+                                <a class="btn btn-link" href="/" type="button">See My Class</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @* Registered Classes *@
+        <div>
+            <h3>Registered Courses</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Course Name</th>
+                        <th>Credits</th>
+                        <th>View Session</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (ClassSession session in user.MyProgram.RegisteredSessions)
+                    {
+                        <tr>
+                            <td>@session.Course.Code</td>
+                            <td>@session.Course.Name</td>
+                            <td>@session.Course.Credits</td>
+                            <td>
+                                <button class="btn btn-link" type="button">View</button>
+                            </td>
                         </tr>
                     }
                 </tbody>
