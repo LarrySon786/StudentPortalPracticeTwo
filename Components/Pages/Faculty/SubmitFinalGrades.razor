@@ -1,0 +1,125 @@
+@page "/faculty/classes/class-details/{Id:int}/submit-grades"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+@namespace StudentPortalPracticeTwo.Components.Ui.Admin.Users.FacultyManagement
+@inject StudentPortalPracticeTwo.Components.Services.Admin.ClassSessionService classSessionService
+@inject StudentPortalPracticeTwo.Components.Services.Admin.AssignmentService assignmentService
+
+
+<div>
+    <a href="/faculty/classes/class-details/@Id" class="btn btn-link">Return</a>
+</div>
+
+@if (session == null) {
+    <p>No session details found.</p>
+}
+else {
+    <div>
+    <h1>@session.Course.Code | @session.Course.Name</h1>
+    @foreach (Student? student in session.StudentProgramModels.Select(x => x.User)) {
+        @if (student != null)
+        {
+            <div class="standard-card">
+                    <p>@student.FirstName @student.LastName</p>
+                    @{
+                        var scored = student.MyProgram.Grade.Sum(g => g.ScoredPoints);
+                        var possible = student.MyProgram.Grade.Sum(g => g.Assignment.TotalPoints);
+                        var percentage = possible == 0 ? 0 : scored / possible * 100;
+                    }
+                    @if (scored / possible < (decimal)0.7) {
+                        <p style="color:red;">Status: FAILING</p>
+                    }
+                    else {
+                        <p style="color:green;">Status: PASSING</p>
+                    }
+                    <p>Scored: @scored</p>
+                    <p>Total Possible Points: @possible</p>
+                    <p>Grade Percentage: @percentage.ToString("F2")%</p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Assignment</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (Grade grade in student.MyProgram.Grade) {
+                            <tr>
+                                <td>@grade.Assignment.Name</td>
+                                <td>@grade.ScoredPoints / @grade.Assignment.TotalPoints</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+</div>
+
+@* Pass class button *@
+<div>
+    <p>
+        Once grades are submited, instructors are unable to make changes 
+        to student scores. Please make sure to review each student's grade carefully.
+    </p>
+    <button class="btn btn-primary" type="button" @onclick="SubmitGrades">Submit Student Grades</button>
+</div>
+
+
+}
+
+
+
+
+
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+    public ClassSession? session { get; set; }
+    public UserModel? user { get; set; }
+    public Faculty? faculty { get; set; }
+    string message { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync() {
+        session = await classSessionService.GetClassSessionById(Id);
+        user = await authService.GetCurrentUserAsync();
+        if (session == null || user == null) {
+            navigationManager.NavigateTo("/faculty", forceLoad: true);
+            return;
+        }
+        if (user is Faculty newFaculty) {
+            faculty = newFaculty;
+        }
+        else {
+            navigationManager.NavigateTo("/faculty", forceLoad: true);
+            return;
+        }
+        if (session.InstructorId != faculty.Id)
+        {
+            navigationManager.NavigateTo("/faculty", forceLoad: true);
+            return;
+        }
+    }
+
+    public async Task SubmitGrades() {
+        try {
+            await assignmentService.SubmitFinalGradeBySession(Id);
+            await classSessionService.ArchiveAndCloseClassSession(Id);
+            navigationManager.NavigateTo("/faculty/classes", forceLoad:true);
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not submit student grades. Ex: {ex}");
+            message = $"Could not submit student grades. {ex.Message}";
+        }
+    }
+
+
+}
+
+
+
+

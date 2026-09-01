@@ -20,6 +20,12 @@ public class ClassSession
     public List<UserProgramModel> StudentProgramModels { get; set; } = new();
     public List<UserProgramModel> RegisteredStudentProgramModels { get; set; } = new();
 
+    // Completed Course Link
+    public List<CompletedCourse> Graduates { get; set; } = new();
+
+    // Failed Course Link
+    public List<FailedCourse> FailedCourses { get; set; } = new();
+
     // public Class Assignments
     public List<Assignments> Assignments { get; set; } = new(); // This list of assignments needs to be looped and created for EACH student
 
@@ -56,5 +62,8 @@ public class ClassSession
 
     [Range(1, int.MaxValue)]
     public int Capacity { get; set; }
+
+    public bool ArchivedAndClosed { get; set; } = false;
+    public bool ClassStarted { get; set; } = false;
 
 }

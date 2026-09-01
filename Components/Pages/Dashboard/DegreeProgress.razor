@@ -51,11 +51,11 @@ else {
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach(Course course in user.MyProgram.CompletedCourses){
+                    @foreach(CompletedCourse course in user.MyProgram.CompletedCourses){
                         <tr>
-                            <td>@course.Code</td>
-                            <td>@course.Name</td>
-                            <td>@course.Credits</td>
+                            <td>@course.Course.Code</td>
+                            <td>@course.Course.Name</td>
+                            <td>@course.Course.Credits</td>
                             <td>[INSERT_DATE_COMPLETED]</td>
                             <td>[INSERT_STUDENT_GPA]</td>
                         </tr>
@@ -76,7 +76,9 @@ else {
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (Course course in user.MyProgram.MyDegree.Courses.Except(user.MyProgram.CompletedCourses))
+                    @foreach (Course course in user.MyProgram.MyDegree.Courses
+                        .Where(course => !user.MyProgram.CompletedCourses
+                        .Any(completed => completed.Course == course)))
                     {
                         <tr>
                             <td>@course.Code</td>

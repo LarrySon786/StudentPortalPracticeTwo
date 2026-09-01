@@ -55,7 +55,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ClassSession> ClassSessionDb { get; set; }
     public DbSet<Term> TermDb { get; set; }
     public DbSet<Assignments> AssignmentsDb { get; set; }
-    public DbSet<Grade> GradeDb{ get; set; }
+    public DbSet<Grade> GradeDb { get; set; }
+    public DbSet<CompletedCourse> CompletedCourseDb { get; set; }
 
 
     // MODEL BUILDER
@@ -101,10 +102,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(x => x.StudentPrograms)
             .HasForeignKey(x => x.DegreeId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<UserProgramModel>()
-            .HasMany(x => x.CompletedCourses)
-            .WithMany();
 
         modelBuilder.Entity<UserProgramModel>()
             .HasMany(x => x.CurrentSessions)
@@ -240,6 +237,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(x => x.SessionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Grade
         modelBuilder.Entity<Grade>()
             .HasOne(x => x.Assignment)
             .WithMany(x => x.Grades)
@@ -252,7 +250,36 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(x => x.SessionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        
+        // Completed Course Model
+        modelBuilder.Entity<CompletedCourse>()
+            .HasOne(x => x.StudentProgram)
+            .WithMany(x => x.CompletedCourses)
+            .HasForeignKey(x => x.StudentProgramId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CompletedCourse>()
+            .HasOne(x => x.Course)
+            .WithMany();
+
+        modelBuilder.Entity<CompletedCourse>()
+            .HasOne(x => x.SessionTaken)
+            .WithMany();
+
+        // Failed Course Model
+        modelBuilder.Entity<FailedCourse>()
+            .HasOne(x => x.StudentProgram)
+            .WithMany(x => x.FailedSessions)
+            .HasForeignKey(x => x.StudentProgramId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<FailedCourse>()
+            .HasOne(x => x.Course)
+            .WithMany();
+
+        modelBuilder.Entity<FailedCourse>()
+            .HasOne(x => x.SessionTaken)
+            .WithMany(x => x.FailedCourses)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 

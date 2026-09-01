@@ -1,7 +1,9 @@
 
 
 LEFT off
-- I finished reworking Reset-Db
+- I need to create the start term feature where instructors start a term and it auto starts all registered classes for students
+- I finished the submit grades feature and the archiving feature.
+- I left off on creating a submit grades for the end of term submission. I also will need to handle term start (see button on class details page)
  - I started creating the faculty class management view. Here they can view all students, create assignments,
 Grade assignments, start the term, submit final grades, and more
 - I just finished creating the assignments Model and linked it to the UserProgramModel and the ClassSession.

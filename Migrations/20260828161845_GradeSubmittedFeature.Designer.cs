@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudentPortalPracticeTwo.Database;
@@ -11,9 +12,11 @@ using StudentPortalPracticeTwo.Database;
 namespace StudentPortalPracticeTwo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260828161845_GradeSubmittedFeature")]
+    partial class GradeSubmittedFeature
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -668,14 +671,8 @@ namespace StudentPortalPracticeTwo.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("ArchivedAndClosed")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("Capacity")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("ClassStarted")
-                        .HasColumnType("boolean");
 
                     b.Property<int>("CourseId")
                         .HasColumnType("integer");
@@ -730,9 +727,6 @@ namespace StudentPortalPracticeTwo.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ClassSessionId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("CourseId")
                         .HasColumnType("integer");
 
@@ -752,8 +746,6 @@ namespace StudentPortalPracticeTwo.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClassSessionId");
 
                     b.HasIndex("CourseId");
 
@@ -811,43 +803,6 @@ namespace StudentPortalPracticeTwo.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DegreeDb");
-                });
-
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.FailedCourse", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CourseId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateOnly>("DateCompleted")
-                        .HasColumnType("date");
-
-                    b.Property<decimal>("GPA")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("Grade")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("SessionTakenId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("StudentProgramId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("SessionTakenId");
-
-                    b.HasIndex("StudentProgramId");
-
-                    b.ToTable("FailedCourse");
                 });
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.Grade", b =>
@@ -1448,10 +1403,6 @@ namespace StudentPortalPracticeTwo.Migrations
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.CompletedCourse", b =>
                 {
-                    b.HasOne("StudentPortalPracticeTwo.Database.Models.Degrees.ClassSession", null)
-                        .WithMany("Graduates")
-                        .HasForeignKey("ClassSessionId");
-
                     b.HasOne("StudentPortalPracticeTwo.Database.Models.Degrees.Course", "Course")
                         .WithMany()
                         .HasForeignKey("CourseId")
@@ -1466,33 +1417,6 @@ namespace StudentPortalPracticeTwo.Migrations
 
                     b.HasOne("StudentPortalPracticeTwo.Database.Models.Users.Students.UserProgramModel", "StudentProgram")
                         .WithMany("CompletedCourses")
-                        .HasForeignKey("StudentProgramId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-
-                    b.Navigation("SessionTaken");
-
-                    b.Navigation("StudentProgram");
-                });
-
-            modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.FailedCourse", b =>
-                {
-                    b.HasOne("StudentPortalPracticeTwo.Database.Models.Degrees.Course", "Course")
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("StudentPortalPracticeTwo.Database.Models.Degrees.ClassSession", "SessionTaken")
-                        .WithMany("FailedCourses")
-                        .HasForeignKey("SessionTakenId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("StudentPortalPracticeTwo.Database.Models.Users.Students.UserProgramModel", "StudentProgram")
-                        .WithMany("FailedSessions")
                         .HasForeignKey("StudentProgramId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1640,10 +1564,6 @@ namespace StudentPortalPracticeTwo.Migrations
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.ClassSession", b =>
                 {
                     b.Navigation("Assignments");
-
-                    b.Navigation("FailedCourses");
-
-                    b.Navigation("Graduates");
                 });
 
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Degrees.Course", b =>
@@ -1664,8 +1584,6 @@ namespace StudentPortalPracticeTwo.Migrations
             modelBuilder.Entity("StudentPortalPracticeTwo.Database.Models.Users.Students.UserProgramModel", b =>
                 {
                     b.Navigation("CompletedCourses");
-
-                    b.Navigation("FailedSessions");
 
                     b.Navigation("Grade");
                 });

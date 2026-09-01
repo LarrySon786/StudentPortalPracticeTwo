@@ -15,14 +15,14 @@
 @* This page should allow instructors to open a link to view a particular Class *@
 @* This page should allow instructors to open a link to grade a particular student *@
 @* This instructor should be able to create assignments for the class *@
-
-
-
-
-@* INCOMPLETE *@
 @* The instructor should be able to start / end terms for each class *@
 @* The instructor should be able to submit final grades for the student (pass or fail the course) *@
 @* The instructor should be able to add grades for the student *@
+
+@* INCOMPLETE *@
+
+
+
 
 @if (faculty == null)
 {
@@ -34,6 +34,7 @@ else
         @* Create a new class Session for this instructor *@
         <button class="btn btn-primary" type="button" @onclick="OpenCreateSessionDialog">Create a Class Session</button>
         <div>
+            <InputCheckbox class="form-checkbox" @bind-Value="displayArchived"/><label class="form-label"> Display Archived Sessions</label>
             <table class="table">
                 <thead>
                     <tr>
@@ -47,7 +48,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (ClassSession session in faculty.ClassSessions)
+                    @foreach (ClassSession session in faculty.ClassSessions.Where(x => x.ArchivedAndClosed == displayArchived))
                     {
                         <tr>
                             <td>@session.Course.Code</td>
@@ -83,6 +84,7 @@ else
     public string message { get; set; } = string.Empty;
     public bool openSessionDialog { get; set; } = false;
     public bool editMode { get; set; } = false;
+    public bool displayArchived { get; set; } = false;
 
     protected override async Task OnInitializedAsync() {
         user = await authService.GetCurrentUserAsync();
@@ -134,22 +136,23 @@ else
     }
 
     public async Task DeleteSession(ClassSession session) {
+        @* Prevents delete if students have taken this course before, are currently enrolled, or are registered to take *@
+        if (session.RegisteredStudentProgramModels.Count() > 0 ||
+                session.StudentProgramModels.Count() > 0 ||
+                session.Graduates.Count() > 0 ||
+                session.FailedCourses.Count() > 0) 
+        {
+            message = "Could not delete class. Students are registered, enrolled, or have previously taken this course";
+            return;
+        }
+
         @* CONFIRM DELETE *@
         bool confirmed = await JS.InvokeAsync<bool>( "confirm",
                 $"Are you sure you want to delete the {session.Course.Name} session?"
             );
         if (!confirmed) return;
 
-        @* Ensure that no students are in the session *@
-        var existingStudents = session.StudentProgramModels.Count();
-        if (existingStudents > 0) {
-            message = $"Cannot delete {session.Course.Name} session. This class still has students registered for it.";
-            return;
-        }
-        else {
-            @* HANDLE DELETE *@
-            await classSessionService.DeleteClassSession(session.Id);
-            await ReloadSessions();
-        }
+        await classSessionService.DeleteClassSession(session.Id);
+        await ReloadSessions();
     }
 }

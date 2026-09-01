@@ -105,7 +105,21 @@ public class AssignmentService
                 TotalPoints = assignment.TotalPoints,
                 SessionId = classSessionId,
                 Instructions = assignment.Instructions,
+                Grades = [],
             };
+
+            foreach (UserProgramModel studentProgram in existingSession.StudentProgramModels)
+            {
+                Grade newGrade = new()
+                {
+                    SessionId = classSessionId,
+                    Assignment = entity,
+                    StudentProgramId = studentProgram.Id,
+                    Submitted = false,
+                };
+                studentProgram.Grade.Add(newGrade);
+                entity.Grades.Add(newGrade);
+            }
 
             // existingSession.Assignments.Add(assignment); // Add this assignment to the class session
 
@@ -138,8 +152,8 @@ public class AssignmentService
             existing.Name = updated.Name;
             existing.TotalPoints = updated.TotalPoints;
             existing.Instructions = updated.Instructions;
-            existing.SessionId = updated.SessionId;
-            existing.Grades = updated.Grades;
+            // existing.SessionId = updated.SessionId;
+            // existing.Grades = updated.Grades;
 
             await context.SaveChangesAsync();
             return existing;
@@ -180,8 +194,9 @@ public class AssignmentService
         }
         try
         {
-            foreach(Grade grade in grades) {
-                if (grade.ScoredPoints >= 0) throw new ValidationException("Scores cannot be negative.");
+            foreach (Grade grade in grades)
+            {
+                if (grade.ScoredPoints < 0) throw new ValidationException("Scores cannot be negative.");
             }
 
             var ids = grades
@@ -198,6 +213,7 @@ public class AssignmentService
                     throw new Exception($"Could not find grade {grade.Id}.");
 
                 existing.ScoredPoints = grade.ScoredPoints;
+                existing.Submitted = true;
             }
 
             await context.SaveChangesAsync();
@@ -206,6 +222,72 @@ public class AssignmentService
         finally
         {
             if (dispose == true) await context.DisposeAsync();
+        }
+    }
+
+    // This function is called when an instructor submits grades for that class session. Saves and calculates if student passed or failed
+    public async Task SubmitFinalGradeBySession(int sessionId, ApplicationDbContext? context = null!)
+    {
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = false;
+        }
+        try
+        {
+            var session = await _sessionService.GetClassSessionById(sessionId, context);
+            if (session == null) throw new Exception("No session found with this Id.");
+
+            foreach (UserProgramModel program in session.StudentProgramModels)
+            {
+                decimal score = program.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints);
+                decimal possiblePoints = program.Grade.Where(x => x.SessionId == sessionId).Sum(y => y.Assignment.TotalPoints);
+                decimal gradePercentage = score / possiblePoints;
+                if (gradePercentage >= (decimal)0.70)
+                {
+                    var completedCourse = new CompletedCourse()
+                    {
+                        SessionTakenId = sessionId,
+                        SessionTaken = session,
+                        CourseId = session.CourseId,
+                        Course = session.Course,
+                        StudentProgram = program,
+                        StudentProgramId = program.Id,
+                        Grade = gradePercentage,
+                        DateCompleted = DateOnly.FromDateTime(DateTime.Now),
+                        GPA = (decimal)4.0,
+                    };
+                    program.CompletedCourses.Add(completedCourse);
+                    program.CurrentSessions.Remove(session);
+                    session.Graduates.Add(completedCourse);
+                }
+                else if (gradePercentage < (decimal)0.70)
+                {
+                    var failedCourse = new FailedCourse()
+                    {
+                        CourseId = session.CourseId,
+                        Course = session.Course,
+                        StudentProgramId = program.Id,
+                        StudentProgram = program,
+                        SessionTakenId = session.Id,
+                        SessionTaken = session,
+                        Grade = gradePercentage,
+                        DateCompleted = DateOnly.FromDateTime(DateTime.Now),
+                        GPA = (decimal)1.0,
+                    };
+
+                    program.FailedSessions.Add(failedCourse);
+                    program.CurrentSessions.Remove(session);
+                    session.FailedCourses.Add(failedCourse);
+                }
+                else throw new Exception("Student grade could NOT be read. Grade could not be submitted");
+            }
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
         }
     }
 
@@ -219,6 +301,4 @@ public class AssignmentService
                 .ThenInclude(x => x.StudentProgram)
                     .ThenInclude(x => x.User);
     }
-
-
 }

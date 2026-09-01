@@ -21,6 +21,7 @@ public class Grade
     public int SessionId { get; set; }
 
     // Properties
-    public int ScoredPoints { get; set; }
-    public decimal PercentageGrade => Math.Round((decimal)(ScoredPoints / Assignment.TotalPoints), 2);
+    public bool Submitted { get; set; } = false; // By default, marks as not yet graded (so zero points does not affect current grade)
+    public decimal ScoredPoints { get; set; }
+    public decimal PercentageGrade => Math.Round((decimal)(ScoredPoints / Assignment.TotalPoints), 2) * 100;
 }

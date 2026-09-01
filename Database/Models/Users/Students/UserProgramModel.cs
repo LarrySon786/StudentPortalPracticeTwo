@@ -20,14 +20,15 @@ public class UserProgramModel
     // Student Class Assignments (in the assignments table, it is tied to each classSession)
     public List<Grade> Grade { get; set; } = new(); // These are all student assignments in one storage. To find by class, use .Where(x=> x.SessionId)
 
+    // Links for different sessions
     public List<ClassSession> CurrentSessions { get; set; } = new(); // Track Students Concurrent Class Sessions
-
-    public List<Course> CompletedCourses { get; set; } = new(); // Track Completed Courses
-
     public List<ClassSession> RegisteredSessions { get; set; } = new(); // Tracks Student's upcoming registered classSessions for next term
+    public List<CompletedCourse> CompletedCourses { get; set; } = new(); // Track Completed Courses
+    public List<FailedCourse> FailedSessions { get; set; } = new(); // Track Failed Courses
+
 
     public double PercentageComplete =>// Methods to figure out current progress on degree
         MyDegree == null || MyDegree.Courses.Count() == 0
             ? 0
-            : CompletedCourses.Sum(c => c.Credits) / MyDegree.Courses.Sum(c => c.Credits) * 100;
+            : CompletedCourses.Sum(c => c.Course.Credits) / MyDegree.Courses.Sum(c => c.Credits) * 100;
 }

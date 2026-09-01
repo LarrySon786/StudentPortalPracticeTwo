@@ -8,7 +8,8 @@
     "ContactDetails": {
       "Phone": "555-100-1001"
     },
-    "CurrentClassSessions": [
+    "CurrentClassSessions": [],
+    "RegisteredClassSessions": [
       {
         "CourseCode": "ENG101",
         "Term": "Fall2026",
@@ -22,7 +23,6 @@
         "StartTime": "10:30:00"
       }
     ],
-    "RegisteredClassSessions": [],
     "CompletedCourses": [],
     "EmergencyContact": [
       {
@@ -43,7 +43,8 @@
     "ContactDetails": {
       "Phone": "555-100-1002"
     },
-    "CurrentClassSessions": [
+    "CurrentClassSessions": [],
+    "RegisteredClassSessions": [
       {
         "CourseCode": "ENG101",
         "Term": "Fall2026",
@@ -51,7 +52,6 @@
         "StartTime": "09:00:00"
       }
     ],
-    "RegisteredClassSessions": [],
     "CompletedCourses": [],
     "EmergencyContact": [
       {
@@ -72,7 +72,8 @@
     "ContactDetails": {
       "Phone": "555-100-1003"
     },
-    "CurrentClassSessions": [
+    "CurrentClassSessions": [],
+    "RegisteredClassSessions": [
       {
         "CourseCode": "MAT151",
         "Term": "Fall2026",
@@ -86,7 +87,6 @@
         "StartTime": "09:00:00"
       }
     ],
-    "RegisteredClassSessions": [],
     "CompletedCourses": [],
     "EmergencyContact": [
       {
@@ -113,7 +113,8 @@
     "ContactDetails": {
       "Phone": "555-100-1004"
     },
-    "CurrentClassSessions": [
+    "CurrentClassSessions": [],
+    "RegisteredClassSessions": [
       {
         "CourseCode": "CSC101",
         "Term": "Fall2026",
@@ -127,7 +128,6 @@
         "StartTime": "11:00:00"
       }
     ],
-    "RegisteredClassSessions": [],
     "CompletedCourses": [],
     "EmergencyContact": [
       {
@@ -148,7 +148,8 @@
     "ContactDetails": {
       "Phone": "555-100-1005"
     },
-    "CurrentClassSessions": [
+    "CurrentClassSessions": [],
+    "RegisteredClassSessions": [
       {
         "CourseCode": "CSC102",
         "Term": "Fall2026",
@@ -162,7 +163,6 @@
         "StartTime": "14:30:00"
       }
     ],
-    "RegisteredClassSessions": [],
     "CompletedCourses": [],
     "EmergencyContact": [
       {

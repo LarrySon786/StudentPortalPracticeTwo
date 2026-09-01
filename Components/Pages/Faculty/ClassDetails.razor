@@ -8,6 +8,7 @@
 @namespace StudentPortalPracticeTwo.Components.Ui.Admin.Users.FacultyManagement
 @inject StudentPortalPracticeTwo.Components.Services.Admin.ClassSessionService classSessionService
 @inject StudentPortalPracticeTwo.Components.Services.Admin.AssignmentService assignmentService
+@inject StudentPortalPracticeTwo.Components.Services.Admin.TermManagement termManagement
 
 @if (session == null) {
     <p>Session details not found</p>
@@ -19,16 +20,39 @@ else {
         This button should allow instructors to activate their class to be active for the term
         Students will then see this class appear in their concurrent active classes.
          *@
-        <button class="btn btn-primary">Begin Class for Term</button> 
+
+        @if (session.ClassStarted  == false && session.ArchivedAndClosed == false) {
+            <button class="btn btn-primary" type="button" @onclick="StartTerm">Begin Class for Term</button> 
+        }
         
-        @* This button will finailize grades for the semester and auto-pass / fail students *@
-        <button class="btn btn-primary">Submit Final Grades</button>
+        @if (session.ArchivedAndClosed == true) {
+            @* <button class="btn btn-primary" @onclick="ArchiveSession">Reopen and Unarchive Session</button> *@
+        }
+        else if (session.ArchivedAndClosed == false && session.ClassStarted == true) {
+            @* This button will finailize grades for the semester and auto-pass / fail students *@
+            <button class="btn btn-primary" @onclick="SubmitFinalGrades">Submit Final Grades</button>
+        }
+        else if (session.ArchivedAndClosed == false ){
+            @* Used to close and archive the session after each term or when the instructor wants to delete it *@
+            <button class="btn btn-primary" @onclick="ArchiveSession">Close and Archive Session</button>
+        }
     </div>
 
-    @* Assignment Management *@
+    @* ERROR HANDLING *@
+    <p>@message</p>
+    <p>
+        @foreach (string err in errors)
+        {
+            @err;
+        }
+    </p>
+
+    @* Assignment Management - Display all class assignments *@
     <div>
         <h2>Assignments</h2>
-        <button class="btn btn-primary" type="button" @onclick="OpenCreateDialog">Create New Assignment</button>
+        @if (session.ArchivedAndClosed == false) {
+            <button class="btn btn-primary" type="button" @onclick="OpenCreateDialog">Create New Assignment</button>
+        }
         <table class="table">
             <thead>
                 <tr>
@@ -44,10 +68,15 @@ else {
                         <td>@assignment.Name</td>
                         <td>@assignment.TotalPoints</td>
                         <td>
-                            <button class="btn btn-link" type="button" @onclick="() => OpenEditDialog(assignment)">Edit</button>
+                            @if (session.ArchivedAndClosed == false)
+                            {
+                                <button class="btn btn-link" type="button" @onclick="() => OpenEditDialog(assignment)">Edit</button>
+                            }
                         </td>
                         <td>
-                            <button class="btn btn-danger" type="button" @onclick="() => DeleteAssignment(assignment.Id)">Delete</button>
+                            @if (session.ArchivedAndClosed == false) {
+                                <button  class="btn btn-danger" type="button" @onclick="() => DeleteAssignment(assignment.Id)">Delete</button>
+                            }
                         </td>
                     </tr>
                 }
@@ -55,39 +84,152 @@ else {
         </table>
     </div>
 
-    @* Student Management *@
-    <div>
-        <h2>Students</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>View</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (UserProgramModel programModel in session.StudentProgramModels) {
-                    @if (programModel.User != null) {
-                        <tr>
-                            <td>@programModel.User!.FirstName @programModel.User.LastName</td>
-                            <td>
-                                <button>View</button>
-                            </td>
-                        </tr>
+    @* DISPLAY registered students if class has not yet started *@
+    @if (session.ClassStarted == false && session.ArchivedAndClosed == false) {
+        <div>
+            <h2>Registered Students</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (UserProgramModel programModel in session.RegisteredStudentProgramModels)
+                    {
+                        @if (programModel.User != null)
+                        {
+                            <tr>
+                                <td>@programModel.User!.FirstName @programModel.User.LastName</td>
+                            </tr>
+                        }
                     }
-                    
-                }
-                
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+    }
 
+    @* DISPLAY student management if the class is not archived *@
+    if (session.ArchivedAndClosed== false && session.ClassStarted == true) {
+        @* Student Management *@
+        <div>
+            <h2>Students</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Current Grade</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (UserProgramModel programModel in session.StudentProgramModels) {
+                        @if (programModel.User != null) {
+                            <tr>
+                                <td>@programModel.User!.FirstName @programModel.User.LastName</td>
+                                <td>
+                                    @* // Total Score Dividing by Total Points *@
+                                    @if ((programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y =>
+                                        y.Assignment.TotalPoints)) * 100 != 0)
+                                    {
+                                        @Math.Round((programModel.User.MyProgram.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints) /
+                                            programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100
+                                            , 2) }%
+                                </td>
+                                <td>
+                                    <button class="btn btn-link" type="button" @onclick="() => OpenStudentDialog(programModel.User)">View</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+
+    @* PAGE DIALOG BOXES *@
     @if (CreateAssignmentDialog == true) {
         <CreateAssignmentDialog assignment="selectedAssignment" sessionId="session.Id" mode="mode" onClose="CloseDialog"/>
     } 
     else if (viewStudentDialog == true) {
         <StudentGradingDialog student="selectedStudent" session="session" OnClose="CloseStudentDialog"/>
     }
+
+    @* ARCHIVED CLASS INFORMATION *@
+    @if (session.ArchivedAndClosed == true) {
+        <div>
+            @* DISPLAY students who succeeded to graduate (if class is archived) *@
+            <h1>Graduates</h1>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Grade Received</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (UserProgramModel programModel in session.Graduates.Select(x => x.StudentProgram)) {
+                        @if (programModel.User != null)
+                        {
+                            <tr>
+                                <td>@programModel.User!.FirstName @programModel.User.LastName</td>
+                                <td>
+                                    @* // Total Score Dividing by Total Points *@
+                                    @if ((programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100 != 0)
+                                    {
+                                        @Math.Round((programModel.User.MyProgram.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints) / programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100, 2)
+                                    }
+                                    %
+                                </td>
+                                <td>
+                                    <button class="btn btn-link" type="button" @onclick="() => OpenStudentDialog(programModel.User)">View</button>
+                                </td>
+                            </tr>
+                        }
+
+                    }
+                </tbody>
+            </table>
+        
+            @* DISPLAY students that failed to graduate (only if class is archived) *@
+            <h1>Failed Course</h1>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Grade Received</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (UserProgramModel programModel in session.FailedCourses.Select(x => x.StudentProgram)) {
+                        @if (programModel.User != null)
+                        {
+                            <tr>
+                                <td>@programModel.User!.FirstName @programModel.User.LastName</td>
+                                <td>
+                                    @* // Total Score Dividing by Total Points *@
+                                    @if ((programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100 != 0)
+                                    {
+                                        @Math.Round((programModel.User.MyProgram.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints) / programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100, 2)
+                                    }
+                                    %
+                                </td>
+                                <td>
+                                    <button class="btn btn-link" type="button" @onclick="() => OpenStudentDialog(programModel.User)">View</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+            
+        </div>
+    }
+
+
 }
 
 
@@ -103,7 +245,6 @@ else {
     public List<Assignments> allAssignments { get; set; } = new();
     public bool CreateAssignmentDialog { get; set; } = false;
     public EditMode mode { get; set; } = EditMode.Create;
-
 
     protected override async Task OnInitializedAsync() {
         session = await classSessionService.GetClassSessionById(Id);
@@ -149,6 +290,7 @@ else {
         selectedAssignment = new();
         CreateAssignmentDialog = false;
         await ReloadAllAssignments();
+        await ReloadSession();
     }
 
     public async Task DeleteAssignment(int id) {
@@ -167,6 +309,7 @@ else {
     @* STUDENT MANAGEMENT *@
     public Student? selectedStudent { get; set; }
     public bool viewStudentDialog { get; set; } = false;
+    public decimal currentGrade { get; set; }
 
 
     public void OpenStudentDialog(Student student) {
@@ -175,9 +318,88 @@ else {
         viewStudentDialog = true;
     }
 
-    public void CloseStudentDialog() {
+    public async Task CloseStudentDialog() {
         selectedStudent = null;
         viewStudentDialog = false;
+        await ReloadSession(); // Refreshs students
+    }
+
+    public async Task ReloadSession() { // Allows the data on the entire page to be reloaded
+        session = await classSessionService.GetClassSessionById(Id);
+        StateHasChanged();
+    }
+
+
+
+    @* TERM MANAGEMENT *@
+    private List<string> errors { get; set; } = new();
+
+    public async Task StartTerm() {
+        try {
+            if (session!.ClassStarted == true) return;
+            await termManagement.StartTerm(Id);
+            if (session == null || session.Term == null) return;
+            message = $"{session.Term.DisplayName} has begun!";
+            await ReloadSession();
+        }
+        catch (Exception ex) 
+        {
+            Console.WriteLine($"Could not start the term. Ex: {ex}");
+            message = $"Term could not start. {ex.Message}.";
+        }
+
+    }
+
+    @* Submit final grades for this term | Auto calculated those who pass / fail. Auto sorts them *@
+    public async Task SubmitFinalGrades() {
+        message = "";
+        errors = [];
+        @* Validate all student assignments have been graded *@
+        await ReloadSession();
+        if (session == null) return;
+
+        foreach (Grade grade in session.Assignments.SelectMany(x => x.Grades)) {
+            if (grade.Submitted == false) {
+                errors.Add($"{grade.StudentProgram.User!.FirstName} {grade.StudentProgram.User.LastName} | {grade.Assignment.Name}");
+                message=$"Could not submit final grade. Several grades have not been entered: ";
+            }
+        }
+        if (errors.Count() > 0) return;
+        @* Redirect to confirmation page *@
+        navigationManager.NavigateTo($"/faculty/classes/class-details/{session.Id}/submit-grades");
+    }   
+
+    @* Closes Session for term and future (but saves session details) *@
+    public async Task ArchiveSession() {
+        try {
+            if (session == null) return;
+            if (session.StudentProgramModels.Count > 0) {
+                message = "Cannot archive class while there are still students enrolled in the session.";
+                return;
+            }
+
+            await classSessionService.ArchiveAndCloseClassSession(session.Id);
+            await ReloadSession();
+            message = "Session archived";
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not close session. Ex: {ex}");
+        }
+    }
+
+    @* Reopens a previously archived session *@
+    public async Task UnarchiveSession()
+    {
+        try
+        {
+            if (session == null) return;
+            await classSessionService.UnArchiveAndOpenClassSession(session.Id);
+            await ReloadSession();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not close session. Ex: {ex}");
+        }
     }
 
 }

@@ -3,6 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
+using StudentPortalPracticeTwo.Database.Models.Users.Students;
 
 namespace StudentPortalPracticeTwo.Components.Services.Admin;
 
@@ -134,6 +135,60 @@ public class ClassSessionService
         }
     }
 
+    // Archive class session | Used to save records of completed class sessions
+    public async Task ArchiveAndCloseClassSession(int classSessionId, ApplicationDbContext? context = null)
+    {
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            // Obtain class session
+            var existing = await GetClassSessionById(classSessionId, context);
+            if (existing == null) throw new Exception("Could not find an existing class session to archive");
+
+            // Make sure no students are still enrolled in this class
+            foreach (UserProgramModel program in existing.StudentProgramModels)
+            {
+                if (program.CurrentSessions.Any(x => x == existing)) throw new Exception("Could not archive class session. Some students are still enrolled in this session");
+            }
+
+            existing.ArchivedAndClosed = true;
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
+    }
+
+    // Unarchive class session | Used to save records of completed class sessions
+    public async Task UnArchiveAndOpenClassSession(int classSessionId, ApplicationDbContext? context = null)
+    {
+        bool dispose = false;
+        if (context == null)
+        {
+            context = await _context.CreateDbContextAsync();
+            dispose = true;
+        }
+        try
+        {
+            // Obtain class session
+            var existing = await GetClassSessionById(classSessionId);
+            if (existing == null) throw new Exception("Could not find an existing class session to archive");
+
+            existing.ArchivedAndClosed = false;
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            if (dispose) await context.DisposeAsync();
+        }
+    }
+
     // QUERY for comprehensive GET requests
     private IQueryable<ClassSession> ClassSessionQuery(ApplicationDbContext context)
     {
@@ -142,11 +197,23 @@ public class ClassSessionService
             .Include(x => x.StudentProgramModels)
                 .ThenInclude(x => x.User)
             .Include(x => x.Term)
-            .Include (x => x.RegisteredStudentProgramModels)
+            .Include(x => x.RegisteredStudentProgramModels)
+                .ThenInclude(x => x.User)
             .Include(x => x.Assignments)
                 .ThenInclude(x => x.Grades)
                     .ThenInclude(x => x.StudentProgram)
-                        .ThenInclude(x => x.User);
+                        .ThenInclude(x => x.User)
+            .Include(x => x.Graduates)
+                .ThenInclude(x => x.StudentProgram)
+                    .ThenInclude(x => x.User)
+            .Include(x => x.FailedCourses)
+                .ThenInclude(x => x.StudentProgram)
+                    .ThenInclude(x => x.User)
+            .Include(x => x.Graduates)
+                .ThenInclude(x => x.Course)
+            .Include(x => x.FailedCourses)
+                .ThenInclude(x => x.Course);
+
     }
 
 

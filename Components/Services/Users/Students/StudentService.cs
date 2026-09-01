@@ -10,6 +10,7 @@ using StudentPortalPracticeTwo.Database.Models.DTOs;
 using StudentPortalPracticeTwo.Components.Services.Admin;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Enums;
+using StudentPortalPracticeTwo.Database.Models.Authentication;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users.Students;
 
@@ -337,10 +338,62 @@ public class StudentService
             }
 
             // Registered Sessions
+            List<ClassSession> registeredSessions = new();
+            foreach (JsonClassSessionReference sessionDto in student.RegisteredClassSessions)
+            {
+                string seasonString = new string(
+                    sessionDto.Term.Where(char.IsLetter).ToArray()
+                );
 
+                string yearString = new string(
+                    sessionDto.Term.Where(char.IsDigit).ToArray()
+                );
 
-            // Compeleted Sessions
+                TermSeason season = Enum.Parse<TermSeason>(seasonString);
+                int year = int.Parse(yearString);
 
+                ClassSession? classSession = await context.ClassSessionDb
+                    .Where(x => x.StartTime == sessionDto.StartTime && x.Course.Code == sessionDto.CourseCode
+                        && x.Instructor!.Email == sessionDto.InstructorEmail && x.Term!.Year == year && x.Term.Season == season)
+                    .FirstOrDefaultAsync();
+
+                if (classSession == null) throw new Exception("Class session did not match either start time, course code, instructor email, or existing term.");
+
+                registeredSessions.Add(classSession);
+            }
+
+            // Compeleted Courses
+            List<CompletedCourse> completedCourses = new();
+            foreach (JsonClassSessionReference sessionDto in student.RegisteredClassSessions)
+            {
+                string seasonString = new string(
+                    sessionDto.Term.Where(char.IsLetter).ToArray()
+                );
+
+                string yearString = new string(
+                    sessionDto.Term.Where(char.IsDigit).ToArray()
+                );
+
+                TermSeason season = Enum.Parse<TermSeason>(seasonString);
+                int year = int.Parse(yearString);
+
+                ClassSession? classSession = await context.ClassSessionDb
+                    .Where(x => x.StartTime == sessionDto.StartTime && x.Course.Code == sessionDto.CourseCode
+                        && x.Instructor!.Email == sessionDto.InstructorEmail && x.Term!.Year == year && x.Term.Season == season)
+                    .FirstOrDefaultAsync();
+
+                if (classSession == null) throw new Exception("Class session did not match either start time, course code, instructor email, or existing term.");
+
+                CompletedCourse course = new()
+                {
+                    SessionTaken = classSession,
+                    SessionTakenId = classSession.Id,
+                    Course = classSession.Course,
+                    CourseId = classSession.CourseId,
+                };
+
+                completedCourses.Add(course);
+            }
 
 
             // Create Student Entity
@@ -360,11 +413,20 @@ public class StudentService
                 {
                     DegreeId = degree.Id,
                     CurrentSessions = currentSessions ?? [],
-                    RegisteredSessions = [],
-                    CompletedCourses = [],
+                    RegisteredSessions = registeredSessions ?? [],
+                    CompletedCourses = completedCourses ?? [],
                 },
                 IdentityUserId = applicationUser.Id,
             };
+
+            if (completedCourses != null)
+            {
+                foreach (CompletedCourse course in completedCourses)
+                {
+                    course.StudentProgram = entity.MyProgram;
+                    course.StudentProgramId = entity.MyProgram.Id;
+                }
+            }
             
             // Create user in Database
             context.StudentDb.Add(entity);
