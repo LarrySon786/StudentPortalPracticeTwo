@@ -7,10 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database.Models.Users.Students;
 using StudentPortalPracticeTwo.Database.Models.DTOs;
-using StudentPortalPracticeTwo.Components.Services.Admin;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Enums;
-using StudentPortalPracticeTwo.Database.Models.Authentication;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users.Students;
 
@@ -39,19 +37,7 @@ public class StudentService
 
         try
         {
-            return await context.StudentDb
-                .Include(x => x.ContactDetails)
-                .Include(x => x.OriginalFinalApplication)
-                .Include(x => x.IdentityUser)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.MyDegree)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.RegisteredSessions)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.CompletedCourses)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.CurrentSessions)
-                .Include(x => x.EmergencyContact)
+            return await StudentQuery(context)
                 .ToListAsync();
         }
         finally
@@ -74,19 +60,7 @@ public class StudentService
 
         try
         {
-            return await context.StudentDb
-                .Include(x => x.ContactDetails)
-                .Include(x => x.OriginalFinalApplication)
-                .Include(x => x.IdentityUser)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.MyDegree)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.RegisteredSessions)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.CompletedCourses)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.CurrentSessions)
-                .Include(x => x.EmergencyContact)
+            return await StudentQuery(context)
                 .Where(x => x.Email == email)
                 .FirstOrDefaultAsync();
         }
@@ -107,20 +81,7 @@ public class StudentService
         }
         try
         {
-            return await context.StudentDb
-                .Include(x => x.ContactDetails)
-                .Include(x => x.OriginalFinalApplication)
-                .Include(x => x.IdentityUser)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.MyDegree)
-                    .ThenInclude(x => x!.Courses)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.RegisteredSessions)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.CompletedCourses)
-                .Include(x => x.MyProgram)
-                    .ThenInclude(x => x.CurrentSessions)
-                .Include(x => x.EmergencyContact)
+            return await StudentQuery(context)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
         }
@@ -310,7 +271,8 @@ public class StudentService
                     Phone = contact.Phone,
                 };
                 contacts.Add(emergencyContact);
-            };
+            }
+            ;
 
             // Current Sessions 
             List<ClassSession> currentSessions = new();
@@ -329,7 +291,7 @@ public class StudentService
 
                 ClassSession? classSession = await context.ClassSessionDb
                     .Where(x => x.StartTime == sessionDto.StartTime && x.Course.Code == sessionDto.CourseCode
-                        && x.Instructor!.Email == sessionDto.InstructorEmail && x.Term!.Year  == year && x.Term.Season == season)
+                        && x.Instructor!.Email == sessionDto.InstructorEmail && x.Term!.Year == year && x.Term.Season == season)
                     .FirstOrDefaultAsync();
 
                 if (classSession == null) throw new Exception("Class session did not match either start time, course code, instructor email, or existing term.");
@@ -427,7 +389,7 @@ public class StudentService
                     course.StudentProgramId = entity.MyProgram.Id;
                 }
             }
-            
+
             // Create user in Database
             context.StudentDb.Add(entity);
             await context.SaveChangesAsync();
@@ -487,5 +449,32 @@ public class StudentService
             if (dispose) await context.DisposeAsync();
         }
     }
+
+
+    private IQueryable<Student> StudentQuery(ApplicationDbContext context)
+    {
+        return context.StudentDb.Include(x => x.ContactDetails)
+                .Include(x => x.OriginalFinalApplication)
+                .Include(x => x.IdentityUser)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.MyDegree)
+                        .ThenInclude(x => x!.Courses)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.RegisteredSessions)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.CompletedCourses)
+                        .ThenInclude(x => x.Course)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.CurrentSessions)
+                        .ThenInclude(x => x.Course)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.FailedSessions)
+                        .ThenInclude(x => x.Course)
+                .Include(x => x.MyProgram)
+                    .ThenInclude(x => x.Grade)
+                        .ThenInclude(x => x.Assignment)
+                .Include(x => x.EmergencyContact);
+    }
+
 
 }

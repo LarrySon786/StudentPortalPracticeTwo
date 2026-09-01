@@ -1,0 +1,66 @@
+@* This page is where students Register class for next term. View existing classes. And drop classes *@
+@page "/dashboard/my-classes"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService
+
+@if (student == null)
+{
+    <p>No student data found</p>
+}
+else
+{
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Credits</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (ClassSession session in student.MyProgram.CurrentSessions)
+                {
+                    <tr>
+                        <td>@session.Course.Code</td>
+                        <td>@session.Course.Name</td>
+                        <td>@session.Course.Credits</td>
+                        <td>
+                            <a href="/dashboard/my-classes/@session.Id" class="btn btn-link">View My Class</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    public UserModel? user { get; set; }
+    public Student? student { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await authService.GetCurrentUserAsync();
+        if (user != null) student = await studentService.GetStudentById(user.Id);
+        else navigationManager.NavigateTo("/login", forceLoad: true);
+        if (student == null) {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+

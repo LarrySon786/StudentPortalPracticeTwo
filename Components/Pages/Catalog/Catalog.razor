@@ -14,10 +14,13 @@
         </thead>
         <tbody>
             @foreach(Degree degree in degrees) {
-                <td>@degree.Name</td>
-                <td>
-                    <a href="/catalog/@degree.Id" class="btn btn-link">View</a>
-                </td>
+                <tr>
+                    <td>@degree.Name</td>
+                    <td>
+                        <a href="/catalog/@degree.Id" class="btn btn-link">View</a>
+                    </td>
+                </tr>
+                
             }
         </tbody>
     </table>

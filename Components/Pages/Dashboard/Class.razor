@@ -1,0 +1,109 @@
+@page "/dashboard/my-classes/{Id:int}"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService
+@inject StudentPortalPracticeTwo.Components.Services.Admin.ClassSessionService classSessionService
+
+
+
+
+@if (session == null || student == null) {
+    <p>Could not load student and session details..</p>
+}
+else {
+    <h3>@session.Course.Name</h3>
+    <div>
+        <h3>Details</h3>
+        <p>@* // Total Score Dividing by Total Points *@
+            @if ((student.MyProgram.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y =>
+                y.Assignment.TotalPoints)) * 100 != 0) {
+                @Math.Round((student.MyProgram.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints) /
+                    student.MyProgram.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100, 2)
+            }
+            %</p>
+    </div>
+
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Total Points</th>
+                    <th></th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(Assignments assignment in session.Assignments ) {
+                    <tr>
+                        <td>@assignment.Name</td>
+                        <td>@assignment.TotalPoints</td>
+                        <td>
+                            <button class="btn btn-link" @onclick="() => OpenDialog(assignment)">View Instructions</button>
+                        </td>
+                        <td>
+                            @(assignment.Grades.Where(x => x.AssignmentId == assignment.Id).Any(y => y.Submitted) == true 
+                                ? $"{assignment.Grades.First(x => x.AssignmentId == assignment.Id).PercentageGrade}%" 
+                                : "--%")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+@if (selectedAssignment != null)
+{
+    <div class="overlay">
+        <div class="overlay-container">
+            <div class="standard-card standard-dialog">
+                <h1>@selectedAssignment.Name</h1>
+                <label class="form-label">Instructions</label>
+                <InputTextArea class="form-control" @bind-Value="@selectedAssignment.Instructions" disabled />
+                <button class="btn btn-secondary" type="button" @onclick="CloseDialog">Close</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    public UserModel? user { get; set; }
+    public Student? student { get; set; }
+    public ClassSession? session { get; set; }
+    public Assignments? selectedAssignment { get; set; } = null;
+
+    protected override async Task OnInitializedAsync() {
+        user = await authService.GetCurrentUserAsync();
+        if (user == null) {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+        student = await studentService.GetStudentById(user.Id);
+        if (student == null) {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+        await ReloadSession();
+    }
+
+    private async Task ReloadSession() {
+        session = await classSessionService.GetClassSessionById(Id);
+        if (session == null)
+        {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+    }
+
+    private void OpenDialog(Assignments assignment) {
+        selectedAssignment = assignment;
+    }
+
+    private void CloseDialog() {
+        selectedAssignment = null;
+    }
+
+}
