@@ -1,0 +1,118 @@
+@page "/dashboard/support/ticket/{Id:int}"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.SupportTicket
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Admin
+@using StudentPortalPracticeTwo.Components.Services.Extensions
+@inject StudentPortalPracticeTwo.Components.Services.SupportTicketServices.SupportTicketService supportTicketService
+
+@if (ticket == null || user == null) {
+    <p>No ticket data found...</p>
+}
+else {
+
+    <div class="standard-card">
+        <h1>@ticket.Title</h1>
+        <p class="">@ticket.Status.GetDisplayName()</p>
+
+        @* Populate existing responses from both STUDENT and ADMIN *@
+        @foreach(ResponseTicket response in ticket.ResponseTicket) {
+            <label class="form-label">@response.User!.FirstName @response.User.LastName</label>
+            <InputTextArea class="form-control" @bind-Value="@response.StudentTicketInput" disabled/>
+        }
+
+        @* BUTTON to write a new response *@
+        @if (!WriteResponse) {
+            <button class="btn btn-primary" type="button" @onclick="ToggleWriteResponse">Write Response</button>
+            @if (ticket.Status != SupportStatus.Resolved)
+            {
+                <button class="btn btn-primary" type="button" @onclick="ResolveTicket">Resolve Ticket</button>
+            }
+            else 
+            {
+                <button class="btn btn-primary" type="button" @onclick="OpenTicket">Reopen Ticket</button>
+            }
+        }
+
+
+        @* FORM to write a new response *@
+        @if (WriteResponse) {
+            <EditForm Model="newResponse" OnValidSubmit="HandleWriteResponse" FormName="Write New Response">
+                <label class="form-label">Your Message</label>
+                <InputTextArea @bind-Value="newResponse.StudentTicketInput" class="form-control" />
+                <ValidationMessage For="(() => newResponse.StudentTicketInput)"/>
+
+                @* Submission button for new response *@
+                <button class="btn btn-primary" type="submit">Send Response</button>
+            </EditForm>
+        }
+        <p>@message</p>
+    </div>
+
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    public SupportTicket? ticket { get; set; }
+    private UserModel? user { get; set; }
+    public ResponseTicket newResponse { get; set; } = new();
+    private bool WriteResponse { get; set; } = false;
+    private string message = string.Empty;
+
+    protected override async Task OnInitializedAsync() {
+        user = await authService.GetCurrentUserAsync();
+        if (user == null)
+        {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+        await ReloadTicket();
+        if (user is AdminModel && ticket != null) return;
+        else if (ticket == null || ticket.StudentId != user.Id) { // Not the student's ticket
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+    }
+
+    private void ToggleWriteResponse() {
+        newResponse = new();
+        WriteResponse = !WriteResponse;
+    }
+
+    public async Task HandleWriteResponse() {
+        try {
+            if (user == null) return;
+            await supportTicketService.AddResponseToTicketById(Id, newResponse, user.Id);
+            if (user is AdminModel){
+                await supportTicketService.MarkAwaiting(Id);
+            }
+            else {
+                await supportTicketService.MarkSubmitted(Id);
+            }
+            message = "Ticket response sent.";
+            await ReloadTicket();
+            ToggleWriteResponse();   
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not create new response. Ex: {ex}");
+            message = $"Ticket failed to send. {ex.Message}.";
+        }
+    }
+
+    private async Task ResolveTicket()
+    {
+        await supportTicketService.MarkResolved(Id);
+        await ReloadTicket();
+    }
+
+    private async Task ReloadTicket() {
+        ticket = await supportTicketService.GetTicketById(Id);
+    }
+
+    private async Task OpenTicket() {
+        await supportTicketService.MarkSubmitted(Id);
+        await ReloadTicket();
+    }
+
+}

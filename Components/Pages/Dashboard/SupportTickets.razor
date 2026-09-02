@@ -1,15 +1,115 @@
 @page "/dashboard/support"
 @attribute [Authorize]
 @rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.SupportTicket
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@using StudentPortalPracticeTwo.Components.Services.Extensions
+@using StudentPortalPracticeTwo.Database.Models.Users
+@inject StudentPortalPracticeTwo.Components.Services.SupportTicketServices.SupportTicketService supportTicketService
+
 
 @* Page to manage student support tickets *@
 
-<div class="standard-card">
+@if (user ==null) {
+    <p>Loading tickets...</p>
+}
+else {
 
-</div>
 
+    <div class="standard-card">
+        @* Create Support Ticket *@
+        <div>
+            @if (CreateTicket == false) {
+                <button class="btn btn-primary" type="button" @onclick="ToggleCreateTicket">Create New Ticket</button>
+            }
+            @if (CreateTicket == true) {
+                <EditForm Model="Response" OnValidSubmit="HandleCreateTicket" FormName="Create Ticket">
+
+                    @* Select Topic *@
+                    <label class="form-label">*Topic</label>
+                    <InputSelect class="form-select" @bind-Value="SupportTicketDto.Topic">
+                        @foreach (var topic in Enum.GetValues<SupportTopic>()) {
+                            <option value="@topic">@topic.GetDisplayName()</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => SupportTicketDto.Topic)"/>
+
+                    @* Title *@
+                    <label class="form-label">*Title</label>
+                    <InputText class="form-control" @bind-Value="SupportTicketDto.Title" />
+                    <ValidationMessage For="(() => SupportTicketDto.Title)" />
+
+                    <label class="form-label">*Student Inquiry</label>
+                    <InputText class="form-control" @bind-Value="Response.StudentTicketInput"/>
+                    <ValidationMessage For="(() => Response.StudentTicketInput)" />
+
+                    <button class="btn btn-primary" type="submit">Create New Ticket</button>
+                </EditForm>
+            }
+        </div>
+
+        @* Populate existing ticket links *@
+        <div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (SupportTicket ticket in StudentTickets) {
+                        <tr>
+                            <td>@ticket.Title</td>
+                            <td>@ticket.Status.GetDisplayName()</td>
+                            <td>
+                                <a href="/dashboard/support/ticket/@ticket.Id">View</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
 
 
 @code {
+    public List<SupportTicket> StudentTickets { get; set; } = new();
+    public ResponseTicket Response { get; set; } = new();
+    public SupportTicketDto SupportTicketDto { get; set; } = new();
+    private bool CreateTicket { get; set; } = false;
+    public UserModel? user { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        user = await authService.GetCurrentUserAsync();
+        if (user == null) {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+        await ReloadTickets();
+    }
+
+    private void ToggleCreateTicket() {
+        CreateTicket = !CreateTicket;
+    }
+
+    private async Task HandleCreateTicket() {
+        try {
+            if (user == null) return;
+            await supportTicketService.CreateNewSupportTicket(SupportTicketDto, Response, user.Id);
+            CreateTicket = false;
+            await ReloadTickets();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Could not create new ticket.Ex: {ex}");
+        }
+    }
+
+    private async Task ReloadTickets() {
+        if (user == null) return;
+        StudentTickets = await supportTicketService.GetTicketByStudentId(user.Id);
+    }
 
 }

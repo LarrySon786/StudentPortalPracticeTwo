@@ -1,0 +1,69 @@
+@page "/admin/support"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.SupportTicket
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@inject StudentPortalPracticeTwo.Components.Services.SupportTicketServices.SupportTicketService supportTicketService
+<div class="standard-card">
+    @* Filter Buttons *@
+        <div>
+            <button class="btn @(filter == SupportStatus.Any ? "btn-primary" : "btn-secondary")" type="button" @onclick="() => ChangeFilter(SupportStatus.Any)">
+                Any
+            </button>
+            <button class="btn @(filter == SupportStatus.Submitted ? "btn-primary" : "btn-secondary")" type="button" @onclick="() => ChangeFilter(SupportStatus.Submitted) ">
+                Pending
+            </button>
+            <button class="btn @(filter == SupportStatus.Awaiting ? "btn-primary" : "btn-secondary")" type="button" @onclick="() => ChangeFilter(SupportStatus.Awaiting)">
+                Awaiting Student Response
+            </button>
+            <button class="btn @(filter == SupportStatus.Resolved ? "btn-primary" : "btn-secondary")" type="button" @onclick="() => ChangeFilter(SupportStatus.Resolved)">
+                Resolved
+            </button>
+        </div>
+
+    @if (filteredTickets.Count() == 0) {
+        <p>No Results.</p>
+    }
+    else {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Ticket Title</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (SupportTicket ticket in filteredTickets) {
+                    <tr>
+                        <td>@ticket.Student.FirstName @ticket.Student.LastName</td>
+                        <td>@ticket.Title</td>
+                        <td>@ticket.Status</td>
+                        <td>
+                            <a href="/dashboard/support/ticket/@ticket.Id">View</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        
+    }
+</div>
+
+@code {
+    public List<SupportTicket> tickets { get; set; } = new();
+    public IEnumerable<SupportTicket> filteredTickets => // Filter the results by type selected
+        (filter == SupportStatus.Any 
+            ? tickets
+            : tickets.Where(x => x.Status == filter));
+    public SupportStatus filter { get; set; } = SupportStatus.Submitted;
+
+
+    protected override async Task OnInitializedAsync() {
+        tickets = await supportTicketService.GetAllTickets();
+    }
+
+    private void ChangeFilter(SupportStatus newFilter) {
+        filter = newFilter;
+    }
+}

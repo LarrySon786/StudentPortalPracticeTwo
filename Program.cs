@@ -14,6 +14,7 @@ using DotNetEnv;
 using StudentPortalPracticeTwo.Components.Services.Authentication;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase;
+using StudentPortalPracticeTwo.Components.Services.SupportTicketServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,7 @@ builder.Services.AddScoped<AdminService>(); // Service to manage creation of Adm
 builder.Services.AddScoped<AuthLogin>(); // Login, logout, and other auth methods
 builder.Services.AddScoped<RegisterCourses>(); // Allows students to register, drop, and manage their courses
 builder.Services.AddScoped<TermManagement>(); // Allows instructors to manage class sessions for each term
+builder.Services.AddScoped<SupportTicketService>(); // Allows support ticket operations between students and admins
 builder.Services.AddControllers();
 builder.Services.AddScoped<TermServiceHelper>();
 // DATABASE SEEDING

@@ -8,6 +8,7 @@ using StudentPortalPracticeTwo.Database.Models.Users.Admin;
 using StudentPortalPracticeTwo.Database.Models.Users.Faculty;
 using StudentPortalPracticeTwo.Database.Models.Users.Students;
 using StudentPortalPracticeTwo.Database.Models.Users;
+using StudentPortalPracticeTwo.Database.Models.SupportTicket;
 
 namespace StudentPortalPracticeTwo.Database;
 
@@ -57,6 +58,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Assignments> AssignmentsDb { get; set; }
     public DbSet<Grade> GradeDb { get; set; }
     public DbSet<CompletedCourse> CompletedCourseDb { get; set; }
+
+    // Student Support Tickets
+    public DbSet<SupportTicket> SupportTicketsDb { get; set; }
+
 
 
     // MODEL BUILDER
@@ -280,6 +285,22 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(x => x.SessionTaken)
             .WithMany(x => x.FailedCourses)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Support Tickets
+        modelBuilder.Entity<SupportTicket>()
+            .HasMany(x => x.ResponseTicket)
+            .WithOne(x => x.SupportTicket)
+            .HasForeignKey(x => x.SupportTicketId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<SupportTicket>()
+            .HasOne(x => x.Student)
+            .WithMany();
+
+        modelBuilder.Entity<ResponseTicket>()
+            .HasOne(x => x.User)
+            .WithMany();
+
     }
 }
 
