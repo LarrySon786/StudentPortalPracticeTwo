@@ -1,6 +1,7 @@
 
 
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 
@@ -8,121 +9,68 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin;
 
 public class DegreeService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
-    public DegreeService(IDbContextFactory<ApplicationDbContext> context)
+    private readonly CreateDisposeContextHelper _createDispose;
+
+    public DegreeService(CreateDisposeContextHelper createDispose)
     {
-        _context = context;
+        _createDispose = createDispose;
     }
 
     // GET all degrees
     public async Task<List<Degree>> GetAllDegrees(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await DegreeQuery(context)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        return await _createDispose.ExecuteAsync(db => DegreeQuery(db).ToListAsync(), context);
     }
 
     // GET degree by id
     public async Task<Degree?> GetDegreeById(int? id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        return await _createDispose.ExecuteAsync(async db =>
         {
             if (id == null) throw new Exception("Could not get degree by id. Id received in parameter is null");
-            return await DegreeQuery(context)
+            return await DegreeQuery(db)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     // POST degree created
     public async Task CreateDegree(Degree newDegree, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            context.DegreeDb.Add(newDegree);
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            db.DegreeDb.Add(newDegree);
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     // PUT existing Degree
     public async Task UpdateDegree(Degree updated, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            Degree? existing = await GetDegreeById(updated.Id);
+            Degree? existing = await GetDegreeById(updated.Id, db);
             if (existing == null) throw new Exception("No existing degree found. Cannot update");
 
             existing.Name = updated.Name;
             existing.Description = updated.Description;
             existing.Courses = updated.Courses;
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     // DELETE existing Degree
     public async Task DeleteDegree(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            context.DegreeDb
+            await db.DegreeDb
                 .Where(x => x.Id == id)
-                .ExecuteDelete();
+                .ExecuteDeleteAsync();
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     private IQueryable<Degree> DegreeQuery(ApplicationDbContext context)

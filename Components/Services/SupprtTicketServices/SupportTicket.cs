@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Application;
 using StudentPortalPracticeTwo.Database.Models.Enums;
@@ -10,88 +11,41 @@ namespace StudentPortalPracticeTwo.Components.Services.SupportTicketServices;
 
 public class SupportTicketService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
 
-    public SupportTicketService(IDbContextFactory<ApplicationDbContext> context)
+    public SupportTicketService(CreateDisposeContextHelper createDispose)
     {
-        _context = context;
+        _createDispose = createDispose;
     }
 
 
     // GET all
     public async Task<List<SupportTicket>> GetAllTickets(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await SupportTicketQuery(context)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        return await _createDispose.ExecuteAsync(db => SupportTicketQuery(db)
+            .ToListAsync(), context);
     }
 
     // GET all by Student
     public async Task<List<SupportTicket>> GetTicketByStudentId(int studentId, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await SupportTicketQuery(context)
+        return await _createDispose.ExecuteAsync(db => SupportTicketQuery(db)
                 .Where(x => x.StudentId == studentId)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .ToListAsync(), context);
     }
 
     // Get one by Id
     public async Task<SupportTicket?> GetTicketById(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await SupportTicketQuery(context)
+        return await _createDispose.ExecuteAsync(db => SupportTicketQuery(db)
                 .Where(x => x.Id == id)
-                .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .FirstOrDefaultAsync(), context);
     }
 
     // Create Support Ticket | By DTO
     public async Task<SupportTicket?> CreateNewSupportTicket(SupportTicketDto ticket, ResponseTicket response, int userId, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-
-        try
+        return await _createDispose.ExecuteAsync(async db =>
         {
             // Assign the student ID
             ticket.StudentId = userId;
@@ -122,148 +76,91 @@ public class SupportTicketService
                 ResponseTicket = ticket.ResponseTicket
             };
 
-            context.SupportTicketsDb.Add(entity);
+            db.SupportTicketsDb.Add(entity);
 
-            await context.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
             return entity;
-        }
-        finally
-        {
-            if (dispose)
-            {
-                await context.DisposeAsync();
-            }
-        }
+        }, context);
     }
 
     // Add Response to existing support ticket
     public async Task<SupportTicket?> AddResponseToTicketById(int id, ResponseTicket response, int userId, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var existing = await GetTicketById(id, context);
+            var existing = await GetTicketById(id, db);
             if (existing == null) throw new Exception("No existing ticket found");
 
             response.UserId = userId;
             existing.ResponseTicket.Add(response); // Add response to message chain
 
-            await context.SaveChangesAsync();
+            await db.SaveChangesAsync();
             return existing;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
 
 
 
-// ********************** | Tools to mark a support ticket status
+    // ********************** | Tools to mark a support ticket status
     // Mark as Pending
     public async Task MarkPending(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var existing = await GetTicketById(id, context);
+            var existing = await GetTicketById(id, db);
             if (existing == null) throw new Exception("No existing ticket found with this Id.");
 
             existing.Status = SupportStatus.Pending;
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     // Mark as Submitted
     public async Task MarkSubmitted(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var existing = await GetTicketById(id, context);
+            var existing = await GetTicketById(id, db);
             if (existing == null) throw new Exception("No existing ticket found with this Id.");
 
             existing.Status = SupportStatus.Submitted;
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     // Mark as Resolved
     public async Task MarkResolved(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var existing = await GetTicketById(id, context);
+            var existing = await GetTicketById(id, db);
             if (existing == null) throw new Exception("No existing ticket found with this Id.");
 
             existing.Status = SupportStatus.Resolved;
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     // Mark as Awaiting
     public async Task MarkAwaiting(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var existing = await GetTicketById(id, context);
+            var existing = await GetTicketById(id, db);
             if (existing == null) throw new Exception("No existing ticket found with this Id.");
 
             existing.Status = SupportStatus.Awaiting;
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
-// **********************
+    // **********************
 
     // General Query
     private IQueryable<SupportTicket> SupportTicketQuery(ApplicationDbContext context)

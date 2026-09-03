@@ -1,6 +1,7 @@
 
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Users.Students;
@@ -10,88 +11,47 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin;
 public class ClassSessionService
 {
     private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
 
-    public ClassSessionService(IDbContextFactory<ApplicationDbContext> context)
+    public ClassSessionService(IDbContextFactory<ApplicationDbContext> context, CreateDisposeContextHelper createDispose)
     {
         _context = context;
+        _createDispose = createDispose;
     }
 
     // GET all class sessions (order by future to past)
     public async Task<List<ClassSession>> GetAllClassSessions(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await ClassSessionQuery(context)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        return await _createDispose.ExecuteAsync(db => ClassSessionQuery(db)
+                .ToListAsync()
+            , context);
     }
 
     // GET class session by Id
     public async Task<ClassSession?> GetClassSessionById(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-
-            return await ClassSessionQuery(context)
+        return await _createDispose.ExecuteAsync(async db => await ClassSessionQuery(db)
                 .Where(x => x.Id == id)
-                .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .FirstOrDefaultAsync()
+            , context);
     }
 
     // POST class session
     public async Task<ClassSession> CreateClassSession(ClassSession session, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            context.ClassSessionDb.Add(session);
-            await context.SaveChangesAsync();
+            db.ClassSessionDb.Add(session);
+            await db.SaveChangesAsync();
             return session;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     // PUT class session
     public async Task UpdateClassSession(ClassSession updated, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-
-            ClassSession? existing = await GetClassSessionById(updated.Id, context);
+        await _createDispose.ExecuteAsync( async db => {
+            ClassSession? existing = await GetClassSessionById(updated.Id, db);
             if (existing == null) throw new Exception("No existing class session was found. Update failed");
 
             existing.InstructorId = updated.InstructorId;
@@ -106,48 +66,24 @@ public class ClassSessionService
             existing.TermId = updated.TermId;
             existing.CourseId = updated.CourseId;
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     // DELETE existing class session
     public async Task DeleteClassSession(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            await context.ClassSessionDb
+        await _createDispose.ExecuteAsync(db => db.ClassSessionDb
             .Where(x => x.Id == id)
-            .ExecuteDeleteAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            .ExecuteDeleteAsync(), context);
     }
 
     // Archive class session | Used to save records of completed class sessions
     public async Task ArchiveAndCloseClassSession(int classSessionId, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
+        await _createDispose.ExecuteAsync( async db => {
             // Obtain class session
-            var existing = await GetClassSessionById(classSessionId, context);
+            var existing = await GetClassSessionById(classSessionId, db);
             if (existing == null) throw new Exception("Could not find an existing class session to archive");
 
             // Make sure no students are still enrolled in this class
@@ -157,36 +93,25 @@ public class ClassSessionService
             }
 
             existing.ArchivedAndClosed = true;
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
+            
     }
 
     // Unarchive class session | Used to save records of completed class sessions
     public async Task UnArchiveAndOpenClassSession(int classSessionId, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             // Obtain class session
-            var existing = await GetClassSessionById(classSessionId);
+            var existing = await GetClassSessionById(classSessionId, db);
             if (existing == null) throw new Exception("Could not find an existing class session to archive");
 
             existing.ArchivedAndClosed = false;
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
+            
+        
     }
 
     // QUERY for comprehensive GET requests

@@ -63,6 +63,7 @@ builder.Services.AddScoped<TermManagement>(); // Allows instructors to manage cl
 builder.Services.AddScoped<SupportTicketService>(); // Allows support ticket operations between students and admins
 builder.Services.AddControllers();
 builder.Services.AddScoped<TermServiceHelper>();
+builder.Services.AddScoped<CreateDisposeContextHelper>(); // Allows creation / dispose of database connection
 // DATABASE SEEDING
 // Database Reset / Seeding
 builder.Services.AddScoped<ResetDatabase>();

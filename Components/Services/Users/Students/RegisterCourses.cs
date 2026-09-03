@@ -2,6 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Components.Services.Admin;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Users;
@@ -11,14 +12,14 @@ namespace StudentPortalPracticeTwo.Components.Services.Users.Students;
 
 public class RegisterCourses
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly StudentService _studentService;
     private readonly ClassSessionService _classSessionService;
 
 
-    public RegisterCourses(IDbContextFactory<ApplicationDbContext> context, StudentService studentService, ClassSessionService classSessionService)
+    public RegisterCourses(CreateDisposeContextHelper createDispose, StudentService studentService, ClassSessionService classSessionService)
     {
-        _context = context;
+        _createDispose = createDispose;
         _studentService = studentService;
         _classSessionService = classSessionService;
     }
@@ -26,27 +27,17 @@ public class RegisterCourses
     public async Task<List<ClassSession>> RegisterNewCourses(Student user, List<ClassSession> sessions, ApplicationDbContext? context = null)
     {
         // arrange the user data and EF core tracking
-        bool dispose = false;
-        Student? existing;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-            existing = await _studentService.GetStudentById(user.Id, context);
-        }
-        else
-        {
-            existing = user;
-        }
-        
-        // Register courses to user account
-        try
-        {
+            Student? existing = context == null
+                ? await _studentService.GetStudentById(user.Id, db)
+                : user;
+
             if (existing == null) throw new Exception("No user found to register courses for.");
 
             var sessionIds = sessions.Select(x => x.Id).ToList();
 
-            List<ClassSession> existingSessions = await context.ClassSessionDb
+            List<ClassSession> existingSessions = await db.ClassSessionDb
                 .Where(x => sessionIds.Contains(x.Id))
                 .Include(x => x.RegisteredStudentProgramModels)
                 .ToListAsync();
@@ -56,13 +47,9 @@ public class RegisterCourses
                 existing.MyProgram.RegisteredSessions.Add(session);
             }
 
-            await context.SaveChangesAsync();
+            await db.SaveChangesAsync();
             return existing.MyProgram.RegisteredSessions;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 }
 

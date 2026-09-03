@@ -14,13 +14,13 @@ namespace StudentPortalPracticeTwo.Components.Services.Users.Students;
 
 public class StudentService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly UserManager<ApplicationUser> _userManager;
 
 
-    public StudentService(IDbContextFactory<ApplicationDbContext> context, UserManager<ApplicationUser> userManager)
+    public StudentService(CreateDisposeContextHelper createDispose, UserManager<ApplicationUser> userManager)
     {
-        _context = context;
+        _createDispose = createDispose;
         _userManager = userManager;
 
     }
@@ -28,80 +28,31 @@ public class StudentService
     // GET ALL STUDENTS
     public async Task<List<Student>> GetAllStudents(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-
-        try
-        {
-            return await StudentQuery(context)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        return await _createDispose.ExecuteAsync(db => StudentQuery(db)
+                .ToListAsync(), context);
 
     }
 
     // GET STUDENT BY EMAIL
     public async Task<Student?> GetStudentByEmail(string email, ApplicationDbContext? context = null)
     {
-        bool disposeContext = false;
-
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            disposeContext = true;
-        }
-
-        try
-        {
-            return await StudentQuery(context)
+        return await _createDispose.ExecuteAsync(db => StudentQuery(db)
                 .Where(x => x.Email == email)
-                .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (disposeContext == true) await context.DisposeAsync();
-        }
+                .FirstOrDefaultAsync(), context);
     }
 
     // GET STUDENT BY ID
     public async Task<Student?> GetStudentById(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await StudentQuery(context)
+        return await _createDispose.ExecuteAsync(db => StudentQuery(db)
                 .Where(x => x.Id == id)
-                .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .FirstOrDefaultAsync(), context);
     }
 
     // CREATE NEW STUDENT | by finalApplication approval
     public async Task<CreateStudentResultHelper> CreateStudentByApplication(ApplicationModel finalApplication, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-
-        try
+        return await _createDispose.ExecuteAsync(async db =>
         {
             // Check for existing user FIRST
             var existingUser = await _userManager.FindByEmailAsync(finalApplication.Email);
@@ -166,30 +117,20 @@ public class StudentService
                 IdentityUserId = applicationUser.Id,
             };
 
-            context.StudentDb.Add(entity);
-            await context.SaveChangesAsync();
+            db.StudentDb.Add(entity);
+            await db.SaveChangesAsync();
             return new CreateStudentResultHelper
             {
                 User = entity,
                 ApplicationUser = applicationUser
             };
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     // CREATE NEW STUDENT | by manual creation
     public async Task CreateStudentManually(Student user, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             var existingUser = await _userManager.FindByEmailAsync(user.Email);
             if (existingUser != null) throw new Exception($"An account already exists for {user.Email}");
@@ -212,25 +153,15 @@ public class StudentService
             else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
 
             // Create user in Database
-            context.StudentDb.Add(user);
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            db.StudentDb.Add(user);
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     // Create Student from DTO
     public async Task CreateDTOStudent(JsonStudent student, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             var existingUser = await _userManager.FindByEmailAsync(student.Email);
             if (existingUser != null) throw new Exception($"An account already exists for {student.Email}");
@@ -253,7 +184,7 @@ public class StudentService
             else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
 
             // Get Degree Id for user
-            var degree = await context.DegreeDb
+            var degree = await db.DegreeDb
                 .Where(x => x.Name == student.DegreeName)
                 .FirstOrDefaultAsync();
 
@@ -289,7 +220,7 @@ public class StudentService
                 TermSeason season = Enum.Parse<TermSeason>(seasonString);
                 int year = int.Parse(yearString);
 
-                ClassSession? classSession = await context.ClassSessionDb
+                ClassSession? classSession = await db.ClassSessionDb
                     .Where(x => x.StartTime == sessionDto.StartTime && x.Course.Code == sessionDto.CourseCode
                         && x.Instructor!.Email == sessionDto.InstructorEmail && x.Term!.Year == year && x.Term.Season == season)
                     .FirstOrDefaultAsync();
@@ -314,7 +245,7 @@ public class StudentService
                 TermSeason season = Enum.Parse<TermSeason>(seasonString);
                 int year = int.Parse(yearString);
 
-                ClassSession? classSession = await context.ClassSessionDb
+                ClassSession? classSession = await db.ClassSessionDb
                     .Where(x => x.StartTime == sessionDto.StartTime && x.Course.Code == sessionDto.CourseCode
                         && x.Instructor!.Email == sessionDto.InstructorEmail && x.Term!.Year == year && x.Term.Season == season)
                     .FirstOrDefaultAsync();
@@ -339,7 +270,7 @@ public class StudentService
                 TermSeason season = Enum.Parse<TermSeason>(seasonString);
                 int year = int.Parse(yearString);
 
-                ClassSession? classSession = await context.ClassSessionDb
+                ClassSession? classSession = await db.ClassSessionDb
                     .Where(x => x.StartTime == sessionDto.StartTime && x.Course.Code == sessionDto.CourseCode
                         && x.Instructor!.Email == sessionDto.InstructorEmail && x.Term!.Year == year && x.Term.Season == season)
                     .FirstOrDefaultAsync();
@@ -391,27 +322,17 @@ public class StudentService
             }
 
             // Create user in Database
-            context.StudentDb.Add(entity);
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            db.StudentDb.Add(entity);
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     // UPDATE STUDENT
     public async Task<Student> UpdateUser(Student updated, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            Student? existing = await GetStudentById(updated.Id, context);
+            Student? existing = await GetStudentById(updated.Id, db);
             if (existing == null) throw new Exception("Could not find an existing user to update");
 
             existing.FirstName = updated.FirstName;
@@ -420,34 +341,17 @@ public class StudentService
             existing.Email = updated.Email;
             existing.ContactDetails.Phone = updated.ContactDetails.Phone;
 
-            await context.SaveChangesAsync();
+            await db.SaveChangesAsync();
             return existing;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     // DELETE STUDENT | Primarily for testing purposes
     public async Task DeleteStudent(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            await context.StudentDb
+        await _createDispose.ExecuteAsync(db => db.StudentDb
                 .Where(x => x.Id == id)
-                .ExecuteDeleteAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .ExecuteDeleteAsync(), context);
     }
 
 

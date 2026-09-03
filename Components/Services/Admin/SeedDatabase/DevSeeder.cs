@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 using StudentPortalPracticeTwo.Components.Services.Users.Students;
@@ -15,7 +16,7 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase;
 public class DevSeeder
 {
     private readonly ApplicationDbContext _db;
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
 
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
@@ -33,14 +34,14 @@ public class DevSeeder
     private readonly ClassSessionService _classSessionService;
 
 
-    public DevSeeder(ApplicationDbContext db, IDbContextFactory<ApplicationDbContext> context, SignInManager<ApplicationUser> signInManager,
+    public DevSeeder(ApplicationDbContext db, CreateDisposeContextHelper createDispose, SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager, UserService userService, StudentService studentService,
         FacultyService facultyService, AdminService adminService, RoleManager<IdentityRole> roleManager,
         TermService termService, DegreeService degreeService, CourseService courseService,
         ClassSessionService classSessionService)
     {
         _db = db;
-        _context = context;
+        _createDispose = createDispose;
 
         _signInManager = signInManager;
         _userManager = userManager;
@@ -60,13 +61,7 @@ public class DevSeeder
 
     public async Task SeedAsync(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             // SEED DATA || Admin User
             ApplicationUser newAdminIdentity = new()
@@ -99,8 +94,8 @@ public class DevSeeder
                 IdentityUserId = newAdminIdentity.Id,
             };
 
-            context.AdminDb.Add(admin);
-            await context.SaveChangesAsync();
+            db.AdminDb.Add(admin);
+            await db.SaveChangesAsync();
 
 
 
@@ -114,7 +109,7 @@ public class DevSeeder
             if (!resultFacultyDev.Succeeded) throw new Exception("Could not create developer faculty user.");
             else await _userManager.AddToRoleAsync(devFacultyIdentity, "Faculty"); // Set Faculty Roles
 
-            
+
 
             var devFaculty = new Faculty() // Faculty Creation
             {
@@ -156,7 +151,7 @@ public class DevSeeder
                 Phone = "666-777-8888",
             };
 
-            var degree = await context.DegreeDb // Get degree to assign to student
+            var degree = await db.DegreeDb // Get degree to assign to student
                 .Where(x => x.Name == "Software Engineering")
                 .Include(x => x.Courses)
                     .ThenInclude(x => x.Sessions)
@@ -189,12 +184,8 @@ public class DevSeeder
                 IdentityUserId = newStudentIdentity.Id
             };
 
-            context.StudentDb.Add(student);
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+            db.StudentDb.Add(student);
+            await db.SaveChangesAsync();
+        }, context);
     }
 }

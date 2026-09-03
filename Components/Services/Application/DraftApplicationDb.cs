@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Components.Services.Admin;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Application;
 
@@ -8,27 +9,21 @@ namespace StudentPortalPracticeTwo.Components.Services.Application;
 
 public class DraftApplicationDb
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
     private readonly DegreeService _degree;
+    private readonly CreateDisposeContextHelper _createDispose;
 
-    public DraftApplicationDb(IDbContextFactory<ApplicationDbContext> context, DegreeService degree)
+    public DraftApplicationDb(DegreeService degree, CreateDisposeContextHelper createDispose)
     {
-        _context = context;
         _degree = degree;
+        _createDispose = createDispose;
     }
 
 
     public async Task<DraftApplicationModel?> GetByEmail(string email, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var entity = await context.DraftApplicationDb
+            var entity = await db.DraftApplicationDb
                 .Include(x => x.DraftStudentInfo)
                 .Include(x => x.DraftStudentContact)
                 .Include(x => x.DraftEmergencyContact)
@@ -38,24 +33,14 @@ public class DraftApplicationDb
                 .FirstOrDefaultAsync(x => x.Email == email);
 
             return entity;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     public async Task<DraftApplicationModel?> GetById(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var entity = await context.DraftApplicationDb
+            var entity = await db.DraftApplicationDb
                 .Include(x => x.DraftStudentInfo)
                 .Include(x => x.DraftStudentContact)
                 .Include(x => x.DraftEmergencyContact)
@@ -65,22 +50,12 @@ public class DraftApplicationDb
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             return entity;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     public async Task<DraftApplicationModel> CreateApplication(string email, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        return await _createDispose.ExecuteAsync(async db =>
         {
 
             DraftApplicationModel entity = new()
@@ -94,28 +69,18 @@ public class DraftApplicationDb
                 DraftEssays = new(),
             };
 
-            context.DraftApplicationDb.Add(entity);
-            await context.SaveChangesAsync();
+            db.DraftApplicationDb.Add(entity);
+            await db.SaveChangesAsync();
 
             return entity;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     public async Task UpdateApplication(DraftApplicationModel updated, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            DraftApplicationModel? existing = await context.DraftApplicationDb
+            DraftApplicationModel? existing = await db.DraftApplicationDb
                 .Include(x => x.DraftStudentInfo)
                 .Include(x => x.DraftStudentContact)
                 .Include(x => x.DraftEmergencyContact)
@@ -138,12 +103,8 @@ public class DraftApplicationDb
             existing.DraftAcademicHistory = updated.DraftAcademicHistory;
             existing.DraftEssays = updated.DraftEssays;
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
 

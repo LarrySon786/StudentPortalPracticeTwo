@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 using StudentPortalPracticeTwo.Components.Services.Users.Students;
@@ -14,15 +15,15 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase;
 
 public class ApplicationSeeder
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly TermService _termService;
     private readonly DegreeService _degreeService;
 
 
-    public ApplicationSeeder(IDbContextFactory<ApplicationDbContext> context,
+    public ApplicationSeeder(CreateDisposeContextHelper createDispose,
         TermService termService, DegreeService degreeService)
     {
-        _context = context;
+        _createDispose = createDispose;
 
         _termService = termService;
         _degreeService = degreeService;
@@ -31,13 +32,7 @@ public class ApplicationSeeder
 
     public async Task SeedAsync(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             // SEED DATA | Create Submited Application
             var file = File.ReadAllText("Database/JSON/Applications/FinalApplication.json");
@@ -53,8 +48,8 @@ public class ApplicationSeeder
             foreach (var student in applicationDefinition!)
             {
                 // Get existing Degree and Term from database
-                var identifiedDegree = await _degreeService.GetDegreeById(student.StudentProgram.DegreeId, context);
-                var identifiedTerm = await _termService.GetTermById(student.StudentProgram.TermId, context);
+                var identifiedDegree = await _degreeService.GetDegreeById(student.StudentProgram.DegreeId, db);
+                var identifiedTerm = await _termService.GetTermById(student.StudentProgram.TermId, db);
 
 
                 ApplicationModel newApplication = new()
@@ -125,12 +120,8 @@ public class ApplicationSeeder
                         ResponseThree = student.Essays.ResponseThree
                     }
                 };
-                context.ApplicationDb.Add(newApplication);
+                db.ApplicationDb.Add(newApplication);
             }
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+        }, context);
     }
 }

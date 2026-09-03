@@ -3,108 +3,60 @@ using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Users.Admin;
 using StudentPortalPracticeTwo.Database.Models.Users;
 using Microsoft.AspNetCore.Identity;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Interfaces;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users;
 
 public class AdminService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly UserManager<ApplicationUser> _userManager;
 
 
-    public AdminService(IDbContextFactory<ApplicationDbContext> context, UserManager<ApplicationUser> userManager)
+    public AdminService(CreateDisposeContextHelper createDispose, UserManager<ApplicationUser> userManager)
     {
-        _context = context;
+        _createDispose = createDispose;
         _userManager = userManager;
     }
 
     // GET ALL Admins
     public async Task<List<AdminModel>> GetAllAdmins(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-
-        try
-        {
-            return await context.AdminDb
+        return await _createDispose.ExecuteAsync(db => db.AdminDb
                 .Include(x => x.ContactDetails)
                 .Include(x => x.IdentityUser)
                 .Include(x => x.EmergencyContact)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
-
+                .ToListAsync(), context);
     }
 
     // GET Admin BY EMAIL
     public async Task<AdminModel?> GetAdminByEmail(string email, ApplicationDbContext? context = null)
     {
-        bool disposeContext = false;
-
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            disposeContext = true;
-        }
-
-        try
-        {
-            return await context.AdminDb
+        return await _createDispose.ExecuteAsync(db => db.AdminDb
                 .Include(x => x.ContactDetails)
                 .Include(x => x.IdentityUser)
                 .Include(x => x.EmergencyContact)
                 .Where(x => x.Email == email)
-                .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (disposeContext == true) await context.DisposeAsync();
-        }
+                .FirstOrDefaultAsync(), context);
     }
 
     // GET Admin BY ID
     public async Task<AdminModel?> GetAdminById(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await context.AdminDb
+        return await _createDispose.ExecuteAsync(db => db.AdminDb
                 .Include(x => x.ContactDetails)
                 .Include(x => x.IdentityUser)
                 .Include(x => x.EmergencyContact)
                 .Where(x => x.Id == id)
-                .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .FirstOrDefaultAsync(), context);
     }
 
 
     // CREATE NEW Admin | by manual creation
     public async Task CreateAdminManually(AdminModel user, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             var existingUser = await _userManager.FindByEmailAsync(user.Email);
             if (existingUser != null) throw new Exception($"An account already exists for {user.Email}");
@@ -127,27 +79,17 @@ public class AdminService
             else await _userManager.AddToRoleAsync(applicationUser, "Student"); // Assigns role for authorization
 
             // Create user in Database
-            context.AdminDb.Add(user);
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            db.AdminDb.Add(user);
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     // UPDATE ADMIN
     public async Task UpdateUser(AdminModel updated, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            AdminModel? existing = await GetAdminById(updated.Id, context);
+            AdminModel? existing = await GetAdminById(updated.Id, db);
             if (existing == null) throw new Exception("Could not find an existing user to update");
 
             existing.FirstName = updated.FirstName;
@@ -156,34 +98,17 @@ public class AdminService
             existing.Email = updated.Email;
             existing.ContactDetails.Phone = updated.ContactDetails.Phone;
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
 
     // DELETE ADMIN | Primarily for testing purposes
     public async Task DeleteAdmin(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            await context.AdminDb
+        await _createDispose.ExecuteAsync(db => db.AdminDb
                 .Where(x => x.Id == id)
-                .ExecuteDeleteAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .ExecuteDeleteAsync(), context);
     }
 
 }

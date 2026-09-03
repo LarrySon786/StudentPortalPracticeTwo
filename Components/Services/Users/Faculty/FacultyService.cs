@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Users.Faculty;
@@ -11,16 +12,16 @@ namespace StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 
 public class FacultyService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly UserService _userService;
     private readonly IEmailService _emailService;
     private readonly IWebHostEnvironment _environment; // Allows tracing back to root of project
     private readonly IConfiguration _configuration; // Gets base URL for the project 
 
-    public FacultyService(IDbContextFactory<ApplicationDbContext> context, UserService userService,
+    public FacultyService(CreateDisposeContextHelper createDispose, UserService userService,
         IEmailService emailService, IWebHostEnvironment enviroment, IConfiguration configuration)
     {
-        _context = context;
+        _createDispose = createDispose;
         _userService = userService;
         _emailService = emailService;
         _environment = enviroment;
@@ -30,63 +31,24 @@ public class FacultyService
     // GET ALL FACULTY
     public async Task<List<Faculty>> GetAllFaculty(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await FacultyQuery(context)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        return await _createDispose.ExecuteAsync(db => FacultyQuery(db)
+                .ToListAsync(), context);
     }
 
     // GET FACULTY BY EMAIL
     public async Task<Faculty?> GetByEmail(string email, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await FacultyQuery(context)
+        return await _createDispose.ExecuteAsync(db => FacultyQuery(db)
                 .Where(x => x.Email == email)
-                .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .FirstOrDefaultAsync(), context);
     }
 
     // GET FACULTY BY ID
     public async Task<Faculty?> GetById(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await FacultyQuery(context)
+        return await _createDispose.ExecuteAsync(db => FacultyQuery(db)
                 .Where(x => x.Id == id)
-                .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .FirstOrDefaultAsync(), context);
     }
 
     // INVITE NEW FACULTY || This method sends an email invite to a new faculty member
@@ -108,17 +70,11 @@ public class FacultyService
                 Encoding.UTF8.GetBytes(token))
         );
         // Store hash in db
-        ApplicationDbContext? context = null;
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            context.PendingFacultyDb.Add(pending);
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (context != null) await context.DisposeAsync();
-        }
+            db.PendingFacultyDb.Add(pending);
+            await db.SaveChangesAsync();
+        });
         var registrationLink = $"{baseUrl}/faculty/accept-invite?userId={pending.Id}&token={token}";
         var html = await File.ReadAllTextAsync(htmlTemplatePath); //Template 
 
@@ -132,20 +88,14 @@ public class FacultyService
     // CREATE NEW FACULTY
     public async Task<Faculty> CreateFaculty(Faculty faculty, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        return await _createDispose.ExecuteAsync(async db =>
         {
             // Check if faculty user already exists / if email is in use
-            var existing = await GetByEmail(faculty.Email, context);
+            var existing = await GetByEmail(faculty.Email, db);
             if (existing != null) throw new Exception("A faculty or student user already exist with this email");
 
             List<UserEmergencyContactModel> emergencyContacts = new();
-            
+
             foreach (var contact in faculty.EmergencyContact)
             {
                 emergencyContacts.Add(contact); // Create Emergency Contacts
@@ -167,30 +117,19 @@ public class FacultyService
                 IdentityUserId = faculty.IdentityUserId,
             };
 
-            context.FacultyUsers.Add(entity);
-            await context.SaveChangesAsync(); // Save Faculty Member
+            db.FacultyUsers.Add(entity);
+            await db.SaveChangesAsync(); // Save Faculty Member
             return entity;
-
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     // UPDATE FACULTY
     public async Task<Faculty> UpdateFaculty(Faculty updated, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        return await _createDispose.ExecuteAsync(async db =>
         {
             // Check if faculty user already exists / if email is in use
-            var existing = await GetById(updated.Id, context);
+            var existing = await GetById(updated.Id, db);
             if (existing == null) throw new Exception("No faculty member could be found to update");
 
             List<UserEmergencyContactModel> emergencyContacts = new();
@@ -211,13 +150,9 @@ public class FacultyService
             existing.IdentityUserId = updated.IdentityUserId;
 
 
-            await context.SaveChangesAsync(); // Save Faculty Member Updates
+            await db.SaveChangesAsync(); // Save Faculty Member Updates
             return existing;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     // DISABLE FACULTY

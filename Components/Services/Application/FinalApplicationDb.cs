@@ -12,18 +12,18 @@ namespace StudentPortalPracticeTwo.Components.Services.Application;
 
 public class FinalApplicationDb
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly StudentService _studentService;
     private readonly IEmailService _emailService; // 
     private readonly IWebHostEnvironment _environment; // Allows tracing back to root of project
     private readonly IConfiguration _configuration; // Gets base URL for the project 
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public FinalApplicationDb(IDbContextFactory<ApplicationDbContext> context,
+    public FinalApplicationDb(CreateDisposeContextHelper createDispose,
         IEmailService emailService, IWebHostEnvironment environment, IConfiguration configuration,
         UserManager<ApplicationUser> userManager, StudentService studentService)
     {
-        _context = context;
+        _createDispose = createDispose;
         _emailService = emailService;
         _environment = environment;
         _configuration = configuration;
@@ -35,42 +35,20 @@ public class FinalApplicationDb
     // GET all applications (includes denied, approved, or pending)
     public async Task<List<ApplicationModel>> GetAllApplications(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await context.ApplicationDb
+        return await _createDispose.ExecuteAsync(db => db.ApplicationDb
                 .Include(x => x.StudentInfo)
                 .Include(y => y.StudentContact)
                 .Include(x => x.EmergencyContact)
                 .Include(x => x.StudentProgram)
                 .Include(x => x.AcademicHistory)
                 .Include(x => x.Essays)
-                .ToListAsync();
-        }  
-         finally
-        {
-            if (dispose) await context.DisposeAsync();
-        } 
+                .ToListAsync(), context);
     }
 
     // GET all PENDING applciations (applications that need reviewed and then approved by admins)
     public async Task<List<ApplicationModel>> GetAllPendingApplications(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-
-            return await context.ApplicationDb
+        return await _createDispose.ExecuteAsync(db => db.ApplicationDb
                 .Where(x => x.ApprovedStatus == Status.Pending)
                 .Include(x => x.StudentInfo)
                 .Include(y => y.StudentContact)
@@ -78,25 +56,14 @@ public class FinalApplicationDb
                 .Include(x => x.StudentProgram)
                 .Include(x => x.AcademicHistory)
                 .Include(x => x.Essays)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .ToListAsync(), context);
     }
 
     public async Task<ApplicationModel?> GetByEmail(string email, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var entity = await context.ApplicationDb
+            var entity = await db.ApplicationDb
                 .Include(x => x.StudentInfo)
                 .Include(x => x.StudentContact)
                 .Include(x => x.EmergencyContact)
@@ -106,25 +73,14 @@ public class FinalApplicationDb
                 .FirstOrDefaultAsync(x => x.Email == email);
 
             return entity;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     public async Task<ApplicationModel?> GetById(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-
-            var entity = await context.ApplicationDb
+            var entity = await db.ApplicationDb
                 .Include(x => x.StudentInfo)
                 .Include(x => x.StudentContact)
                 .Include(x => x.EmergencyContact)
@@ -136,22 +92,12 @@ public class FinalApplicationDb
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             return entity;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     public async Task<ApplicationModel> CreateApplication(DraftApplicationModel draft, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        return await _createDispose.ExecuteAsync(async db =>
         {
 
             // VALIDATE the Draft ApplicationModel Required fields first. Identify if any fields are NULL
@@ -166,7 +112,7 @@ public class FinalApplicationDb
             ServerSideValidation(draft, validationResults);
 
             // Determine if email already exists on a user.
-            var existing = await GetByEmail(draft.Email, context);
+            var existing = await GetByEmail(draft.Email, db);
             if (existing != null) errors.Add("A student already has this email. Please use a different email");
 
             // Add server-side errors to UI errors
@@ -191,9 +137,9 @@ public class FinalApplicationDb
                 EmergencyContactList.Add(EmergencyContact);
             }
             // Create start Term
-            var startTerm = await context.TermDb.SingleAsync(x => x.Id == draft.DraftProgramSelection.StartTerm!.Id);
+            var startTerm = await db.TermDb.SingleAsync(x => x.Id == draft.DraftProgramSelection.StartTerm!.Id);
             // Create selected Program
-            var selectedProgram = await context.DegreeDb.SingleAsync(x => x.Id == draft.DraftProgramSelection.SelectedProgram!.Id);
+            var selectedProgram = await db.DegreeDb.SingleAsync(x => x.Id == draft.DraftProgramSelection.SelectedProgram!.Id);
 
             // CREATE FINAL DRAFT FROM existing draft
             ApplicationModel entity = new()
@@ -253,29 +199,19 @@ public class FinalApplicationDb
             // BLOCK SAVE AND THROW ERRORS IF ANY
             if (errors.Any()) throw new ValidationException(string.Join(Environment.NewLine, errors));
 
-            context.ApplicationDb.Add(entity);
-            await context.SaveChangesAsync();
+            db.ApplicationDb.Add(entity);
+            await db.SaveChangesAsync();
 
             return entity;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     public async Task UpdateApplication(ApplicationModel updated, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
 
-            ApplicationModel? entity = await GetById(updated.Id, context);
+            ApplicationModel? entity = await GetById(updated.Id, db);
 
             if (entity == null)
                 throw new Exception("No application found");
@@ -296,12 +232,8 @@ public class FinalApplicationDb
             entity.StudentContact.Phone = updated.StudentContact.Phone;
             entity.StudentContact.AltPhone = updated.StudentContact.AltPhone;
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     public bool ValidateRequiredFields(DraftApplicationModel draft, List<string>? errors)
@@ -477,7 +409,7 @@ public class FinalApplicationDb
             var dateResult = new ValidationResult("The minimum age to apply is 12 years old. Please change your date of birth.");
             validationResults.Add(dateResult);
         }
-        
+
 
         if (final.StudentContact != null)
         {
@@ -535,39 +467,23 @@ public class FinalApplicationDb
     }
     public async Task DownloadPdf(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var application = await GetById(id, context);
+            var application = await GetById(id, db);
 
             // Download the PDF to the user's PC.
             // ...
             // ...
             // ...
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
 
     }
 
     public async Task ApproveApplication(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var application = await GetById(id, context);
+            var application = await GetById(id, db);
             if (application == null) throw new Exception("No application could be found to approve.");
             if (application.ApprovedStatus == Status.Approved) return;
 
@@ -575,9 +491,9 @@ public class FinalApplicationDb
             application.ApprovedStatus = Status.Approved;
 
             // Create new student user + Create user Identity for Authorization / Authentication
-            CreateStudentResultHelper user = await _studentService.CreateStudentByApplication(application, context);
+            CreateStudentResultHelper user = await _studentService.CreateStudentByApplication(application, db);
             if (user.User == null || user.ApplicationUser == null) throw new Exception("Could not create user.");
-            await context.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
             // CREATE EMAIL | Email Subject | HTML Body
             var firstLastName = $"{application.StudentInfo.FirstName} {application.StudentInfo.LastName}";
@@ -598,31 +514,21 @@ public class FinalApplicationDb
 
             // SEND NEW USER EMAIL TO REGISTER ACCOUNT
             await _emailService.SendEmailAsync(application.Email, firstLastName, subject, html);
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     public async Task DeclineApplication(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var application = await GetById(id, context);
+            var application = await GetById(id, db);
             if (application == null) throw new Exception("No application could be found to deny.");
 
             // Mark application as denied
             application.ApprovedStatus = Status.Denied;
 
             // SAVE denied status
-            await context.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
             // Send email to notify student
             // CREATE EMAIL | Email Subject | HTML Body
@@ -635,35 +541,21 @@ public class FinalApplicationDb
 
             // SEND NEW USER EMAIL TO REGISTER ACCOUNT
             await _emailService.SendEmailAsync(application.Email, firstLastName, subject, html);
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     public async Task PendingApplication(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var application = await GetById(id, context);
+            var application = await GetById(id, db);
             if (application == null) throw new Exception("No application could be found to change to pending.");
 
             // Mark application as declined
             application.ApprovedStatus = Status.Pending;
 
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 }
 

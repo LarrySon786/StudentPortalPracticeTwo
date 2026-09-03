@@ -5,23 +5,22 @@ using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using StudentPortalPracticeTwo.Components.Services.Interfaces;
-using Superpower.Model;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users;
 
 public class UserService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly IWebHostEnvironment _environment;
     private readonly IConfiguration _configuration;
 
-    public UserService(IDbContextFactory<ApplicationDbContext> context, UserManager<ApplicationUser> userManager, IEmailService emailService,
+    public UserService(CreateDisposeContextHelper createDispose, UserManager<ApplicationUser> userManager, IEmailService emailService,
         IWebHostEnvironment environment, IConfiguration configuration)
     {
-        _context = context;
+        _createDispose = createDispose;
         _userManager = userManager;
         _emailService = emailService;
         _environment = environment;
@@ -31,90 +30,41 @@ public class UserService
     // GET ALL Users
     public async Task<List<UserModel>> GetAllUsers(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-
-        try
-        {
-            return await context.UserDb
+        return await _createDispose.ExecuteAsync(db => db.UserDb
                 .Include(x => x.ContactDetails)
                 .Include(x => x.IdentityUser)
                 .Include(x => x.EmergencyContact)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
-        
+                .ToListAsync(), context);
     }
 
     // GET User BY EMAIL
     public async Task<UserModel?> GetUserByEmail(string email, ApplicationDbContext? context = null)
     {
-        bool disposeContext = false;
-
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            disposeContext = true;
-        }
-
-        try
-        {
-            return  await context.UserDb
+        return await _createDispose.ExecuteAsync(db => db.UserDb
                 .Include(x => x.ContactDetails)
                 .Include(x => x.IdentityUser)
                 .Include(x => x.EmergencyContact)
                 .Where(x => x.Email == email)
-                .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (disposeContext == true) await context.DisposeAsync();
-        }
+                .FirstOrDefaultAsync(), context);
     }
 
     // GET User BY ID
     public async Task<UserModel?> GetUserById(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await context.UserDb
+        return await _createDispose.ExecuteAsync(db => db.UserDb
                 .Include(x => x.ContactDetails)
                 .Include(x => x.IdentityUser)
                 .Include(x => x.EmergencyContact)
                 .Where(x => x.Id == id)
-                .FirstOrDefaultAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
-        }
+                .FirstOrDefaultAsync(), context);
+    }
 
     // UPDATE STUDENT
     public async Task<UserModel> UpdateUser(UserModel updated, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            UserModel? existing = await GetUserById(updated.Id, context);
+            UserModel? existing = await GetUserById(updated.Id, db);
             if (existing == null) throw new Exception("Could not find an existing user to update");
 
             existing.FirstName = updated.FirstName;
@@ -124,14 +74,10 @@ public class UserService
             existing.Email = updated.Email;
             existing.ContactDetails.Phone = updated.ContactDetails.Phone;
 
-            await context.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
             return existing;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     // Password Reset Email
@@ -163,7 +109,7 @@ public class UserService
         Console.WriteLine($"Security Stamp: {user.IdentityUser.SecurityStamp}");
         Console.WriteLine($"Email: {user.IdentityUser.Email}");
         Console.WriteLine($"Token Length: {token.Length}");
-        
+
         // Find Identity User
         var identityUser = await _userManager.FindByIdAsync(user.IdentityUserId);
 
@@ -182,47 +128,24 @@ public class UserService
     // Disable / Re-enable Student Account
     public async Task<bool> DisableUserToggle(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            UserModel? existing = await GetUserById(id, context);
+            UserModel? existing = await GetUserById(id, db);
             if (existing == null) throw new Exception("Could not find a user with that Id");
 
             existing.IsDisabled = !existing.IsDisabled;
 
-            await context.SaveChangesAsync();
+            await db.SaveChangesAsync();
             return existing.IsDisabled;
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+        }, context);
     }
 
     // DELETE USER | Primarily for testing purposes
     public async Task DeleteUser(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            await context.UserDb
+        await _createDispose.ExecuteAsync(db => db.UserDb
                 .Where(x => x.Id == id)
-                .ExecuteDeleteAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+                .ExecuteDeleteAsync(), context);
     }
 
 }

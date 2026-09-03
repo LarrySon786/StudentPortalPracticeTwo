@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 using StudentPortalPracticeTwo.Components.Services.Users.Students;
@@ -13,27 +14,21 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase;
 
 public class FacultySeeder
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly FacultyService _facultyService;
 
 
-    public FacultySeeder(IDbContextFactory<ApplicationDbContext> context, UserManager<ApplicationUser> userManager,
+    public FacultySeeder(CreateDisposeContextHelper createDispose, UserManager<ApplicationUser> userManager,
         FacultyService facultyService)
     {
-        _context = context;
+        _createDispose = createDispose;
         _userManager = userManager;
         _facultyService = facultyService;
     }
     public async Task SeedAsync(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             // SEED DATA | Create Instructors
             var jsonInstructors = File.ReadAllText("Database/JSON/Users/Faculty/Faculty.Json");
@@ -61,7 +56,7 @@ public class FacultySeeder
 
                 List<UserEmergencyContactModel> emergencyContacts = new(); // Prepare emergency contacts
                 foreach (var contact in faculty.EmergencyContact)
-                {   
+                {
                     var newContact = new UserEmergencyContactModel()
                     {
                         ContactName = contact.ContactName,
@@ -85,13 +80,9 @@ public class FacultySeeder
                     EmergencyContact = emergencyContacts,
                     IdentityUserId = identity.Id
                 };
-                await _facultyService.CreateFaculty(entity, context); // Create and Save
+                await _facultyService.CreateFaculty(entity, db); // Create and Save
             }
 
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+        }, context);
     }
 }

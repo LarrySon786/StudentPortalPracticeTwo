@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 using StudentPortalPracticeTwo.Components.Services.Users.Students;
@@ -13,28 +14,22 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase;
 
 public class CourseSeeder
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
 
 
     private readonly CourseService _courseService;
 
 
 
-    public CourseSeeder(IDbContextFactory<ApplicationDbContext> context, CourseService courseService)
+    public CourseSeeder(CreateDisposeContextHelper createDispose, CourseService courseService)
     {
-        _context = context;
+        _createDispose = createDispose;
         _courseService = courseService;
     }
 
     public async Task SeedAsync(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             // SEED DATA || Create Courses
             var jsonCourses = File.ReadAllText("Database/JSON/Courses/SoftwareEngineering.json"); // Course JSON
@@ -51,13 +46,9 @@ public class CourseSeeder
                     Code = courseItem.Code,
                     Credits = courseItem.Credits,
                 };
-                await _courseService.CreateCourse(course, context); // Create + Save
+                await _courseService.CreateCourse(course, db); // Create + Save
             }
 
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+        }, context);
     }
 }

@@ -68,3 +68,5 @@ They still need major CSS work but the basic data and concepts are there. Basic 
 - Instructors can create class sessions for themself.
 - Authentication is set up so you can only access a class session content if you are the instructor who created it.
 - I created the basis for catalog pages
+- I created an admin support menu and student ticket support system. It works like a text mssg chat
+Both parties can resolve or open tickets

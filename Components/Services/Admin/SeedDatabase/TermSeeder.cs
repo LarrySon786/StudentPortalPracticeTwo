@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 using StudentPortalPracticeTwo.Components.Services.Users.Students;
@@ -12,25 +13,19 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase;
 
 public class TermSeeder
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
 
     private readonly TermService _termService;
 
 
-    public TermSeeder(IDbContextFactory<ApplicationDbContext> context, TermService termService)
+    public TermSeeder(CreateDisposeContextHelper createDispose, TermService termService)
     {
-        _context = context;
+        _createDispose = createDispose;
         _termService = termService;
     }
     public async Task SeedAsync(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             // SEED DATA | Create Default Terms
             var termOne = new Term() // Term One
@@ -46,13 +41,9 @@ public class TermSeeder
                 Year = 2027,
                 AvailableToRegisterClasses = true,
             };
-            await _termService.CreateTerm(termOne, context); // Create Terms
-            await _termService.CreateTerm(termTwo, context);
+            await _termService.CreateTerm(termOne, db); // Create Terms
+            await _termService.CreateTerm(termTwo, db);
 
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+        }, context);
     }
 }

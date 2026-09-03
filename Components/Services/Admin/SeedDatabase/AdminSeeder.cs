@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 using StudentPortalPracticeTwo.Components.Services.Users.Students;
@@ -11,7 +12,7 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase;
 public class AdminSeeder
 {
     private readonly ApplicationDbContext _db;
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
 
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
@@ -29,14 +30,14 @@ public class AdminSeeder
     private readonly ClassSessionService _classSessionService;
 
 
-    public AdminSeeder(ApplicationDbContext db, IDbContextFactory<ApplicationDbContext> context, SignInManager<ApplicationUser> signInManager,
+    public AdminSeeder(ApplicationDbContext db, CreateDisposeContextHelper createDispose, SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager, UserService userService, StudentService studentService,
         FacultyService facultyService, AdminService adminService, RoleManager<IdentityRole> roleManager,
         TermService termService, DegreeService degreeService, CourseService courseService,
         ClassSessionService classSessionService)
     {
         _db = db;
-        _context = context;
+        _createDispose = createDispose;
 
         _signInManager = signInManager;
         _userManager = userManager;
@@ -56,22 +57,12 @@ public class AdminSeeder
 
     public async Task SeedAsync(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             // SEED DATA
 
 
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+        }, context);
     }
 
 }

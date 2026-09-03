@@ -2,8 +2,6 @@
 
 LEFT off
 
-- Create student view of My Classes
-
 
 
 - TO DO

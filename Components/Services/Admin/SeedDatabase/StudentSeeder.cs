@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 using StudentPortalPracticeTwo.Components.Services.Users.Students;
@@ -12,25 +13,19 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase;
 
 public class StudentSeeder
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly StudentService _studentService;
 
-    public StudentSeeder(IDbContextFactory<ApplicationDbContext> context, StudentService studentService
+    public StudentSeeder(CreateDisposeContextHelper createDispose, StudentService studentService
 )
     {
-        _context = context;
+        _createDispose = createDispose;
         _studentService = studentService;
 
     }
     public async Task SeedAsync(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             // SEED DATA | Create Students
             var json = File.ReadAllText("Database/JSON/Users/Students/Students.json");
@@ -40,13 +35,9 @@ public class StudentSeeder
             });
             foreach (JsonStudent student in studentDefinition!)
             {
-                await _studentService.CreateDTOStudent(student, context);
+                await _studentService.CreateDTOStudent(student, db);
             }
 
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+        }, context);
     }
 }

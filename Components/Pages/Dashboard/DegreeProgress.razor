@@ -253,7 +253,7 @@ else {
                         <p>No sessions found</p>
                     }
                     else {
-                        @foreach(ClassSession session in selectedCourse!.Sessions) {
+                        @foreach(ClassSession session in selectedCourse!.Sessions.Where(x => x.ClassStarted == false)) {
                             <h4>@session.Course.Name Sessions</h4>
                             <table class="table">
                                 <thead>

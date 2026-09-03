@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Users.Students;
@@ -8,95 +9,59 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin;
 
 public class AssignmentService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly IDbContextFactory<ApplicationDbContext> _context; // Replaced by _createDispose which creates the context
     private readonly ClassSessionService _sessionService;
+    private readonly CreateDisposeContextHelper _createDispose;
 
-    public AssignmentService(IDbContextFactory<ApplicationDbContext> context, ClassSessionService sessionService)
+    public AssignmentService(IDbContextFactory<ApplicationDbContext> context, ClassSessionService sessionService, CreateDisposeContextHelper createDispose)
     {
         _context = context;
         _sessionService = sessionService;
+        _createDispose = createDispose;
     }
 
     // GET ALL ASSIGNMENTS BY CLASSSESSION
     public async Task<List<Assignments>> GetAllAssignmentsByClassSession(int classSessionId, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await AssignmentsQuery(context)
+
+        return await _createDispose.ExecuteAsync(db => AssignmentsQuery(db)
                 .Where(x => x.SessionId == classSessionId)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+                .ToListAsync()
+        , context);
+        
 
     }
     // GET ASSIGNMENT BY ID
     public async Task<Assignments> GetAssignmentById(int assignmentId, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await AssignmentsQuery(context)
-                .Where(x => x.Id == assignmentId)
-                .FirstAsync();
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
-
+        return await _createDispose.ExecuteAsync(db => AssignmentsQuery(db) // Pass search query in
+                .Where(x => x.Id == assignmentId) // Search query
+                .FirstAsync(),
+            context); // Pass context in
     }
     // GET ASSIGNMENT BY STUDENT
     public async Task<List<Grade>> GetAllAssignmentsByStudentAndClassSession(Student student, int classSessionId, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            return await context.GradeDb
+        return await _createDispose.ExecuteAsync(db => db.GradeDb
                 .Where(x => x.SessionId == classSessionId && x.StudentProgramId == student.MyProgram.Id)
                 .Include(x => x.StudentProgram)
                     .ThenInclude(x => x.User)
                 .Include(x => x.Assignment)
                 .Include(x => x.Session)
                     .ThenInclude(x => x.Course)
-                .ToListAsync();
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+                .ToListAsync()
+            , context);
+
+        
+        
     }
 
     // CREATE NEW ASSIGNMENT BY CLASS SESSION
     public async Task<Assignments> CreateAssignmentByClassSession(Assignments assignment, int classSessionId, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var existingSession = await _sessionService.GetClassSessionById(classSessionId, context);
+            var existingSession = await _sessionService.GetClassSessionById(classSessionId, db);
             if (existingSession == null) throw new Exception("No existing session found to add an assignment to.");
 
             Assignments entity = new()
@@ -123,76 +88,53 @@ public class AssignmentService
 
             // existingSession.Assignments.Add(assignment); // Add this assignment to the class session
 
-            context.AssignmentsDb.Add(entity);
-            await context.SaveChangesAsync();
+            db.AssignmentsDb.Add(entity);
+            await db.SaveChangesAsync();
 
             return entity;
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+        }, context);
+            
+        
 
     }
 
     // UPDATE ASSIGNMENT 
     public async Task<Assignments> UpdateAssignment(Assignments updated, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        return await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var existing = await GetAssignmentById(updated.Id, context);
-            if (existing == null) throw new Exception("No existing assignment found to update.");
+            var existing = await GetAssignmentById(updated.Id, db);
+
+            if (existing == null)
+                throw new Exception("No existing assignment found to update.");
 
             existing.Name = updated.Name;
             existing.TotalPoints = updated.TotalPoints;
             existing.Instructions = updated.Instructions;
+
             // existing.SessionId = updated.SessionId;
             // existing.Grades = updated.Grades;
 
-            await context.SaveChangesAsync();
+            await db.SaveChangesAsync();
+
             return existing;
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+
+        }, context);
 
     }
     // DELETE ASSIGNMENT | Parameters (assignmentId , database context)
     public async Task DeleteAssignment(int id, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            await context.AssignmentsDb.Where(x => x.Id == id).ExecuteDeleteAsync();
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+        await _createDispose.ExecuteAsync(db => db.AssignmentsDb
+            .Where(x => x.Id == id)
+            .ExecuteDeleteAsync()
+        , context);
     }
 
     // GRADE Student copy of Assignment | Save to Student account, save class sesison ID in grade, save to assignment grades
     public async Task SaveGrades(List<Grade> grades, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             foreach (Grade grade in grades)
             {
@@ -203,7 +145,7 @@ public class AssignmentService
                 .Select(x => x.Id)
                 .ToList();
 
-            var existingGrades = await context.GradeDb
+            var existingGrades = await db.GradeDb
                 .Where(g => ids.Contains(g.Id))
                 .ToDictionaryAsync(g => g.Id);
 
@@ -216,27 +158,19 @@ public class AssignmentService
                 existing.Submitted = true;
             }
 
-            await context.SaveChangesAsync();
+            await db.SaveChangesAsync();
+        }, context);
+            
 
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+        
     }
 
     // This function is called when an instructor submits grades for that class session. Saves and calculates if student passed or failed
     public async Task SubmitFinalGradeBySession(int sessionId, ApplicationDbContext? context = null!)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = false;
-        }
-        try
-        {
-            var session = await _sessionService.GetClassSessionById(sessionId, context);
+            var session = await _sessionService.GetClassSessionById(sessionId, db);
             if (session == null) throw new Exception("No session found with this Id.");
 
             foreach (UserProgramModel program in session.StudentProgramModels)
@@ -283,12 +217,8 @@ public class AssignmentService
                 }
                 else throw new Exception("Student grade could NOT be read. Grade could not be submitted");
             }
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+            await db.SaveChangesAsync();
+        }, context);
     }
 
     // Standard Assignment Query

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 using StudentPortalPracticeTwo.Components.Services.Users.Students;
@@ -14,26 +15,20 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase;
 public class ClassSessionSeeder
 {
 
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly ClassSessionService _classSessionService;
 
 
-    public ClassSessionSeeder(IDbContextFactory<ApplicationDbContext> context,
+    public ClassSessionSeeder(CreateDisposeContextHelper createDispose,
         ClassSessionService classSessionService)
     {
-        _context = context;
+        _createDispose = createDispose;
         _classSessionService = classSessionService;
     }
 
     public async Task SeedAsync(ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
-        {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
+        await _createDispose.ExecuteAsync(async db =>
         {
             // SEED DATA | Create Course Sessions
             var jsonSessions = File.ReadAllText("Database/JSON/ClassSessions.Json"); // Read Json Sample Data
@@ -46,9 +41,9 @@ public class ClassSessionSeeder
 
             foreach (var session in classSessionDefinition!) // Iterate and create each JSON DTO object as session
             {
-                var course = context.CourseDb.Single(s => s.Code == session.CourseCode); // Get course, term, and instructor
-                var term = context.TermDb.Single(s => s.Season.ToString() + s.Year.ToString() == $"{session.Term}");
-                var instructor = context.FacultyDb.Single(s => s.Email == session.InstructorEmail);
+                var course = db.CourseDb.Single(s => s.Code == session.CourseCode); // Get course, term, and instructor
+                var term = db.TermDb.Single(s => s.Season.ToString() + s.Year.ToString() == $"{session.Term}");
+                var instructor = db.FacultyDb.Single(s => s.Email == session.InstructorEmail);
 
                 var createdSession = new ClassSession()
                 {
@@ -65,13 +60,9 @@ public class ClassSessionSeeder
                     Term = term,
                 };
 
-                await _classSessionService.CreateClassSession(createdSession, context); // Create and save
+                await _classSessionService.CreateClassSession(createdSession, db); // Create and save
             }
-        }
-        finally
-        {
-            if (dispose == true) await context.DisposeAsync();
-        }
+        }, context);
     }
 
 }

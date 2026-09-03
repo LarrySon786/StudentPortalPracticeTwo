@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Components.Services.Admin;
+using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Users.Students;
@@ -9,26 +10,20 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin;
 
 public class TermManagement
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+    private readonly CreateDisposeContextHelper _createDispose;
     private readonly ClassSessionService _sessionService;
 
-    public TermManagement(IDbContextFactory<ApplicationDbContext> context, ClassSessionService sessionService)
+    public TermManagement(CreateDisposeContextHelper createDispose, ClassSessionService sessionService)
     {
-        _context = context;
+        _createDispose = createDispose;
         _sessionService = sessionService;
     }
 
     public async Task StartTerm(int classSessionId, ApplicationDbContext? context = null)
     {
-        bool dispose = false;
-        if (context == null)
+        await _createDispose.ExecuteAsync(async db =>
         {
-            context = await _context.CreateDbContextAsync();
-            dispose = true;
-        }
-        try
-        {
-            var existing = await _sessionService.GetClassSessionById(classSessionId, context);
+            var existing = await _sessionService.GetClassSessionById(classSessionId, db);
             if (existing == null) throw new Exception("Could not fin an existing class session by Id to start.");
 
             if (existing.RegisteredStudentProgramModels.Count() == 0) throw new Exception("No students are enrolled in this class");
@@ -53,13 +48,9 @@ public class TermManagement
 
             }
             existing.ClassStarted = true;
-            
-            await context.SaveChangesAsync();
-        }
-        finally
-        {
-            if (dispose) await context.DisposeAsync();
-        }
+
+            await db.SaveChangesAsync();
+        }, context);
     }
 
 }
