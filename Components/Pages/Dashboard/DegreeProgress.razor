@@ -4,6 +4,7 @@
 @using StudentPortalPracticeTwo.Database.Models.Users
 @using StudentPortalPracticeTwo.Database.Models.Users.Students
 @using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Components.Services.Extensions
 @inject StudentPortalPracticeTwo.Components.Services.Users.Students.RegisterCourses registerCourses
 @inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService
 @inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService
@@ -17,13 +18,21 @@ else {
         @* My Program Details *@
         <div>
             <h1>@user.MyProgram.MyDegree!.Name | @user.FirstName @user.LastName</h1>
-            <p><span style="font-weight:700;">Start Date:</span> [Insert_start_date]</p>
+            <p><span style="font-weight:700;">Start Date:</span> [insert_date]</p>
 
             @* Percentage Complete *@
             <p><span style="font-weight:700;">Degree Completion:</span> 
                 @user.MyProgram.PercentageComplete.ToString("F1")%
             </p>
-            <p><span style="font-weight:700;">Expected Graduation:</span> [Insert_Calculated_Graduation]</p>
+            <p><span style="font-weight:700;">Current GPA:</span>
+                @if (user.MyProgram.CompletedCourses.Count() > 0) {
+                    @(CalculateGPAHelper.CalculateAverageGPA(user.MyProgram.CompletedCourses.Select(x => x.GPA).ToList()).ToString("F2"));
+                }
+                else {
+                    <span>--</span>
+                }
+            </p>
+            <p><span style="font-weight:700;">Expected Graduation:</span> @(GraduationDateHelper.PredictGraduationDate(user.MyProgram, user.MyProgram.MyDegree))</p>
             <p class="text-muted" style="font-size:smaller;">
                 *Expected Graduation Date is based on a full-time 15 credit work load each semester.
             </p>
@@ -341,7 +350,6 @@ else {
             await registerCourses.RegisterNewCourses(user!, sessions);
             sessions = [];
             IsRegistering = false;
-
         }
         catch (Exception ex) {
             Console.WriteLine($"Could not register classes. {ex}");

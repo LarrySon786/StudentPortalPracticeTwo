@@ -1,0 +1,93 @@
+@page "/admin/accept-invite"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using StudentPortalPracticeTwo.Database.Models.Users.Admin
+@inject StudentPortalPracticeTwo.Components.Services.Users.AdminService adminService
+
+<div class="standard-card">
+    @if (pendingAdmin == null)
+    {
+        <p>Loading invitation...</p>
+        <p>@message</p>
+    }
+    else
+    {
+        <h1>Set Up Administrator Account</h1>
+        <EditForm Model="account" OnValidSubmit="HandleSubmit" FormName="AcceptAdminInviteForm">
+            <DataAnnotationsValidator />
+            <label class="form-label">First Name</label>
+            <InputText class="form-control" @bind-Value="account.FirstName" disabled />
+            <label class="form-label">Last Name</label>
+            <InputText class="form-control" @bind-Value="account.LastName" disabled />
+            <label class="form-label">Email</label>
+            <InputText class="form-control" @bind-Value="account.Email" disabled />
+            <label class="form-label">Date of Birth</label>
+            <InputDate class="form-control" @bind-Value="account.DateOfBirth" />
+            <ValidationMessage For="@(() => account.DateOfBirth)" />
+            <label class="form-label">Phone Number</label>
+            <InputText class="form-control" @bind-Value="account.Phone" />
+            <ValidationMessage For="@(() => account.Phone)" />
+            <label class="form-label">Password</label>
+            <InputText class="form-control" type="password" @bind-Value="account.Password" />
+            <ValidationMessage For="@(() => account.Password)" />
+            <label class="form-label">Confirm Password</label>
+            <InputText class="form-control" type="password" @bind-Value="account.ConfirmPassword" />
+            <ValidationMessage For="@(() => account.ConfirmPassword)" />
+            <p class="error-messages">@message</p>
+            <button type="submit" class="btn btn-primary">Create Administrator Account</button>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public int UserId { get; set; }
+    [SupplyParameterFromQuery] public string Token { get; set; } = string.Empty;
+    private PendingAdmin? pendingAdmin;
+    private string message = string.Empty;
+    private AdminAccount account = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        pendingAdmin = await adminService.GetPendingAdmin(UserId);
+        if (pendingAdmin == null)
+        {
+            message = "This administrator invitation could not be found.";
+            return;
+        }
+        account.FirstName = pendingAdmin.FirstName;
+        account.LastName = pendingAdmin.LastName;
+        account.Email = pendingAdmin.Email;
+    }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            await adminService.AcceptAdminInvite(pendingAdmin!, Token, account.Password, account.DateOfBirth, account.Phone);
+            navigationManager.NavigateTo("/login", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            message = ex.Message;
+        }
+    }
+
+    private sealed class AdminAccount
+    {
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Email { get; set; }
+
+        [Required]
+        public DateOnly DateOfBirth { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+
+        [Required]
+        public string Phone { get; set; } = string.Empty;
+
+        [Required, StringLength(100, MinimumLength = 6)]
+        public string Password { get; set; } = string.Empty;
+
+        [Required, Compare(nameof(Password))]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}

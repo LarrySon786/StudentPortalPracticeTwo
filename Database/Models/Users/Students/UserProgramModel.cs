@@ -30,5 +30,5 @@ public class UserProgramModel
     public double PercentageComplete =>// Methods to figure out current progress on degree
         MyDegree == null || MyDegree.Courses.Count() == 0
             ? 0
-            : CompletedCourses.Sum(c => c.Course.Credits) / MyDegree.Courses.Sum(c => c.Credits) * 100;
+            : (double)CompletedCourses.Sum(c => c.Course.Credits) / (double)MyDegree.Courses.Sum(c => c.Credits) * 100;
 }

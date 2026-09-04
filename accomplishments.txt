@@ -70,3 +70,6 @@ They still need major CSS work but the basic data and concepts are there. Basic 
 - I created the basis for catalog pages
 - I created an admin support menu and student ticket support system. It works like a text mssg chat
 Both parties can resolve or open tickets
+- I refactored the existing code to use a helper to make a DbContext for each service operation
+
+

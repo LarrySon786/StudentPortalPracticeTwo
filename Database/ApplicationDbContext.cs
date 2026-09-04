@@ -24,6 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Student> StudentDb { get; set; }
     public DbSet<Faculty> FacultyDb { get; set; }
     public DbSet<AdminModel> AdminDb { get; set; }
+    public DbSet<PendingAdmin> PendingAdminDb { get; set; }
     public DbSet<UserContactModel> UserContactDb { get; set; }
     public DbSet<UserEmergencyContactModel> UserEmergencyDb { get; set; }
     public DbSet<UserProgramModel> UserProgram { get; set; }
@@ -38,7 +39,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<StudentContactModel> StudentContactDb { get; set; }
     public DbSet<EmergencyContactModel> EmergencyContactDb { get; set; }
     public DbSet<StudentProgram> StudentProgramDb { get; set; }
-    public DbSet<AcademicHistoryModel> AcademicHistoryDb{ get; set; }
+    public DbSet<AcademicHistoryModel> AcademicHistoryDb { get; set; }
     public DbSet<StudentEssayModel> EssayDb { get; set; }
 
     // DRAFT Application - used to save student progress in their application
@@ -130,7 +131,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .OnDelete(DeleteBehavior.Restrict);
 
         // Admins
-        
+
 
         // Final
         modelBuilder.Entity<ApplicationModel>()
@@ -162,13 +163,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithOne(x => x.Application)
             .HasForeignKey<AcademicHistoryModel>(x => x.ApplicationId)
             .OnDelete(DeleteBehavior.Cascade);
-            
+
         modelBuilder.Entity<ApplicationModel>()
             .HasOne(x => x.Essays)
             .WithOne(x => x.Application)
             .HasForeignKey<StudentEssayModel>(x => x.ApplicationId)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
 
         // Draft
         modelBuilder.Entity<DraftApplicationModel>()

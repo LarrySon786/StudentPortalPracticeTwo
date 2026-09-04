@@ -1,0 +1,93 @@
+@page "/admin/admins"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Database.Models.Users.Admin
+@inject StudentPortalPracticeTwo.Components.Services.Users.AdminService adminService
+
+<div class="standard-card">
+    <a href="/admin" class="btn btn-link">⬅ Return</a>
+    <div>
+        <button class="btn btn-primary" type="button" @onclick="ToggleCreateAdminDialog">Create Admin</button>
+    </div>
+    <div>
+        <input class="form-label" placeholder="Search..." @oninput="UpdateQuery" />
+    </div>
+
+    @if (admins.Count == 0)
+    {
+        <p>No existing admins found.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date of Birth</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (AdminModel admin in QueriedAdmins)
+                {
+                    <tr>
+                        <td>@admin.FirstName @admin.LastName</td>
+                        <td>@admin.DateOfBirth</td>
+                        <td>@admin.Email</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@if (createAdminDialog)
+{
+    <div class="overlay">
+        <div class="overlay-container">
+            <div class="standard-card standard-dialog">
+                <h3>Create Admin</h3>
+                <EditForm Model="pendingAdmin" OnValidSubmit="HandleSubmit" FormName="CreateAdminForm">
+                    <DataAnnotationsValidator />
+                    <label class="form-label">First Name</label>
+                    <InputText class="form-control" @bind-Value="pendingAdmin.FirstName" />
+                    <ValidationMessage For="@(() => pendingAdmin.FirstName)" />
+                    <label class="form-label">Last Name</label>
+                    <InputText class="form-control" @bind-Value="pendingAdmin.LastName" />
+                    <ValidationMessage For="@(() => pendingAdmin.LastName)" />
+                    <label class="form-label">Email</label>
+                    <InputText class="form-control" type="email" @bind-Value="pendingAdmin.Email" />
+                    <ValidationMessage For="@(() => pendingAdmin.Email)" />
+                    <button type="button" class="btn btn-secondary" @onclick="ToggleCreateAdminDialog">Close</button>
+                    <button type="submit" class="btn btn-primary">Invite Admin</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<AdminModel> admins = new();
+    private PendingAdmin pendingAdmin = new();
+    private string query = string.Empty;
+    private bool createAdminDialog;
+
+    private IEnumerable<AdminModel> QueriedAdmins => admins.Where(admin =>
+        string.IsNullOrWhiteSpace(query) ||
+        admin.Email.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+        admin.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+        admin.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+        admin.DateOfBirth.ToString().Contains(query, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync() => admins = await adminService.GetAllAdmins();
+
+    private void ToggleCreateAdminDialog() => createAdminDialog = !createAdminDialog;
+
+    private void UpdateQuery(ChangeEventArgs args) => query = args.Value?.ToString() ?? string.Empty;
+
+    private async Task HandleSubmit()
+    {
+        await adminService.InviteAdmin(pendingAdmin);
+        pendingAdmin = new();
+        createAdminDialog = false;
+    }
+}

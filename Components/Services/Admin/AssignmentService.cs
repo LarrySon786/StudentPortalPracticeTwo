@@ -190,7 +190,7 @@ public class AssignmentService
                         StudentProgramId = program.Id,
                         Grade = gradePercentage,
                         DateCompleted = DateOnly.FromDateTime(DateTime.Now),
-                        GPA = (decimal)4.0,
+                        GPA = (decimal)CalculateGPAHelper.CalculateGPA(gradePercentage),
                     };
                     program.CompletedCourses.Add(completedCourse);
                     program.CurrentSessions.Remove(session);
@@ -208,7 +208,7 @@ public class AssignmentService
                         SessionTaken = session,
                         Grade = gradePercentage,
                         DateCompleted = DateOnly.FromDateTime(DateTime.Now),
-                        GPA = (decimal)1.0,
+                        GPA = (decimal)CalculateGPAHelper.CalculateGPA(gradePercentage),
                     };
 
                     program.FailedSessions.Add(failedCourse);
