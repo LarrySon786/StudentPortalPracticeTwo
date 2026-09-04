@@ -1,6 +1,7 @@
 @page "/degree-listings"
 @rendermode InteractiveServer
 @layout AdminDashboardLayout
+@attribute [Authorize(Roles = "Admin")]
 @using StudentPortalPracticeTwo.Components.Ui.Admin;
 
 <h1>Degree Listings</h1>

@@ -1,5 +1,6 @@
 @page "/admin/support"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
 @using StudentPortalPracticeTwo.Database.Models.SupportTicket
 @using StudentPortalPracticeTwo.Database.Models.Enums
 @inject StudentPortalPracticeTwo.Components.Services.SupportTicketServices.SupportTicketService supportTicketService

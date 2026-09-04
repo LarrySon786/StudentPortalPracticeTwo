@@ -44,6 +44,7 @@ public class UserService
                 .Include(x => x.ContactDetails)
                 .Include(x => x.IdentityUser)
                 .Include(x => x.EmergencyContact)
+                .Include(x => x.IdentityUser)
                 .Where(x => x.Email == email)
                 .FirstOrDefaultAsync(), context);
     }
@@ -55,6 +56,7 @@ public class UserService
                 .Include(x => x.ContactDetails)
                 .Include(x => x.IdentityUser)
                 .Include(x => x.EmergencyContact)
+                .Include(x => x.IdentityUser)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync(), context);
     }
@@ -131,9 +133,22 @@ public class UserService
         return await _createDispose.ExecuteAsync(async db =>
         {
             UserModel? existing = await GetUserById(id, db);
-            if (existing == null) throw new Exception("Could not find a user with that Id");
+            if (existing == null || existing.IdentityUser == null) throw new Exception("Could not find a user with that Id");
 
-            existing.IsDisabled = !existing.IsDisabled;
+            var user = await _userManager.FindByIdAsync(existing.IdentityUser.Id);
+            if (user == null) throw new Exception("Could not load user. No user found with this Id.");
+
+            if (existing.IdentityUser.LockoutEnd > DateTimeOffset.UtcNow)
+            {
+                await _userManager.SetLockoutEndDateAsync(user, null);
+                existing.IsDisabled = false;
+            }
+            else
+            {
+                await _userManager.SetLockoutEnabledAsync(user, true);
+                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+                existing.IsDisabled = true;
+            }
 
             await db.SaveChangesAsync();
             return existing.IsDisabled;

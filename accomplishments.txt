@@ -71,5 +71,10 @@ They still need major CSS work but the basic data and concepts are there. Basic 
 - I created an admin support menu and student ticket support system. It works like a text mssg chat
 Both parties can resolve or open tickets
 - I refactored the existing code to use a helper to make a DbContext for each service operation
-
+- I created a GPA calculator helper and used it in the student dashboard
+- I created a graduation date expectancy calculator and used it in the student dashboard
+- I created an average GPA calculator and used it in the student dashboard
+- I had AI create an admin management interface using my previously designed INSTRUCTOR interface as an example. 
+This included creating an admin invite system, an admin invite email with token link, an admin registeration for accepting the email, 
+and the actual razor page with the sign-up for new admins.
 

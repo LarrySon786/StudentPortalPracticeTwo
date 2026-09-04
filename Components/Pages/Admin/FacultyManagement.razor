@@ -1,5 +1,6 @@
 @page "/admin/faculty"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
 @using StudentPortalPracticeTwo.Database.Models.Users.Faculty
 @inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
 

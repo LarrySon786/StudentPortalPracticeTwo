@@ -99,23 +99,28 @@ app.UseAntiforgery();
 
 // Login Http Endpoint
 app.MapPost("/account/login", async (HttpContext context, SignInManager<ApplicationUser> signInManager
-    , UserService userService) =>
+    , UserService userService, AuthLogin authService, UserManager<ApplicationUser> userManager ) =>
 {
     var form = await context.Request.ReadFormAsync();
 
     var email = form["Email"].ToString();
     var password = form["Password"].ToString();
 
+    // Detect null fields
     if (string.IsNullOrEmpty(email)) return Results.Redirect("/login");
     if (string.IsNullOrEmpty(password)) return Results.Redirect("/login");
 
-    var user = await userService.GetUserByEmail(email);
-    if (user == null || user.IsDisabled == true) return Results.Redirect("/login?error=true");
+    var user = await userService.GetUserByEmail(email); // Verify user exists to verify if disabled
+    if (user == null || user.IsDisabled == true || user.IdentityUser == null) return Results.Redirect("/login?error=true");
 
-    var result = await signInManager.PasswordSignInAsync(email, password, true, false);
+    var result = await signInManager.PasswordSignInAsync(email, password, true, false); // Signin User
+    if (!result.Succeeded) return Results.Redirect("/login?error=true");
 
-    if (result.Succeeded) return Results.Redirect("/dashboard");
-    return Results.Redirect("/login?error=true");
+    var roles = await userManager.GetRolesAsync(user.IdentityUser); // Get ROLES
+    if (roles.Contains("Admin")) return Results.Redirect("/admin"); //Admin Role
+    else if (roles.Contains("Faculty")) return Results.Redirect("/faculty"); // faculty Role
+    else if (roles.Contains("Student")) return Results.Redirect("/dashboard"); // Student Role
+    else return Results.Redirect("/login?error=true"); // No role found
 });
 
 // LOGOUT

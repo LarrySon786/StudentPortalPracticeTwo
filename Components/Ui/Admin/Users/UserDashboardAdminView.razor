@@ -17,6 +17,9 @@
         else if (User is Faculty) {
             <a href="/admin/faculty" class="btn btn-link">⬅ Return</a>
         }
+        else if (User is AdminModel){
+            <a href="/admin/admins" class="btn btn-link">⬅ Return</a>
+        }
         
     </div>
     <button class="btn btn-link @(Tab == TabSelected.Demographics ? "active" : "")" type="button"

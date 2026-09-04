@@ -1,5 +1,6 @@
 @page "/dashboard/my-classes/{Id:int}"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Student")]
 @using StudentPortalPracticeTwo.Database.Models.Users
 @using StudentPortalPracticeTwo.Database.Models.Users.Students
 @using StudentPortalPracticeTwo.Database.Models.Degrees

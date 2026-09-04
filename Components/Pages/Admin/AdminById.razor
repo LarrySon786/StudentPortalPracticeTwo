@@ -1,18 +1,18 @@
-@page "/admin/faculty/{Id:int}"
+@page "/admin/admin/{Id:int}"
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 @using StudentPortalPracticeTwo.Components.Ui.Admin.Users
-@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
+@using StudentPortalPracticeTwo.Database.Models.Users.Admin
 @using StudentPortalPracticeTwo.Database.Models.Enums
-@inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
+@inject StudentPortalPracticeTwo.Components.Services.Users.AdminService adminService
 
-@if (faculty == null) {
+@if (admin == null) {
     <p>Loading user information</p>
 }
 else {
     <div>
-        <h1>@faculty.FirstName @faculty.LastName</h1>
-        <UserDashboardAdminView Mode="EditMode.Edit" User="faculty" OnSavedChanges="RefreshComponent"/>
+        <h1>@admin.FirstName @admin.LastName</h1>
+        <UserDashboardAdminView Mode="EditMode.Edit" User="admin" OnSavedChanges="RefreshComponent" />
     </div>
 }
 
@@ -24,11 +24,12 @@ else {
 
 @code {
     [Parameter] public int Id { get; set; }
-    public Faculty? faculty { get; set; }
+    public AdminModel? admin { get; set; }
 
     protected override async Task OnInitializedAsync() {
-        faculty = await facultyService.GetById(Id);
-        if (faculty == null) {
+        admin = await adminService.GetAdminById(Id);
+        if (admin == null)
+        {
             navigationManager.NavigateTo("/admin/faculty");
             return;
         }
@@ -36,7 +37,7 @@ else {
 
     public async Task RefreshComponent()
     {
-        await facultyService.GetById(Id);
+        await adminService.GetAdminById(Id);
         StateHasChanged();
     }
 }

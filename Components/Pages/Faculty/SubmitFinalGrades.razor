@@ -1,5 +1,6 @@
 @page "/faculty/classes/class-details/{Id:int}/submit-grades"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Faculty")]
 @using StudentPortalPracticeTwo.Database.Models.Degrees
 @using StudentPortalPracticeTwo.Database.Models.Users
 @using StudentPortalPracticeTwo.Database.Models.Users.Faculty

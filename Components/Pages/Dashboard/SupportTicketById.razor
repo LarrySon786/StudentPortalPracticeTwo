@@ -1,5 +1,6 @@
 @page "/dashboard/support/ticket/{Id:int}"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Student, Admin")]
 @using StudentPortalPracticeTwo.Database.Models.SupportTicket
 @using StudentPortalPracticeTwo.Database.Models.Enums
 @using StudentPortalPracticeTwo.Database.Models.Users

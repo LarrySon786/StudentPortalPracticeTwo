@@ -1,4 +1,6 @@
 @page "/admin/applicants/{applicationId:int}"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
 @using StudentPortalPracticeTwo.Components.Ui.Admin.Users.PendingApplicants
 @using StudentPortalPracticeTwo.Database.Models.Application;
 @using StudentPortalPracticeTwo.Components.Ui.Admin.Users

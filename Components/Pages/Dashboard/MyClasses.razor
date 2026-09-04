@@ -1,6 +1,6 @@
 @* This page is where students Register class for next term. View existing classes. And drop classes *@
 @page "/dashboard/my-classes"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Student")]
 @rendermode InteractiveServer
 @using StudentPortalPracticeTwo.Database.Models.Users
 @using StudentPortalPracticeTwo.Database.Models.Users.Students

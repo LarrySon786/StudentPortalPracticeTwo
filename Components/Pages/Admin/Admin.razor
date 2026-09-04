@@ -1,6 +1,7 @@
 @page "/admin"
 @rendermode InteractiveServer 
 @layout AdminDashboardLayout
+@attribute [Authorize(Roles = "Admin")]
 
 <h1>Admin Dashboard</h1>
 

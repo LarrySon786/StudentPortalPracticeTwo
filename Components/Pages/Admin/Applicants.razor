@@ -1,5 +1,6 @@
 @page "/admin/applicants"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
+@attribute [Authorize(Roles = "Admin")]
 @using StudentPortalPracticeTwo.Database.Models.Application;
 @inject StudentPortalPracticeTwo.Components.Services.Application.FinalApplicationDb studentApplication;
 @inject NavigationManager navigationManager;

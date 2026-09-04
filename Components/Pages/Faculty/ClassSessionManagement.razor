@@ -1,5 +1,6 @@
 @page "/faculty/classes"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Faculty")]
 @using StudentPortalPracticeTwo.Components.Services.Users.Instructors
 @using StudentPortalPracticeTwo.Components.Services.Admin
 @using StudentPortalPracticeTwo.Components.Ui.Admin

@@ -1,5 +1,6 @@
 @page "/admin/terms"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
 @using StudentPortalPracticeTwo.Database.Models.Degrees
 @using StudentPortalPracticeTwo.Database.Models.Enums
 @using StudentPortalPracticeTwo.Components.Ui.Admin
