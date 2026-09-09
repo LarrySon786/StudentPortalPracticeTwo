@@ -137,7 +137,8 @@ public class ClassSessionService
             .Include(x => x.Graduates)
                 .ThenInclude(x => x.Course)
             .Include(x => x.FailedCourses)
-                .ThenInclude(x => x.Course);
+                .ThenInclude(x => x.Course)
+            .Include(x => x.Instructor);
 
     }
 

@@ -10,7 +10,6 @@ using StudentPortalPracticeTwo.Components.Services.EmailServices;
 using StudentPortalPracticeTwo.Components.Services.Users;
 using StudentPortalPracticeTwo.Components.Services.Users.Students;
 using StudentPortalPracticeTwo.Components.Services.Users.Instructors;
-using DotNetEnv;
 using StudentPortalPracticeTwo.Components.Services.Authentication;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Components.Services.Admin.SeedDatabase;
@@ -31,6 +30,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>() // Identity Core auth features
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
 builder.Services.ConfigureApplicationCookie(options => // Cookie configurations
 {
     options.Cookie.Name = "StudentPortal.Identity";
@@ -41,13 +41,14 @@ builder.Services.ConfigureApplicationCookie(options => // Cookie configurations
     options.SlidingExpiration = true;
 });
 
-// COOKIE for filling out draft application
+// COOKIE for filling out draft application | AUthorization / Authentication
 builder.Services.AddAuthentication().AddCookie("ApplicationFormCookie", options =>
 {
     options.Cookie.Name = "CSU.Application.Form";
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     options.SlidingExpiration = false;
 });
+
 
 
 // Database

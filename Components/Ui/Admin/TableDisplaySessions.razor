@@ -3,6 +3,10 @@
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 
+<div>
+    <input class="form-control" type="text" placeholder="Search sessions..." @oninput="UpdateQuery" />
+</div>
+
 <table class="table">
     <thead>
         <th>Session Course</th>
@@ -11,20 +15,21 @@
         <th>End Date/Time</th>
         <th></th>
     </thead>
-
-    @foreach (ClassSession session in sessions)
-    {
-        <tr>
-            <td>@session.Course.Name</td>
-            <td>@session.Instructor</td>
-            <td>@session.StartDate</td>
-            <td>@session.EndDate</td>
-            <div>
-                <td><button class="btn btn-primary" type="button" @onclick="() => ToggleEditSessionDialog(session)">Edit/View Session</button></td>
-                <td><button class="btn btn-danger" type="button" @onclick="() => HandleDelete(session.Id)">Delete</button></td>
-            </div>
-        </tr>
-    }
+    <tbody>
+        @foreach (ClassSession session in queriedSessions)
+        {
+            <tr>
+                <td>@session.Course.Name</td>
+                <td>@(session.Instructor is null ? "Unknown" : $"{session.Instructor.FirstName} {session.Instructor.LastName}")</td>
+                <td>@session.StartDate @session.StartTime</td>
+                <td>@session.EndDate @session.EndTime</td>
+                <div>
+                    <td><button class="btn btn-primary" type="button" @onclick="() => ToggleEditSessionDialog(session)">Edit/View Session</button></td>
+                    <td><button class="btn btn-danger" type="button" @onclick="() => HandleDelete(session.Id)">Delete</button></td>
+                </div>
+            </tr>
+        }
+    </tbody>
 </table>
 
 @* Edit Session Dialog *@
@@ -41,6 +46,26 @@
     public List<ClassSession> sessions = new();
     public bool editSessionDialog = false;
     public ClassSession? selectedSession { get; set; }
+    private string query { get; set; } = string.Empty;
+    private IEnumerable<ClassSession> queriedSessions =>
+        string.IsNullOrWhiteSpace(query)
+            ? sessions
+            : sessions.Where(session =>
+                (session.Course != null && (
+                    session.Course.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                    session.Course.Code.Contains(query, StringComparison.OrdinalIgnoreCase)
+                )) ||
+                (session.Location.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                (session.Instructor != null && (
+                    session.Instructor.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                    session.Instructor.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                    $"{session.Instructor.FirstName} {session.Instructor.LastName}".Contains(query, StringComparison.OrdinalIgnoreCase)
+                )) ||
+                session.StartDate.ToString().Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                session.EndDate.ToString().Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                session.StartTime.ToString().Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                session.EndTime.ToString().Contains(query, StringComparison.OrdinalIgnoreCase)
+            );
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,5 +109,22 @@
         }
     }
 
+    private void UpdateQuery(ChangeEventArgs e)
+    {
+        if (e == null || e.Value == null)
+        {
+            query = string.Empty;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(e.Value.ToString()) == true)
+        {
+            query = string.Empty;
+        }
+        else
+        {
+            query = e.Value.ToString()!;
+        }
+    }
 
 }

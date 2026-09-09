@@ -3,23 +3,33 @@
 @inject StudentPortalPracticeTwo.Components.Services.Admin.DegreeService degreeService;
 @inject IJSRuntime JS;
 
+<div>
+    <input class="form-control" type="text" placeholder="Search..." @oninput="UpdateQuery"/>
+</div>
+
 <table class="table">
     <thead>
         <th>Degree</th>
         <th></th>
+        <th></th>
+        <th></th>
     </thead>
-    
-    @foreach(Degree degree in degrees) {
-        <tr>
-            <td>@degree.Name</td>
-            <div>
-                <td><button class="btn btn-primary" type="button" @onclick="() => ToggleEditDegree(degree)">Edit Degree</button></td>
-                <td><button class="btn btn-secondary" type="button">View Courses</button></td>
-                <td><button class="btn btn-danger" type="button" @onclick="() => DeleteDegree(degree.Id)">Delete</button>
+    <tbody>
+        @foreach(Degree degree in queriedDegrees) {
+            <tr>
+                <td>@degree.Name</td>
+                <td>
+                    <button class="btn btn-primary" type="button" @onclick="() => ToggleEditDegree(degree)">Edit Degree</button>
                 </td>
-            </div>
-        </tr>
-    }
+                <td>
+                    <button class="btn btn-secondary" type="button">View Courses</button>
+                </td>
+                <td>
+                    <button class="btn btn-danger" type="button" @onclick="() => DeleteDegree(degree.Id)">Delete</button> 
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
 
 @if (editDegreeDialog) {
@@ -33,6 +43,12 @@
 
     public bool editDegreeDialog = false;
     public Degree? selectedDegree { get; set; }
+    private IEnumerable<Degree> queriedDegrees =>
+        (!string.IsNullOrWhiteSpace(query)
+            ? degrees.Where(x => x.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+            : degrees
+        );
+    private string query { get; set; } = string.Empty;
 
 
 
@@ -84,6 +100,25 @@
         catch (Exception ex) {
             Console.WriteLine($"Could not edit degree. Ex: {ex}");
         }
+    }
+
+    private void UpdateQuery(ChangeEventArgs e)
+    {
+        if (e == null || e.Value == null)
+        {
+            query = string.Empty;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(e.Value.ToString()) == true)
+        {
+            query = string.Empty;
+        }
+        else
+        {
+            query = e.Value.ToString()!;
+        }
+        Console.WriteLine($"Query = {query}");
     }
 
 }

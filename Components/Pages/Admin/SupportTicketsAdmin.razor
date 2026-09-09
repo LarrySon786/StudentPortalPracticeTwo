@@ -5,6 +5,12 @@
 @using StudentPortalPracticeTwo.Database.Models.Enums
 @inject StudentPortalPracticeTwo.Components.Services.SupportTicketServices.SupportTicketService supportTicketService
 <div class="standard-card">
+
+    @* SEARCH BAR *@
+        <div>
+            <input class="form-control" placeholder="Search..." type="text" @oninput="UpdateQuery"/>
+        </div>
+
     @* Filter Buttons *@
         <div>
             <button class="btn @(filter == SupportStatus.Any ? "btn-primary" : "btn-secondary")" type="button" @onclick="() => ChangeFilter(SupportStatus.Any)">
@@ -21,10 +27,12 @@
             </button>
         </div>
 
-    @if (filteredTickets.Count() == 0) {
+    @if (queriedTickets.Count() == 0)
+    {
         <p>No Results.</p>
     }
     else {
+        @* DISPLAY tickets *@
         <table class="table">
             <thead>
                 <tr>
@@ -35,7 +43,8 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (SupportTicket ticket in filteredTickets) {
+                @foreach (SupportTicket ticket in queriedTickets)
+                {
                     <tr>
                         <td>@ticket.Student.FirstName @ticket.Student.LastName</td>
                         <td>@ticket.Title</td>
@@ -57,7 +66,15 @@
         (filter == SupportStatus.Any 
             ? tickets
             : tickets.Where(x => x.Status == filter));
+    public IEnumerable<SupportTicket> queriedTickets =>
+        (!string.IsNullOrWhiteSpace(query)
+            ? filteredTickets.Where(x => x.Title.ToLower().Contains(query) ||
+                x.Student.FirstName.ToLower().Contains(query) ||
+                x.Student.LastName.ToLower().Contains(query))
+            : filteredTickets
+        );
     public SupportStatus filter { get; set; } = SupportStatus.Submitted;
+    private string query { get; set; } = string.Empty;
 
 
     protected override async Task OnInitializedAsync() {
@@ -66,5 +83,19 @@
 
     private void ChangeFilter(SupportStatus newFilter) {
         filter = newFilter;
+    }
+
+    private void UpdateQuery(ChangeEventArgs e) {
+        if (e == null || e.Value == null) {
+            query = string.Empty;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(e.Value.ToString()) == true) {
+            query = string.Empty;
+        }
+        else {
+            query = e.Value.ToString()!.ToLower();
+        }
     }
 }

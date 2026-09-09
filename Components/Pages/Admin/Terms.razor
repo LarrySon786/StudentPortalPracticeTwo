@@ -12,6 +12,10 @@
 @* Button to add new term *@
 <button class="btn btn-primary" @onclick="() => ToggleEditTermDialog(EditMode.Create)">Create New Term</button>
 
+@* SEARCH *@
+<div>
+    <input type="text" @oninput="UpdateQuery" placeholder="Search..." class="form-control"/>
+</div>
 @* Display terms with options to edit *@
 <table class="table">
     <thead>
@@ -19,14 +23,18 @@
         <th></th>
     </thead>
     <tbody>
-        @if (terms.Count() == 0) {
-            <p>Loading Terms... If no terms appear, try adding a new term.</p>
+        @if (queriedTerms.Count() == 0)
+        {
+            <p>No Terms Found</p>
         }
         else {
-            @foreach(Term term in terms) {
+            @foreach (Term term in queriedTerms)
+            {
                 <tr>
                     <td>@term.DisplayName</td>
-                    <button class="btn btn-primary" @onclick="() => ToggleEditTermDialog(EditMode.Edit, term)">Edit Term</button>
+                    <td>
+                       <button class="btn btn-primary" @onclick="() => ToggleEditTermDialog(EditMode.Edit, term)">Edit Term</button>
+                    </td>
                 </tr>
             }
         }
@@ -44,6 +52,15 @@
     public EditMode editMode = EditMode.Create;
     public Term selectedTerm = new();
     List<Term> terms = new();
+
+    public IEnumerable<Term> queriedTerms =>
+        (!string.IsNullOrWhiteSpace(query)
+            ? terms.Where(x => x.Year.ToString().ToLower().Contains(query) ||
+                x.Season.ToString().ToLower().Contains(query)) 
+            : terms
+        );
+
+    private string query { get; set; } = string.Empty;
 
     protected async override Task OnInitializedAsync()
     {
@@ -70,6 +87,20 @@
         }
         catch (Exception ex) {
             Console.WriteLine($"Could not reload the terms. Ex: {ex}");
+        }
+    }
+
+    private void UpdateQuery(ChangeEventArgs e) {
+        if (e == null || e.Value == null) {
+            query = string.Empty;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(e.Value.ToString()) == true) {
+            query = string.Empty;
+        }
+        else {
+            query = e.Value.ToString()!.ToLower();
         }
     }
 

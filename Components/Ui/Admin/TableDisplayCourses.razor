@@ -3,6 +3,10 @@
 @inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService;
 @inject IJSRuntime JS
 
+<div>
+    <input class="form-control" type="text" placeholder="Search courses..." @oninput="UpdateQuery" />
+</div>
+
 <table class="table">
     <thead>
         <th>Course Code</th>
@@ -11,20 +15,22 @@
         <th></th>
     </thead>
 
-    @foreach (Course course in courses)
-    {
-        <tr>
-            <td>@course.Code</td>
-            <td>@course.Name</td>
-            <td>@course.Credits</td>
-            <div>
-                <td><button class="btn btn-primary" @onclick="() => ToggleEdit(course.Id)">Edit Course</button></td>
-                <td><button class="btn btn-secondary">View Degrees</button></td>
-                <td><button class="btn btn-secondary">View Sessions</button></td>
-                <td><button class="btn btn-danger" @onclick="() => HandleDelete(course.Id)">Delete</button></td>
-            </div>
-        </tr>
-    }
+    <tbody>
+        @foreach (Course course in queriedCourses)
+        {
+            <tr>
+                <td>@course.Code</td>
+                <td>@course.Name</td>
+                <td>@course.Credits</td>
+                <div>
+                    <td><button class="btn btn-primary" @onclick="() => ToggleEdit(course.Id)">Edit Course</button></td>
+                    <td><button class="btn btn-secondary">View Degrees</button></td>
+                    <td><button class="btn btn-secondary">View Sessions</button></td>
+                    <td><button class="btn btn-danger" @onclick="() => HandleDelete(course.Id)">Delete</button></td>
+                </div>
+            </tr>
+        }
+    </tbody>
 </table>
 
 @if (editCourseDialog) {
@@ -37,6 +43,15 @@
     public List<Course> courses = new();
     public bool editCourseDialog = false;
     public int selectedCourseId;
+    private string query { get; set; } = string.Empty;
+    private IEnumerable<Course> queriedCourses =>
+        string.IsNullOrWhiteSpace(query)
+            ? courses
+            : courses.Where(course =>
+                course.Code.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                course.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                course.Credits.ToString().Contains(query, StringComparison.OrdinalIgnoreCase)
+        );
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,5 +93,23 @@
         selectedCourseId = selectedId;
         if (editCourseDialog == false) editCourseDialog = true;
         else if (editCourseDialog == true) editCourseDialog = false;
+    }
+
+    private void UpdateQuery(ChangeEventArgs e)
+    {
+        if (e == null || e.Value == null)
+        {
+            query = string.Empty;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(e.Value.ToString()) == true)
+        {
+            query = string.Empty;
+        }
+        else
+        {
+            query = e.Value.ToString()!;
+        }
     }
 }
