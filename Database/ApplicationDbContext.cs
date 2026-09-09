@@ -9,6 +9,7 @@ using StudentPortalPracticeTwo.Database.Models.Users.Faculty;
 using StudentPortalPracticeTwo.Database.Models.Users.Students;
 using StudentPortalPracticeTwo.Database.Models.Users;
 using StudentPortalPracticeTwo.Database.Models.SupportTicket;
+using StudentPortalPracticeTwo.Database.Models.Authentication;
 
 namespace StudentPortalPracticeTwo.Database;
 
@@ -50,6 +51,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<DraftStudentProgram> DraftStudentProgram { get; set; }
     public DbSet<DraftAcademicHistoryModel> DraftAcademicHistoryDb { get; set; }
     public DbSet<DraftStudentEssayModel> DraftEssayDb { get; set; }
+    public DbSet<ApplicationVerificationCode> DraftVerificationCode { get; set; }
 
     // DEGREES 
     public DbSet<Degree> DegreeDb { get; set; }
@@ -219,6 +221,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithOne(x => x.DraftApplication)
             .HasForeignKey<DraftStudentEssayModel>(x => x.DraftApplicationId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ApplicationVerificationCode>()
+            .HasOne(x => x.DraftApplication)
+            .WithMany();
 
         // Degree
         modelBuilder.Entity<Degree>()

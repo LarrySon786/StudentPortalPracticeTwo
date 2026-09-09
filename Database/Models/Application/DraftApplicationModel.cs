@@ -28,4 +28,13 @@ public class DraftApplicationModel
 
     public DraftStudentEssayModel DraftEssays { get; set; } = new();
 
+    // Access and Expiration
+    public Guid? AccessToken { get; set; }
+
+    public DateTime? TokenExpires { get; set; }
+
+    public string? VerificationCodeHash { get; set; }
+
+    public DateTime? VerificationCodeExpires { get; set; }
+
 }

@@ -77,4 +77,17 @@ Both parties can resolve or open tickets
 - I had AI create an admin management interface using my previously designed INSTRUCTOR interface as an example. 
 This included creating an admin invite system, an admin invite email with token link, an admin registeration for accepting the email, 
 and the actual razor page with the sign-up for new admins.
+- I ensured every page on the app has the correct authorization roles.
+- I ensured that login redirects to correct dashboard based on roles. 
+- I had to refactor my email service to use Brevo instead of SendGrd because my free tier with SendGrid expired
+- I created a cookie auth system for student applications. When a user enters their email, it stores a hashed token
+in the database tied to their draft application (this happens for new applications and existing). The code then 
+sends an email with email service to the student to enter the verification code in the app. After entering the 
+verification code, a cookie is created and stored in the user browser. The page redirects to /apply. Whenever you are 
+in the /apply route, middleware checks your cookie for an application ID (it decodes the cookie). That application ID
+is then stored in a service that keeps track of the auth state (a singleton service). The apply page grabs that value
+and renders the entire draft application.
+
+
+
 

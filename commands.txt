@@ -1,7 +1,8 @@
 
 
 LEFT off
-
+- I finished creating cookie authentication for /apply route. It encrypts cookie and reads it on the routes
+- I finished refactoring code to use Brevo instead of SendGrid
 
 
 - TO DO

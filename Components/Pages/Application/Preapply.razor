@@ -13,70 +13,114 @@
         <img src="/images/csu-logo-no-background.webp" alt="CSU Logo" class="logo-image"/>
         
     </div>
-
+    
     <div class="standard-card">
         <h1 class="header-underline">Apply to Cascade Falls University</h1>
-        <p>
-            Enter an email to start your student application.
-            If you have already started an application with your email, you can resume
-            your application by inputing your email below.
-            Your progress will be saved and you can continue your form at any time
-        </p>
-        <p class="error-messages">@message</p>
+        @if (validateExistingApplication == false)
+        {
+            <p>
+                Enter an email to start your student application.
+                If you have already started an application with your email, you can resume
+                your application by inputing your email below.
+                Your progress will be saved and you can continue your form at any time
+            </p>
+            <p class="error-messages">@message</p>
 
-        <EditForm Model="preapply" OnValidSubmit="HandleSubmit">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+            <EditForm Model="preapply" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
 
-            <label class="form-label">Email</label>
-            <InputText class="form-control" @bind-Value="preapply.Email" />
-            <ValidationMessage For="@(() => preapply.Email)"/>
+                <label class="form-label">Email</label>
+                <InputText class="form-control" @bind-Value="preapply.Email" />
+                <ValidationMessage For="@(() => preapply.Email)"/>
 
 
-            @if (isSubmitting) {
-                <p style="color:green">Getting your application ready...</p>
+                @if (isSubmitting)
+                {
+                    <p style="color:green">Getting your application ready...</p>
+                }
+                else
+                {
+                    <button class="btn btn-primary" type="submit">Begin / Continue Application</button>
+                }
+            </EditForm>
+        }
+        else {
+            <p>A code has been sent to your email. Please enter that code to access your student application.</p>
+        
+            @if (error == "codeInvalid") {
+                <p class="danger">Code was invalid</p>
             }
-            else {
-                <button class="btn btn-primary" type="submit">Begin / Continue Application</button>
-            }
-        </EditForm>
+
+            @* HTTP submission form to verify code *@
+            <form method="Post" action="/application/login">
+                <label class="form-label">6-Digit Code</label>
+                <input type="text" name="Code" class="form-control"/> 
+                <input type="email" name="Email" value="@preapply.Email" hidden/>
+                <button class="btn btn-primary" type="submit">Proceed to Application</button>
+            </form>
+            
+        }
     </div>
 </div>
 
 
 @code {
-    PreapplyModel preapply = new();    
+    PreapplyModel preapply = new();
+    public int existingId { get; set; }
+    private string tokenCode { get; set; } = string.Empty;
     private string message = "";
+    [Parameter] public string? error { get; set; }
     bool isSubmitting = false;
-
-
+    bool validateExistingApplication = false;
 
     public async Task HandleSubmit() {
 
         try {
             isSubmitting = true;
+
+            @* Verify that no previous student has applied with this email *@
             var duplicateEmail = await finalApplication.GetByEmail(preapply.Email);
             if (duplicateEmail != null) {
                 message = "This email already has a student account. Please use a diffferent email";
+                isSubmitting = false;
                 return;
             }
+
+            @* Determine if application already exists, or is new *@
             DraftApplicationModel? existing = await data.GetByEmail(preapply.Email);
             if (existing == null) {
-                DraftApplicationModel newApplication = await data.CreateApplication(preapply.Email);
-                NavigationManager.NavigateTo($"/apply/{newApplication.Id}");
+                @* If application does NOT already exist *@
+                existing = await data.CreateApplication(preapply.Email);
             }
             else {
-                NavigationManager.NavigateTo($"/apply/{existing.Id}");
+                @* If application already exists *@
+                existingId = existing.Id;
             }
+            @* Send email to student *@
+            await data.SendApplicantVerificationEmail(preapply.Email);
+
+            validateExistingApplication = true;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Something went wrong. We could not find you application. Error code : {ex}");
             message = "Something went wrong searching for your application. Please try again.";
         }
-
         isSubmitting = false;
     }
+
+    @* private void ValidateExistingApplication() {
+
+        try {
+
+            NavigationManager.NavigateTo($"/apply/{existingId}");
+        }
+        catch(Exception ex) {
+            Console.WriteLine($"Could not access the application. Ex: {ex}");
+            message = "Could not access the appliation. Please try again."
+        }
+    } *@
 }
 
 

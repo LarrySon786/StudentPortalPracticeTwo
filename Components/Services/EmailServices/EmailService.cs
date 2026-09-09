@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Http.HttpResults;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 using StudentPortalPracticeTwo.Components.Services.Interfaces;
 using System;
 using System.Threading.Tasks;
+using brevo_csharp.Api;
+using brevo_csharp.Client;
+using brevo_csharp.Model;
 
 namespace StudentPortalPracticeTwo.Components.Services.EmailServices;
 
@@ -15,30 +15,42 @@ public class EmailService : IEmailService
 
     public EmailService()
     {
-        _api_key = Environment.GetEnvironmentVariable("SENDGRID_API_KEY")!;
-        _sender_email = Environment.GetEnvironmentVariable("SENDGRID_SENDER_EMAIL")!;
+        _api_key = Environment.GetEnvironmentVariable("BREVO_API_KEY")
+            ?? throw new InvalidOperationException("BREVO_API_KEY is not configured.");
+
+        _sender_email = Environment.GetEnvironmentVariable("BREVO_SENDER_EMAIL")
+            ?? throw new InvalidOperationException("BREVO_SENDER_EMAIL is not configured.");
     }
 
-    public async Task SendEmailAsync(string recipientEmail, string recipientName, string subject, string html)
+    public System.Threading.Tasks.Task SendEmailAsync(string recipientEmail, string recipientName, string subject, string html)
     {
         // EMAIL CONNECTION | FROM | TO
-        var client = new SendGridClient(_api_key);
-        var from = new EmailAddress(_sender_email, _from);
-        var to = new EmailAddress(recipientEmail, recipientName);
+        brevo_csharp.Client.Configuration.Default.ApiKey["api-key"] = _api_key;
+        var apiInstance = new TransactionalEmailsApi();
 
-        // EMAIL BODY CONTENT
-        var plainTextContent = HtmlToPlainText(html);
+        // SENDER
+        var sender = new SendSmtpEmailSender(_from, _sender_email);
+        // RECIPIENT
+        var recipient = new SendSmtpEmailTo(recipientEmail, recipientName);
 
         // SENDS THE EMAIL
-        var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, html);
-        var response = await client.SendEmailAsync(msg);
+        var email = new SendSmtpEmail()
+        {
+            Sender = sender,
+            To = new List<SendSmtpEmailTo>
+            {
+                recipient
+            },
+            Subject = subject,
+            HtmlContent = html,
+            TextContent = HtmlToPlainText(html) // turns html into plain text for non-supported html email readers
+        };
+
+        var response = apiInstance.SendTransacEmail(email);
 
         // Error Handling
-        Console.WriteLine(response.StatusCode);
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new Exception($"Email failed: {response.StatusCode}");
-        }
+        Console.WriteLine(response.MessageId);
+        return System.Threading.Tasks.Task.CompletedTask;
     }
 
     private string HtmlToPlainText(string html)

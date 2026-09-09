@@ -32,7 +32,6 @@
 
     protected override async Task OnInitializedAsync() {
         @* GET user for page *@
-        Console.WriteLine($"RECEIVED TOKEN LENGTH: {Token?.Length}");
         user = await userService.GetUserById(int.Parse(UserId));
         if (user == null) navigationManager.NavigateTo("/login");
     }
