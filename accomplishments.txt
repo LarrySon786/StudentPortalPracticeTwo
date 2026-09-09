@@ -87,6 +87,7 @@ verification code, a cookie is created and stored in the user browser. The page 
 in the /apply route, middleware checks your cookie for an application ID (it decodes the cookie). That application ID
 is then stored in a service that keeps track of the auth state (a singleton service). The apply page grabs that value
 and renders the entire draft application.
+- I made sure all admin pages have search query functionality
 
 
 

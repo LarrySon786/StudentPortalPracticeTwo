@@ -33,6 +33,9 @@ else
         <button class="btn btn-primary" type="button" @onclick="OpenCreateSessionDialog">Create a Class Session</button>
         <div>
             <InputCheckbox class="form-checkbox" @bind-Value="displayArchived"/><label class="form-label"> Display Archived Sessions</label>
+            <div>
+                <input class="form-control" type="text" placeholder="Search sessions..." @oninput="UpdateSessionQuery" />
+            </div>
             <table class="table">
                 <thead>
                     <tr>
@@ -46,7 +49,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (ClassSession session in faculty.ClassSessions.Where(x => x.ArchivedAndClosed == displayArchived))
+                    @foreach (ClassSession session in filteredSessions)
                     {
                         <tr>
                             <td>@session.Course.Code</td>
@@ -83,6 +86,18 @@ else
     public bool openSessionDialog { get; set; } = false;
     public bool editMode { get; set; } = false;
     public bool displayArchived { get; set; } = false;
+    private string sessionQuery { get; set; } = string.Empty;
+    private IEnumerable<ClassSession> filteredSessions =>
+        string.IsNullOrWhiteSpace(sessionQuery)
+            ? faculty?.ClassSessions.Where(x => x.ArchivedAndClosed == displayArchived) ?? Enumerable.Empty<ClassSession>()
+            : (faculty?.ClassSessions.Where(x => x.ArchivedAndClosed == displayArchived) ?? Enumerable.Empty<ClassSession>())
+                .Where(session =>
+                    session.Course.Code.Contains(sessionQuery, StringComparison.OrdinalIgnoreCase) ||
+                    session.Course.Name.Contains(sessionQuery, StringComparison.OrdinalIgnoreCase) ||
+                    (session.Term != null && session.Term.DisplayName.Contains(sessionQuery, StringComparison.OrdinalIgnoreCase)) ||
+                    session.StartDate.ToString().Contains(sessionQuery, StringComparison.OrdinalIgnoreCase) ||
+                    session.EndDate.ToString().Contains(sessionQuery, StringComparison.OrdinalIgnoreCase)
+                );
 
     protected override async Task OnInitializedAsync() {
         user = await authService.GetCurrentUserAsync();
@@ -152,5 +167,16 @@ else
 
         await classSessionService.DeleteClassSession(session.Id);
         await ReloadSessions();
+    }
+
+    private void UpdateSessionQuery(ChangeEventArgs e)
+    {
+        if (e == null || e.Value == null)
+        {
+            sessionQuery = string.Empty;
+            return;
+        }
+
+        sessionQuery = string.IsNullOrWhiteSpace(e.Value.ToString()) ? string.Empty : e.Value.ToString()!;
     }
 }

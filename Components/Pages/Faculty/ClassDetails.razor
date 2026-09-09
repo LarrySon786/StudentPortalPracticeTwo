@@ -51,6 +51,9 @@ else {
     @* Assignment Management - Display all class assignments *@
     <div>
         <h2>Assignments</h2>
+        <div>
+            <input class="form-control" type="text" placeholder="Search assignments..." @oninput="UpdateAssignmentQuery" />
+        </div>
         @if (session.ArchivedAndClosed == false) {
             <button class="btn btn-primary" type="button" @onclick="OpenCreateDialog">Create New Assignment</button>
         }
@@ -64,7 +67,7 @@ else {
                 </tr>
             </thead>
             <tbody>
-                @foreach (Assignments assignment in allAssignments) {
+                @foreach (Assignments assignment in filteredAssignments) {
                     <tr>
                         <td>@assignment.Name</td>
                         <td>@assignment.TotalPoints</td>
@@ -89,6 +92,9 @@ else {
     @if (session.ClassStarted == false && session.ArchivedAndClosed == false) {
         <div>
             <h2>Registered Students</h2>
+            <div>
+                <input class="form-control" type="text" placeholder="Search registered students..." @oninput="UpdateRegisteredStudentQuery" />
+            </div>
             <table class="table">
                 <thead>
                     <tr>
@@ -96,7 +102,7 @@ else {
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (UserProgramModel programModel in session.RegisteredStudentProgramModels)
+                    @foreach (UserProgramModel programModel in filteredRegisteredStudents)
                     {
                         @if (programModel.User != null)
                         {
@@ -115,6 +121,9 @@ else {
         @* Student Management *@
         <div>
             <h2>Students</h2>
+            <div>
+                <input class="form-control" type="text" placeholder="Search current students..." @oninput="UpdateCurrentStudentQuery" />
+            </div>
             <table class="table">
                 <thead>
                     <tr>
@@ -124,7 +133,7 @@ else {
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (UserProgramModel programModel in session.StudentProgramModels) {
+                    @foreach (UserProgramModel programModel in filteredCurrentStudents) {
                         @if (programModel.User != null) {
                             <tr>
                                 <td>@programModel.User!.FirstName @programModel.User.LastName</td>
@@ -239,7 +248,43 @@ else {
     public UserModel? user { get; set; } // Faculty member --> Validates that this faculty member is instructor to this session. Otherwise, redirect
     public ClassSession? session { get; set; } // Class Session Details
     private string message = string.Empty; // Error handling
+    private string assignmentQuery { get; set; } = string.Empty;
+    private string registeredStudentQuery { get; set; } = string.Empty;
+    private string currentStudentQuery { get; set; } = string.Empty;
 
+    private IEnumerable<Assignments> filteredAssignments =>
+        string.IsNullOrWhiteSpace(assignmentQuery)
+            ? allAssignments
+            : allAssignments.Where(assignment =>
+                assignment.Name.Contains(assignmentQuery, StringComparison.OrdinalIgnoreCase) ||
+                assignment.TotalPoints.ToString().Contains(assignmentQuery, StringComparison.OrdinalIgnoreCase)
+            );
+
+    private IEnumerable<UserProgramModel> filteredRegisteredStudents =>
+        session == null
+            ? Enumerable.Empty<UserProgramModel>()
+            : string.IsNullOrWhiteSpace(registeredStudentQuery)
+                ? session.RegisteredStudentProgramModels
+                : session.RegisteredStudentProgramModels.Where(programModel =>
+                    programModel.User != null && (
+                        programModel.User.FirstName.Contains(registeredStudentQuery, StringComparison.OrdinalIgnoreCase) ||
+                        programModel.User.LastName.Contains(registeredStudentQuery, StringComparison.OrdinalIgnoreCase) ||
+                        $"{programModel.User.FirstName} {programModel.User.LastName}".Contains(registeredStudentQuery, StringComparison.OrdinalIgnoreCase)
+                    )
+                );
+
+    private IEnumerable<UserProgramModel> filteredCurrentStudents =>
+        session == null
+            ? Enumerable.Empty<UserProgramModel>()
+            : string.IsNullOrWhiteSpace(currentStudentQuery)
+                ? session.StudentProgramModels
+                : session.StudentProgramModels.Where(programModel =>
+                    programModel.User != null && (
+                        programModel.User.FirstName.Contains(currentStudentQuery, StringComparison.OrdinalIgnoreCase) ||
+                        programModel.User.LastName.Contains(currentStudentQuery, StringComparison.OrdinalIgnoreCase) ||
+                        $"{programModel.User.FirstName} {programModel.User.LastName}".Contains(currentStudentQuery, StringComparison.OrdinalIgnoreCase)
+                    )
+                );
 
     @* ASSIGNMENT MANAGEMENT *@
     public Assignments selectedAssignment { get; set; } = new();
@@ -272,6 +317,39 @@ else {
 
     public async Task ReloadAllAssignments() {
         allAssignments = await assignmentService.GetAllAssignmentsByClassSession(session!.Id);
+    }
+
+    private void UpdateAssignmentQuery(ChangeEventArgs e)
+    {
+        if (e == null || e.Value == null)
+        {
+            assignmentQuery = string.Empty;
+            return;
+        }
+
+        assignmentQuery = string.IsNullOrWhiteSpace(e.Value.ToString()) ? string.Empty : e.Value.ToString()!;
+    }
+
+    private void UpdateRegisteredStudentQuery(ChangeEventArgs e)
+    {
+        if (e == null || e.Value == null)
+        {
+            registeredStudentQuery = string.Empty;
+            return;
+        }
+
+        registeredStudentQuery = string.IsNullOrWhiteSpace(e.Value.ToString()) ? string.Empty : e.Value.ToString()!;
+    }
+
+    private void UpdateCurrentStudentQuery(ChangeEventArgs e)
+    {
+        if (e == null || e.Value == null)
+        {
+            currentStudentQuery = string.Empty;
+            return;
+        }
+
+        currentStudentQuery = string.IsNullOrWhiteSpace(e.Value.ToString()) ? string.Empty : e.Value.ToString()!;
     }
 
     public void OpenCreateDialog() {
