@@ -88,7 +88,10 @@ in the /apply route, middleware checks your cookie for an application ID (it dec
 is then stored in a service that keeps track of the auth state (a singleton service). The apply page grabs that value
 and renders the entire draft application.
 - I made sure all admin pages have search query functionality
-
+- I used AI to copy the query format I had been using and apply that query format to the faculty pages for search filters
+- I used AI to copy the query format again for student search filters. All queryies are inplace throughout website
+- I created an admin and faculty navigation menu. Actually, I reused the student navigation but made differentiations between
+authorized routes and links
 
 
 

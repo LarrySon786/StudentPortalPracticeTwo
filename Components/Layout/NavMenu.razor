@@ -1,11 +1,10 @@
-@using Microsoft.VisualBasic
 @using StudentPortalPracticeTwo.Database.Models.Users
 @inject NavigationManager navigationManager
 
 
 <div class="left-tab @(NavOpen ? "" : "closed")">
     <nav>
-        @* Student Profile *@
+        @* User Profile *@
         @if (user != null) {
             <div class="account-container">
                 <div class="profile-pic">
@@ -25,28 +24,85 @@
             </div>
         }
         @* Navigation Links *@
-        <div class="nav-group">
-            <div class="nav-item" style="border-top:1px solid var(--text);">
-                <NavLink href="/dashboard">
-                    Student Dashboard
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink href="/dashboard/my-classes">
-                    My Classes
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink href="/dashboard/degree-progress">
-                    Degree Progress
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink href="/dashboard/support">
-                    Student Support
-                </NavLink>
-            </div>
-        </div>
+        <AuthorizeView Roles="Student">
+            <Authorized >
+                <div class="nav-group">
+                    <div class="nav-item" style="border-top:1px solid var(--text);">
+                        <NavLink href="/dashboard">
+                            Student Dashboard
+                        </NavLink>
+                    </div>
+                    <div class="nav-item">
+                        <NavLink href="/dashboard/my-classes">
+                            My Classes
+                        </NavLink>
+                    </div>
+                    <div class="nav-item">
+                        <NavLink href="/dashboard/degree-progress">
+                            Degree Progress
+                        </NavLink>
+                    </div>
+                    <div class="nav-item">
+                        <NavLink href="/dashboard/support">
+                            Student Support
+                        </NavLink>
+                    </div>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Faculty">
+            <Authorized>
+                <div class="nav-group">
+                    <div class="nav-item" style="border-top:1px solid var(--text);">
+                        <NavLink href="/faculty">
+                            Faculty Dashboard
+                        </NavLink>
+                    </div>
+                    <div class="nav-item" style="border-top:1px solid var(--text);">
+                        <NavLink href="/faculty/classes">
+                            My Class Sessions
+                        </NavLink>
+                    </div>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <div class="nav-group">
+                    <div class="nav-item" style="border-top:1px solid var(--text);">
+                        <NavLink href="/admin">
+                            Admin Dashboard
+                        </NavLink>
+                    </div>
+                    <div class="nav-item" style="border-top:1px solid var(--text);">
+                        <NavLink href="/admin/students">
+                            CSU Students
+                        </NavLink>
+                    </div>
+                    <div class="nav-item" style="border-top:1px solid var(--text);">
+                        <NavLink href="/admin/applicants">
+                            CSU Applicants
+                        </NavLink>
+                    </div>
+                    <div class="nav-item" style="border-top:1px solid var(--text);">
+                        <NavLink href="/admin/faculty">
+                            CSU Faculty
+                        </NavLink>
+                    </div>
+                    <div class="nav-item" style="border-top:1px solid var(--text);">
+                        <NavLink href="/degree-listings">
+                            Degree Listings
+                        </NavLink>
+                    </div>
+                    <div class="nav-item" style="border-top:1px solid var(--text);">
+                        <NavLink href="/admin/support">
+                            Support Tickets
+                        </NavLink>
+                    </div>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        
     </nav>
 
     @* Logout | Admin Portal Link *@

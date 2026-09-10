@@ -10,29 +10,34 @@
 
 @* Page to manage student support tickets *@
 
-@if (user ==null) {
+@if (user == null)
+{
     <p>Loading tickets...</p>
 }
-else {
+else
+{
 
 
     <div class="standard-card">
         @* Create Support Ticket *@
         <div>
-            @if (CreateTicket == false) {
+            @if (CreateTicket == false)
+            {
                 <button class="btn btn-primary" type="button" @onclick="ToggleCreateTicket">Create New Ticket</button>
             }
-            @if (CreateTicket == true) {
+            @if (CreateTicket == true)
+            {
                 <EditForm Model="Response" OnValidSubmit="HandleCreateTicket" FormName="Create Ticket">
 
                     @* Select Topic *@
                     <label class="form-label">*Topic</label>
                     <InputSelect class="form-select" @bind-Value="SupportTicketDto.Topic">
-                        @foreach (var topic in Enum.GetValues<SupportTopic>()) {
+                        @foreach (var topic in Enum.GetValues<SupportTopic>())
+                        {
                             <option value="@topic">@topic.GetDisplayName()</option>
                         }
                     </InputSelect>
-                    <ValidationMessage For="(() => SupportTicketDto.Topic)"/>
+                    <ValidationMessage For="(() => SupportTicketDto.Topic)" />
 
                     @* Title *@
                     <label class="form-label">*Title</label>
@@ -40,7 +45,7 @@ else {
                     <ValidationMessage For="(() => SupportTicketDto.Title)" />
 
                     <label class="form-label">*Student Inquiry</label>
-                    <InputText class="form-control" @bind-Value="Response.StudentTicketInput"/>
+                    <InputText class="form-control" @bind-Value="Response.StudentTicketInput" />
                     <ValidationMessage For="(() => Response.StudentTicketInput)" />
 
                     <button class="btn btn-primary" type="submit">Create New Ticket</button>
@@ -49,6 +54,9 @@ else {
         </div>
 
         @* Populate existing ticket links *@
+        <div>
+            <input class="form-control" placeholder="Search tickets..." @oninput="UpdateTicketQuery" />
+        </div>
         <div>
             <table class="table">
                 <thead>
@@ -59,7 +67,8 @@ else {
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (SupportTicket ticket in StudentTickets) {
+                    @foreach (SupportTicket ticket in QueriedTickets)
+                    {
                         <tr>
                             <td>@ticket.Title</td>
                             <td>@ticket.Status.GetDisplayName()</td>
@@ -81,33 +90,48 @@ else {
     public SupportTicketDto SupportTicketDto { get; set; } = new();
     private bool CreateTicket { get; set; } = false;
     public UserModel? user { get; set; }
+    private string ticketQuery = string.Empty;
 
-    protected override async Task OnInitializedAsync() {
+    private IEnumerable<SupportTicket> QueriedTickets => StudentTickets.Where(ticket =>
+        string.IsNullOrWhiteSpace(ticketQuery) ||
+        ticket.Title.Contains(ticketQuery, StringComparison.OrdinalIgnoreCase) ||
+        ticket.Status.GetDisplayName().Contains(ticketQuery, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
         user = await authService.GetCurrentUserAsync();
-        if (user == null) {
+        if (user == null)
+        {
             navigationManager.NavigateTo("/login", forceLoad: true);
             return;
         }
         await ReloadTickets();
     }
 
-    private void ToggleCreateTicket() {
+    private void ToggleCreateTicket()
+    {
         CreateTicket = !CreateTicket;
     }
 
-    private async Task HandleCreateTicket() {
-        try {
+    private void UpdateTicketQuery(ChangeEventArgs args) => ticketQuery = args.Value?.ToString() ?? string.Empty;
+
+    private async Task HandleCreateTicket()
+    {
+        try
+        {
             if (user == null) return;
             await supportTicketService.CreateNewSupportTicket(SupportTicketDto, Response, user.Id);
             CreateTicket = false;
             await ReloadTickets();
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             Console.WriteLine($"Could not create new ticket.Ex: {ex}");
         }
     }
 
-    private async Task ReloadTickets() {
+    private async Task ReloadTickets()
+    {
         if (user == null) return;
         StudentTickets = await supportTicketService.GetTicketByStudentId(user.Id);
     }

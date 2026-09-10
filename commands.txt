@@ -1,25 +1,22 @@
 
 
 LEFT off
-- I finished creating cookie authentication for /apply route. It encrypts cookie and reads it on the routes
-- I finished refactoring code to use Brevo instead of SendGrid
+- I finished setting up the admin and faculty layouts
+- I finished setting up all queries on the website
 
 
 - TO DO
-- Set up search bar for all searchable tables
 - Polish CSS
 - Polish validation throughout site
 - Server side validation on ALL forms
 - I created a test Project for software testing
 - Add Pathfinding on all pages. Basically the path to your current page appears:
 /admin/students/{student_name} ||| Users can select 'students' to return to '/admin/students' or 'admin' to return to '/admin'
-- Student Support Tickets
 - Student Update Account Details
 - Admin: Logs of edits made on students, courses, and degrees.
 - Admin: Logs of edits made on accounts by students.
-- Make EMAIL unique for draft applications and student accounts
 - Set up PDF Creator | Student Applications | Student Summaries | Student Transcripts (CSU editions)
-- Real DB connection and updates
+- Real DB connection and updates (in production)
 - Deploy Website on Azure
 
 

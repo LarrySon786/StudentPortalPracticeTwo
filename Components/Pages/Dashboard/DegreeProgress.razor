@@ -167,6 +167,9 @@ else {
                     <InputCheckbox @bind-Value="displayAllCourses" />
                     Courses In My Program ONLY
                 </label>
+                <div>
+                    <input class="form-control" type="text" placeholder="Search courses..." @oninput="UpdateCourseQuery" />
+                </div>
                 <table class="table">
                     <thead>
                         <tr>
@@ -178,7 +181,7 @@ else {
                     </thead>
                     <tbody>
                         @if (displayAllCourses && coursesInProgram != null) {
-                                @foreach(Course course in coursesInProgram) {
+                                @foreach(Course course in QueriedCourses) {
                                     <tr>
                                         <td>@course.Code</td>
                                         <td>@course.Name</td>
@@ -192,7 +195,7 @@ else {
                                 }
                         }
                         else if (!displayAllCourses && allCourses != null) {
-                            @foreach (Course course in allCourses)
+                            @foreach (Course course in QueriedCourses)
                             {
                                 <tr>
                                     <td>@course.Code</td>
@@ -312,6 +315,12 @@ else {
     public IEnumerable<Course>? allCourses { get; set; }
     public IEnumerable<Course>? coursesInProgram => allCourses?
         .Where(x => user!.MyProgram.MyDegree!.Courses.Any(c => c.Code == x.Code));
+    private string courseQuery = string.Empty;
+    public IEnumerable<Course> QueriedCourses => (displayAllCourses ? coursesInProgram ?? Enumerable.Empty<Course>() : allCourses ?? Enumerable.Empty<Course>())
+        .Where(course =>
+            string.IsNullOrWhiteSpace(courseQuery) ||
+            course.Code.Contains(courseQuery, StringComparison.OrdinalIgnoreCase) ||
+            course.Name.Contains(courseQuery, StringComparison.OrdinalIgnoreCase));
     public List<ClassSession> sessions { get; set; } = new();
     public bool IsRegistering { get; set; } = false;
     public bool displayAllCourses { get; set; } = false;
@@ -343,6 +352,8 @@ else {
     public void ToggleBeginRegisteration() { // Toggles the registeration table
         IsRegistering = !IsRegistering;
     }
+
+    private void UpdateCourseQuery(ChangeEventArgs args) => courseQuery = args.Value?.ToString() ?? string.Empty;
 
     public async Task RegisterCourses() { // This will finalize and save a student's selected courses they want to register.
         try
