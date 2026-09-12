@@ -58,6 +58,8 @@
     <UserDemographics user="User" />
 
 }
+
+@* Students *@
 else if (Tab == TabSelected.EnrolledPrograms && User is Student student) {
     <EnrolledProgram student="student"/>
 }
@@ -65,7 +67,7 @@ else if (Tab == TabSelected.CurrentCourses && User is Student studentOne)
 {
     <CurrentCourse student="studentOne"/>
 }
-else if (Tab == TabSelected.DegreeProgress && User is Student studentTwo)
+else if (Tab == TabSelected.DegreeProgress && User is Student studentTwo && Viewer is AdminModel)
 {
     <DegreeProgress student="studentTwo"/>
 }
@@ -82,7 +84,8 @@ else if (Tab == TabSelected.ClassSessions && User is Faculty faculty) {
 @code {
     [Parameter] public EditMode Mode { get; set; } = EditMode.View;
     [Parameter] public EventCallback OnSavedChanges { get; set; }
-    [Parameter] required public UserModel User { get; set; }
+    [Parameter] required public UserModel User { get; set; } // The person the page described (admin, student, or faculty)
+    public UserModel? Viewer { get; set; } // Viewer is the person looking at the page (admin, student, or faculty)
     public TabSelected Tab{ get; set; } = TabSelected.Demographics;
 
     public enum TabSelected {
@@ -92,6 +95,15 @@ else if (Tab == TabSelected.ClassSessions && User is Faculty faculty) {
         DegreeProgress,
         Other,
         ClassSessions
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Viewer = await authService.GetCurrentUserAsync();
+        if (Viewer == null) {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
     }
 
 

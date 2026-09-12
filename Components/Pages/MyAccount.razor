@@ -1,0 +1,41 @@
+@page "/my-account"
+@rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Components.Ui.Admin.Users
+@using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+@using StudentPortalPracticeTwo.Database.Models.Enums
+@inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService
+
+@if (student == null) {
+    <p>No student account found</p>
+}
+else {
+    <div>
+        <UserDashboardAdminView Mode="EditMode.View" User="user" />
+    </div>
+}
+
+
+
+
+
+
+@code {
+    public UserModel? user { get; set; }
+    public Student? student { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        user = await authService.GetCurrentUserAsync();
+        if (user == null) {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+        student = await studentService.GetStudentById(user.Id);
+        if (student == null)
+        {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+
+    }
+}
