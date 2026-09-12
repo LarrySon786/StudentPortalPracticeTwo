@@ -5,11 +5,20 @@
 @using StudentPortalPracticeTwo.Database.Models.Users.Students
 @using StudentPortalPracticeTwo.Database.Models.Degrees
 @using StudentPortalPracticeTwo.Components.Services.Extensions
+@using StudentPortalPracticeTwo.Database.Models.Ui
+@using StudentPortalPracticeTwo.Components.Ui
 @inject StudentPortalPracticeTwo.Components.Services.Users.Students.RegisterCourses registerCourses
 @inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService
 @inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService
 
 @* This page is to view all Degree Progress *@
+
+<div>
+    <BreadCrumbs Crumbs="crumbs"/>
+    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
+</div>
+
+
 @if (user == null || user.MyProgram == null) {
     <p>No Program found. Please sign-up for an academic program to monitor degree progress</p>
 }
@@ -326,6 +335,17 @@ else {
     public bool displayAllCourses { get; set; } = false;
     public bool chooseSessions { get; set; }
     public Course? selectedCourse { get; set; }
+    public List<BreadCrumbModel> crumbs { get; set; } = new() // Crumbs passed into component
+    {
+        new BreadCrumbModel {
+            Name= "Student Dashboard",
+            Link="/dashboard",
+        },
+        new BreadCrumbModel {
+            Name="My Degree Progress",
+            IsCurrent = true,
+        }
+    };
 
     protected override async Task OnInitializedAsync() {
         try {

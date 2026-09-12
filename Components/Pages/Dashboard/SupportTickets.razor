@@ -5,10 +5,17 @@
 @using StudentPortalPracticeTwo.Database.Models.Enums
 @using StudentPortalPracticeTwo.Components.Services.Extensions
 @using StudentPortalPracticeTwo.Database.Models.Users
+@using StudentPortalPracticeTwo.Database.Models.Ui
+@using StudentPortalPracticeTwo.Components.Ui
 @inject StudentPortalPracticeTwo.Components.Services.SupportTicketServices.SupportTicketService supportTicketService
-
+ 
 
 @* Page to manage student support tickets *@
+
+<div>
+    <BreadCrumbs Crumbs="crumbs"/>
+    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
+</div>
 
 @if (user == null)
 {
@@ -91,6 +98,17 @@ else
     private bool CreateTicket { get; set; } = false;
     public UserModel? user { get; set; }
     private string ticketQuery = string.Empty;
+    public List<BreadCrumbModel> crumbs { get; set; } = new() // Crumbs passed into component
+    {
+        new BreadCrumbModel {
+            Name= "Student Dashboard",
+            Link="/dashboard",
+        },
+        new BreadCrumbModel {
+            Name="Support Tickets",
+            IsCurrent = true,
+        }
+    };
 
     private IEnumerable<SupportTicket> QueriedTickets => StudentTickets.Where(ticket =>
         string.IsNullOrWhiteSpace(ticketQuery) ||

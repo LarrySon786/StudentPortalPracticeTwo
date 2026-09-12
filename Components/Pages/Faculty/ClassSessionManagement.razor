@@ -7,6 +7,8 @@
 @using StudentPortalPracticeTwo.Database.Models.Users
 @using StudentPortalPracticeTwo.Database.Models.Users.Faculty
 @using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Ui
+@using StudentPortalPracticeTwo.Components.Ui
 @inject FacultyService facultyService
 @inject ClassSessionService classSessionService
 @inject IJSRuntime JS
@@ -21,6 +23,11 @@
 @* The instructor should be able to add grades for the student *@
 
 @* INCOMPLETE *@
+
+<div>
+    <BreadCrumbs Crumbs="crumbs" />
+    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
+</div>
 
 @if (faculty == null)
 {
@@ -98,6 +105,17 @@ else
                     session.StartDate.ToString().Contains(sessionQuery, StringComparison.OrdinalIgnoreCase) ||
                     session.EndDate.ToString().Contains(sessionQuery, StringComparison.OrdinalIgnoreCase)
                 );
+    public List<BreadCrumbModel> crumbs { get; set; } = new() // Crumbs passed into component
+    {
+        new BreadCrumbModel {
+            Name= "Faculty Dashboard",
+            Link="/faculty",
+        },
+        new BreadCrumbModel {
+            Name="My Class Sessions",
+            IsCurrent = true,
+        }
+    };
 
     protected override async Task OnInitializedAsync() {
         user = await authService.GetCurrentUserAsync();

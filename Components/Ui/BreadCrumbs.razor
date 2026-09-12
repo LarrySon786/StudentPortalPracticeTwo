@@ -1,0 +1,38 @@
+@using StudentPortalPracticeTwo.Database.Models.Ui
+
+
+
+<div>
+    <p>
+        @* Iterate through breadcrumbs *@
+        @for (int i = 0; i < Crumbs.Count; i++)
+        {
+            @* Select crumb *@
+            var crumb = Crumbs[i];
+
+            @* If link existis, populate link *@
+            @if (crumb.Link is not null) 
+            {
+                <a href="@crumb.Link">@crumb.Name</a>
+            }
+            
+            @* If no link exists, only populate name *@
+            else 
+            {
+                <span>@crumb.Name</span>
+            }
+
+            @if (i < Crumbs.Count - 1)
+            {
+                <span> / </span>
+            }
+        }
+    </p>
+    
+</div>
+
+
+
+@code {
+    [Parameter] public List<BreadCrumbModel> Crumbs { get; set; } = new();
+}

@@ -1,6 +1,7 @@
 
 
 LEFT off
+- I finished adding breadcrumbs and return links throughout the app.
 - I finished setting up the admin and faculty layouts
 - I finished setting up all queries on the website
 
@@ -10,15 +11,12 @@ LEFT off
 - Polish validation throughout site
 - Server side validation on ALL forms
 - I created a test Project for software testing
-- Add Pathfinding on all pages. Basically the path to your current page appears:
-/admin/students/{student_name} ||| Users can select 'students' to return to '/admin/students' or 'admin' to return to '/admin'
 - Student Update Account Details
 - Admin: Logs of edits made on students, courses, and degrees.
 - Admin: Logs of edits made on accounts by students.
 - Set up PDF Creator | Student Applications | Student Summaries | Student Transcripts (CSU editions)
 - Real DB connection and updates (in production)
 - Deploy Website on Azure
-
 
 
 

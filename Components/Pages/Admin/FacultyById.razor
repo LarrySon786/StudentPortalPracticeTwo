@@ -4,7 +4,13 @@
 @using StudentPortalPracticeTwo.Components.Ui.Admin.Users
 @using StudentPortalPracticeTwo.Database.Models.Users.Faculty
 @using StudentPortalPracticeTwo.Database.Models.Enums
+@using StudentPortalPracticeTwo.Database.Models.Ui
+@using StudentPortalPracticeTwo.Components.Ui
 @inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
+
+<div>
+    <BreadCrumbs Crumbs="crumbs" />
+</div>
 
 @if (faculty == null) {
     <p>Loading user information</p>
@@ -25,6 +31,21 @@ else {
 @code {
     [Parameter] public int Id { get; set; }
     public Faculty? faculty { get; set; }
+    public List<BreadCrumbModel> crumbs { get; set; } = new() // Crumbs passed into component
+    {
+        new BreadCrumbModel {
+            Name= "Admin Dashboard",
+            Link="/admin",
+        },
+        new BreadCrumbModel {
+            Name="Faculty",
+            Link="/admin/faculty"
+        },
+        new BreadCrumbModel {
+            Name = "Profile",
+            IsCurrent = true,
+        }
+    };
 
     protected override async Task OnInitializedAsync() {
         faculty = await facultyService.GetById(Id);

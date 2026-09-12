@@ -4,10 +4,16 @@
 @using StudentPortalPracticeTwo.Database.Models.Degrees
 @using StudentPortalPracticeTwo.Database.Models.Enums
 @using StudentPortalPracticeTwo.Components.Ui.Admin
+@using StudentPortalPracticeTwo.Database.Models.Ui
+@using StudentPortalPracticeTwo.Components.Ui
 @inject StudentPortalPracticeTwo.Components.Services.Admin.TermService termService
 
 
 <h1>Scheduled Terms</h1>
+<div>
+    <BreadCrumbs Crumbs="crumbs" />
+    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
+</div>
 
 @* Button to add new term *@
 <button class="btn btn-primary" @onclick="() => ToggleEditTermDialog(EditMode.Create)">Create New Term</button>
@@ -61,6 +67,17 @@
         );
 
     private string query { get; set; } = string.Empty;
+    public List<BreadCrumbModel> crumbs { get; set; } = new() // Crumbs passed into component
+    {
+        new BreadCrumbModel {
+            Name= "Admin Dashboard",
+            Link="/admin",
+        },
+        new BreadCrumbModel {
+            Name="Existing Students",
+            IsCurrent = true,
+        }
+    };
 
     protected async override Task OnInitializedAsync()
     {

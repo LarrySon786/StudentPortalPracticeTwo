@@ -92,6 +92,8 @@ and renders the entire draft application.
 - I used AI to copy the query format again for student search filters. All queryies are inplace throughout website
 - I created an admin and faculty navigation menu. Actually, I reused the student navigation but made differentiations between
 authorized routes and links
+- I added breadcrumbs and pathfinding to the application. Every page after login should have them
+
 
 
 

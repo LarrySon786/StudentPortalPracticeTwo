@@ -1,7 +1,9 @@
 @page "/admin/students"
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
+@using StudentPortalPracticeTwo.Components.Ui
 @using StudentPortalPracticeTwo.Database.Models.Users.Students
+@using StudentPortalPracticeTwo.Database.Models.Ui
 @inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService;
 @inject NavigationManager navigationManager;
 
@@ -12,8 +14,14 @@
 @* Admins should be able to view student's currently enrolled programs *@
 @* Admins should be able to view student's completed classes, transfer credits, and relevant details (non-editable) *@
 
+
+
 <h1>Existing Students</h1>
-<a href="/admin" class="btn btn-link">⬅ Return</a>
+<div>
+    <BreadCrumbs Crumbs="crumbs"/>
+    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
+</div>
+
 
 @* Search bar to query all existing students *@
 <div class="search-bar">
@@ -62,6 +70,17 @@
     public int pageSize { get; set; } = 9; // Can change to display more/less students on each table page
     public int currPage { get; set; } = 1; // Default starting page is 1
     public int totalPages { get; set; } // Total pages is calculated by method 'UpdateTotalPages()'
+    public List<BreadCrumbModel> crumbs { get; set; } = new() // Crumbs passed into component
+    {
+        new BreadCrumbModel {
+            Name= "Admin Dashboard",
+            Link="/admin",
+        },
+        new BreadCrumbModel {
+            Name="Existing Students",
+            IsCurrent = true,
+        }
+    };
 
     public IEnumerable<Student> filteredResultsByQuery => // Filtered by search query
         users.Where(a => query == "" ||
