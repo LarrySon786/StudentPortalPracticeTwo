@@ -8,12 +8,7 @@
 @inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
 
 
-@* Background for Dialog *@
-<div class="overlay"></div> 
-
-@* Dialog Container *@
-<div class="overlay-container">
-    <div class="standard-card standard-dialog">
+<Dialog OnClose="HandleClose">
         <h1>Create Session</h1>
         @if (terms.Count() == 0 || availableCourses!.Count() == 0) {
             <p>Loading available courses and terms...</p>
@@ -142,8 +137,7 @@
                 </div>
             </EditForm>
         }
-    </div>
-</div>
+</Dialog>
 
 @code {
     [Parameter] public ClassSession session { get; set;} = new();

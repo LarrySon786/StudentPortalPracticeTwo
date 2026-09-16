@@ -5,74 +5,68 @@
 @inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService;
 
 
-<div class="overlay"></div>
+<h1>@(IsEditing ? "Edit Course" : "Create Course")</h1>
 
-<div class="overlay-container">
-    <div class="standard-card standard-dialog">
-        <h1>@(IsEditing ? "Edit Course" : "Create Course")</h1>
+@if (course == null) {
+    <p>Loading course details...</p>
+}
+else {
+    <EditForm Model="course" OnValidSubmit="HandleSubmit" FormName="@(IsEditing ? "Edit Course Form" : "Create Course Form")">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label class="form-label">Course Name</label>
+            <InputText class="form-control" @bind-Value="course.Name" />
+            <ValidationMessage For="(() => course.Name)"/>
+        </div>
 
-        @if (course == null) {
-            <p>Loading course details...</p>
-        }
-        else {
-            <EditForm Model="course" OnValidSubmit="HandleSubmit" FormName="@(IsEditing ? "Edit Course Form" : "Create Course Form")">
-                <DataAnnotationsValidator />
-                <div class="form-group">
-                    <label class="form-label">Course Name</label>
-                    <InputText class="form-control" @bind-Value="course.Name" />
-                    <ValidationMessage For="(() => course.Name)"/>
-                </div>
+        <div class="form-group">
+            <label class="form-label">Course Code</label>
+            <InputText class="form-control" @bind-Value="course.Code" />
+            <ValidationMessage For="(() => course.Code)" />
+        </div>
 
-                <div class="form-group">
-                    <label class="form-label">Course Code</label>
-                    <InputText class="form-control" @bind-Value="course.Code" />
-                    <ValidationMessage For="(() => course.Code)" />
-                </div>
+        <div class="form-group">
+            <label class="form-label">Credits</label>
+            <InputNumber class="form-control" @bind-Value="course.Credits" />
+            <ValidationMessage For="(() => course.Credits)" />
+        </div>
 
-                <div class="form-group">
-                    <label class="form-label">Credits</label>
-                    <InputNumber class="form-control" @bind-Value="course.Credits" />
-                    <ValidationMessage For="(() => course.Credits)" />
-                </div>
+        @* Display Existing Sessions *@
 
-                @* Display Existing Sessions *@
+        @if (IsEditing) {
+            <div class="form-group">
+                <label class="form-label">Add a class session</label>
+                <li class="dialog-lists">
+                    @foreach (ClassSession session in course.Sessions)
+                    {
+                        <ul>@session.Term!.DisplayName | @session.StartDate - @session.EndDate | @session.Instructor!.FirstName @session.Instructor.LastName</ul>
+                    }
+                </li>
 
-                @if (IsEditing) {
-                    <div class="form-group">
-                        <label class="form-label">Add a class session</label>
-                        <li class="dialog-lists">
-                            @foreach (ClassSession session in course.Sessions)
-                            {
-                                <ul>@session.Term!.DisplayName | @session.StartDate - @session.EndDate | @session.Instructor!.FirstName @session.Instructor.LastName</ul>
-                            }
-                        </li>
-
-                        @* ADD A NEW CLASS SESSION *@
-                        @if (AddSessionDialog == true) {
-                            <CreateSessionDialog 
-                                AddClassSession="AddClassSession"
-                                IsAddToCourse = "true"
-                                CloseDialog="ToggleAddClassSession" 
-                                Session="@session"
-                                courseSelected="@course" />
-                        }
-                        <div>
-                            @* <button class="btn btn-link" type="button" @onclick="ToggleAddClassSession">Add Existing Session</button> *@
-                            <button class="btn btn-link" type="button" @onclick="ToggleAddClassSession">Add New Session</button>
-                        </div>
-                    </div>
+                @* ADD A NEW CLASS SESSION *@
+                @if (AddSessionDialog == true) {
+                    <CreateSessionDialog 
+                        AddClassSession="AddClassSession"
+                        IsAddToCourse = "true"
+                        CloseDialog="ToggleAddClassSession" 
+                        Session="@session"
+                        courseSelected="@course" />
                 }
-                @* Submission or exit Dialog *@
-                @if (AddSessionDialog == false) {
-                    <div class="dialog-buttons">
-                        <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
-                        <button class="btn btn-primary" type="submit">@(IsEditing ? "Save Edits" : "Create Course")</button>
-                    </div>
-                }
-            </EditForm>  
+                <div>
+                    @* <button class="btn btn-link" type="button" @onclick="ToggleAddClassSession">Add Existing Session</button> *@
+                    <button class="btn btn-link" type="button" @onclick="ToggleAddClassSession">Add New Session</button>
+                </div>
+            </div>
         }
-    </div> 
-</div>
+        @* Submission or exit Dialog *@
+        @if (AddSessionDialog == false) {
+            <div class="dialog-buttons">
+                <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+                <button class="btn btn-primary" type="submit">@(IsEditing ? "Save Edits" : "Create Course")</button>
+            </div>
+        }
+    </EditForm>  
+}
 
 @code {
     [Parameter] public EventCallback CloseDialog { get; set; }

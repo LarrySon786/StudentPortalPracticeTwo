@@ -1,0 +1,36 @@
+@using StudentPortalPracticeTwo.Database.Models.Users.Admin
+@inject StudentPortalPracticeTwo.Components.Services.Users.AdminService adminService
+
+<Dialog OnClose="HandleClose">
+    <h3>Create Admin</h3>
+    <EditForm Model="pendingAdmin" OnValidSubmit="HandleSubmit" FormName="CreateAdminForm">
+        <DataAnnotationsValidator />
+        <label class="form-label">First Name</label>
+        <InputText class="form-control" @bind-Value="pendingAdmin.FirstName" />
+        <ValidationMessage For="@(() => pendingAdmin.FirstName)" />
+        <label class="form-label">Last Name</label>
+        <InputText class="form-control" @bind-Value="pendingAdmin.LastName" />
+        <ValidationMessage For="@(() => pendingAdmin.LastName)" />
+        <label class="form-label">Email</label>
+        <InputText class="form-control" type="email" @bind-Value="pendingAdmin.Email" />
+        <ValidationMessage For="@(() => pendingAdmin.Email)" />
+        <button type="button" class="btn btn-secondary" @onclick="HandleClose">Close</button>
+        <button type="submit" class="btn btn-primary">Invite Admin</button>
+    </EditForm>
+</Dialog>
+
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnAdminCreated { get; set; }
+    private PendingAdmin pendingAdmin = new();
+
+    private async Task HandleSubmit()
+    {
+        await adminService.InviteAdmin(pendingAdmin);
+        pendingAdmin = new();
+        await OnAdminCreated.InvokeAsync();
+        await HandleClose();
+    }
+
+    private Task HandleClose() => OnClose.InvokeAsync();
+}

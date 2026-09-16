@@ -34,11 +34,13 @@
 
 @* Edit Session Dialog *@
 @if (editSessionDialog == true) {
-    <CreateSessionDialog 
-        session="selectedSession" 
-        CloseDialog="() => ToggleEditSessionDialog(selectedSession!)" 
-        OnSessionCreated="SessionReload" 
-        isEdit="true"/>
+    <Dialog OnClose="() => ToggleEditSessionDialog(selectedSession!)">
+        <CreateSessionDialog
+            session="selectedSession"
+            CloseDialog="() => ToggleEditSessionDialog(selectedSession!)"
+            OnSessionCreated="SessionReload"
+            isEdit="true"/>
+    </Dialog>
 }
 
 

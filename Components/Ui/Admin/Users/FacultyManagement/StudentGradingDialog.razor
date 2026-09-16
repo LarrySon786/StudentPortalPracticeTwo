@@ -5,9 +5,7 @@
 @inject StudentPortalPracticeTwo.Components.Services.Admin.AssignmentService assignmentService
 
 
-<div class="overlay">
-    <div class="overlay-container">
-        <div class="standard-card standard-dialog">
+<Dialog OnClose="HandleClose">
             @* Assignments *@
             <div>
                 <table class="table">
@@ -46,10 +44,7 @@
                 <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
                 <button class="btn btn-primary" type="button" @onclick="SaveChanges">Save Changes</button>
             </div>
-        </div>
-    </div>
-
-</div>
+</Dialog>
 
 
 

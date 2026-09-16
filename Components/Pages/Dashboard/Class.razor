@@ -6,6 +6,7 @@
 @using StudentPortalPracticeTwo.Database.Models.Degrees
 @using StudentPortalPracticeTwo.Database.Models.Ui
 @using StudentPortalPracticeTwo.Components.Ui
+@using StudentPortalPracticeTwo.Components.Ui.Admin
 @inject StudentPortalPracticeTwo.Components.Services.Users.Students.StudentService studentService
 @inject StudentPortalPracticeTwo.Components.Services.Admin.ClassSessionService classSessionService
 
@@ -62,16 +63,7 @@ else {
 }
 @if (selectedAssignment != null)
 {
-    <div class="overlay">
-        <div class="overlay-container">
-            <div class="standard-card standard-dialog">
-                <h1>@selectedAssignment.Name</h1>
-                <label class="form-label">Instructions</label>
-                <InputTextArea class="form-control" @bind-Value="@selectedAssignment.Instructions" disabled />
-                <button class="btn btn-secondary" type="button" @onclick="CloseDialog">Close</button>
-            </div>
-        </div>
-    </div>
+    <AssignmentInstructionsDialog assignment="selectedAssignment" OnClose="CloseDialog" />
 }
 
 @code {

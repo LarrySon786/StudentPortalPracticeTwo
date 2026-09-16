@@ -1,0 +1,15 @@
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+
+<Dialog OnClose="HandleClose">
+    <h1>@assignment.Name</h1>
+    <label class="form-label">Instructions</label>
+    <InputTextArea class="form-control" @bind-Value="assignment.Instructions" disabled />
+    <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+</Dialog>
+
+@code {
+    [Parameter] public Assignments assignment { get; set; } = new();
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private Task HandleClose() => OnClose.InvokeAsync();
+}

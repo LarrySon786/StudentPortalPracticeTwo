@@ -4,6 +4,7 @@
 @using StudentPortalPracticeTwo.Database.Models.Users.Admin
 @using StudentPortalPracticeTwo.Database.Models.Ui
 @using StudentPortalPracticeTwo.Components.Ui
+@using StudentPortalPracticeTwo.Components.Ui.Admin
 @inject StudentPortalPracticeTwo.Components.Services.Users.AdminService adminService
  
 <div class="standard-card">
@@ -48,32 +49,11 @@
 
 @if (createAdminDialog)
 {
-    <div class="overlay">
-        <div class="overlay-container">
-            <div class="standard-card standard-dialog">
-                <h3>Create Admin</h3>
-                <EditForm Model="pendingAdmin" OnValidSubmit="HandleSubmit" FormName="CreateAdminForm">
-                    <DataAnnotationsValidator />
-                    <label class="form-label">First Name</label>
-                    <InputText class="form-control" @bind-Value="pendingAdmin.FirstName" />
-                    <ValidationMessage For="@(() => pendingAdmin.FirstName)" />
-                    <label class="form-label">Last Name</label>
-                    <InputText class="form-control" @bind-Value="pendingAdmin.LastName" />
-                    <ValidationMessage For="@(() => pendingAdmin.LastName)" />
-                    <label class="form-label">Email</label>
-                    <InputText class="form-control" type="email" @bind-Value="pendingAdmin.Email" />
-                    <ValidationMessage For="@(() => pendingAdmin.Email)" />
-                    <button type="button" class="btn btn-secondary" @onclick="ToggleCreateAdminDialog">Close</button>
-                    <button type="submit" class="btn btn-primary">Invite Admin</button>
-                </EditForm>
-            </div>
-        </div>
-    </div>
+    <CreateAdminDialog OnClose="ToggleCreateAdminDialog" OnAdminCreated="ReloadAdmins" />
 }
 
 @code {
     private List<AdminModel> admins = new();
-    private PendingAdmin pendingAdmin = new();
     private string query = string.Empty;
     private bool createAdminDialog;
 
@@ -95,16 +75,12 @@
         }
     };
 
-    protected override async Task OnInitializedAsync() => admins = await adminService.GetAllAdmins();
+    protected override async Task OnInitializedAsync() => await ReloadAdmins();
+
+    private async Task ReloadAdmins() => admins = await adminService.GetAllAdmins();
 
     private void ToggleCreateAdminDialog() => createAdminDialog = !createAdminDialog;
 
     private void UpdateQuery(ChangeEventArgs args) => query = args.Value?.ToString() ?? string.Empty;
 
-    private async Task HandleSubmit()
-    {
-        await adminService.InviteAdmin(pendingAdmin);
-        pendingAdmin = new();
-        createAdminDialog = false;
-    }
 }

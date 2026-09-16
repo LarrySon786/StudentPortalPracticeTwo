@@ -1,0 +1,23 @@
+
+
+<div class="overlay">
+    <div class="overlay-container">
+        <div class="standard-card standard-dialog">
+            <div class="top-bar">
+                <button class="btn close-btn"@onclick="Close">X</button>
+            </div>
+            
+            @ChildContent
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public required RenderFragment ChildContent { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private async Task Close() {
+        await OnClose.InvokeAsync();
+    }
+}

@@ -1,0 +1,61 @@
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+
+<Dialog OnClose="HandleClose">
+    @if (selectedCourse == null)
+    {
+        <p>No course found</p>
+    }
+    else if (selectedCourse.Sessions.Count == 0)
+    {
+        <p>No sessions found</p>
+    }
+    else
+    {
+        @foreach (ClassSession session in selectedCourse.Sessions.Where(x => x.ClassStarted == false))
+        {
+            <h4>@selectedCourse.Name Sessions</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Instructor</th>
+                        <th>Term</th>
+                        <th>Start/End Date</th>
+                        <th>Start/End Time</th>
+                        <th>Seats Available</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@session.Instructor!.FirstName @session.Instructor.LastName</td>
+                        <td>@session.Term!.DisplayName</td>
+                        <td>@session.StartDate - @session.EndDate</td>
+                        <td>@session.StartTime - @session.EndTime</td>
+                        <td>@session.CurrentCount / @session.Capacity</td>
+                        <td>
+                            @if (sessions.Contains(session))
+                            {
+                                <button class="btn btn-secondary" type="button" disabled>Added</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-link" type="button" @onclick="() => HandleAdd(session)">Add Session</button>
+                            }
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+    }
+    <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+</Dialog>
+
+@code {
+    [Parameter] public Course? selectedCourse { get; set; }
+    [Parameter] public List<ClassSession> sessions { get; set; } = new();
+    [Parameter] public EventCallback<ClassSession> OnAdd { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private Task HandleAdd(ClassSession session) => OnAdd.InvokeAsync(session);
+    private Task HandleClose() => OnClose.InvokeAsync();
+}

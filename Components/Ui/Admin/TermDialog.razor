@@ -3,9 +3,7 @@
 @using StudentPortalPracticeTwo.Database.Models.Enums
 @inject StudentPortalPracticeTwo.Components.Services.Admin.TermService termService
 
-<div class="overlay">
-    <div class="overlay-container">
-        <div class="standard-card standard-dialog">
+<Dialog OnClose="HandleClose">
             <EditForm Model="term" OnValidSubmit="HandleSubmit" FormName="Create or Edit Term">
                 <DataAnnotationsValidator />
                 <div class="form-group">
@@ -39,9 +37,7 @@
                 </div>
                 
             </EditForm>
-        </div>
-    </div>
-</div>
+</Dialog>
 
 
 @code {

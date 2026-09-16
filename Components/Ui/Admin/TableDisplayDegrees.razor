@@ -33,7 +33,9 @@
 </table>
 
 @if (editDegreeDialog) {
-    <CreateDegree degree="selectedDegree" CloseDialog="() => ToggleEditDegree(selectedDegree!)" IsEditing="true" />
+    <Dialog OnClose="() => ToggleEditDegree(selectedDegree!)">
+        <CreateDegree degree="selectedDegree" CloseDialog="() => ToggleEditDegree(selectedDegree!)" IsEditing="true" />
+    </Dialog>
 }
 
 

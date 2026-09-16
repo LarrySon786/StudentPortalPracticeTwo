@@ -93,7 +93,8 @@ and renders the entire draft application.
 - I created an admin and faculty navigation menu. Actually, I reused the student navigation but made differentiations between
 authorized routes and links
 - I added breadcrumbs and pathfinding to the application. Every page after login should have them
-
+- I converted all UI Dialog boxes to use the new <Dialog> component for conventional formatting. Also convreted dialogs that 
+did not have components to now use components. I did the first design and then had AI replicate that design throughout the app
 
 
 

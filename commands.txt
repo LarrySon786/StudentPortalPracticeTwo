@@ -1,6 +1,11 @@
 
 
 LEFT off
+- I also began re-doing my color pallete a little so I can do more elite css throughout the website
+- I began creating the my account details page. It need overhalled a little for what I have in mind. 
+Plan and redesign the existing component to meet needs so admin, faculty, and students can all Access
+anyone's account, but be redirected depending on authorized level, or only have certain features displayed to them.
+Some roles can enable edit mode which will then allow them to save changes. 
 - I finished adding breadcrumbs and return links throughout the app.
 - I finished setting up the admin and faculty layouts
 - I finished setting up all queries on the website

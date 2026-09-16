@@ -1,0 +1,36 @@
+@using StudentPortalPracticeTwo.Database.Models.Users.Faculty
+@inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
+
+<Dialog OnClose="HandleClose">
+    <h3>Create Faculty</h3>
+    <EditForm Model="newFaculty" OnValidSubmit="HandleSubmit" FormName="CreateFacultyForm">
+        <DataAnnotationsValidator />
+        <label class="form-label">First Name</label>
+        <InputText class="form-control" @bind-Value="newFaculty.FirstName" />
+        <ValidationMessage For="@(() => newFaculty.FirstName)" />
+        <label class="form-label">Last Name</label>
+        <InputText class="form-control" @bind-Value="newFaculty.LastName" />
+        <ValidationMessage For="@(() => newFaculty.LastName)" />
+        <label class="form-label">Email</label>
+        <InputText class="form-control" type="email" @bind-Value="newFaculty.Email" />
+        <ValidationMessage For="@(() => newFaculty.Email)" />
+        <button type="button" class="btn btn-secondary" @onclick="HandleClose">Close</button>
+        <button type="submit" class="btn btn-primary">Invite Faculty</button>
+    </EditForm>
+</Dialog>
+
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnFacultyCreated { get; set; }
+    private PendingFaculty newFaculty = new();
+
+    private async Task HandleSubmit()
+    {
+        await facultyService.InviteFaculty(newFaculty);
+        newFaculty = new();
+        await OnFacultyCreated.InvokeAsync();
+        await HandleClose();
+    }
+
+    private Task HandleClose() => OnClose.InvokeAsync();
+}

@@ -1,0 +1,20 @@
+.top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding-right:0.5rem;
+    background-color: var(--color-danger);
+    color:white;
+    display: flex;
+    justify-content: end;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+.close-btn {
+    color: white;
+}
+.close-btn:hover {
+    color: rgb(216, 212, 212);
+}

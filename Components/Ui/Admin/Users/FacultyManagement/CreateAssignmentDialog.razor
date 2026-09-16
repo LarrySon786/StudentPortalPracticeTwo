@@ -5,9 +5,7 @@
 
 @inject StudentPortalPracticeTwo.Components.Services.Admin.AssignmentService assignmentService
 
-<div class="overlay">
-    <div class="overlay-container">
-        <div class="standard-card standard-dialog">
+<Dialog OnClose="OnClose">
             <EditForm Model="assignment" OnValidSubmit="OnSave" FormName="AssignmentDialog">
                 <DataAnnotationsValidator />
 
@@ -28,9 +26,7 @@
                     <button class="btn btn-primary" type="submit">Save Assignment</button>
                 </div>
             </EditForm>
-        </div>
-    </div>
-</div>
+</Dialog>
 
 
 @code {

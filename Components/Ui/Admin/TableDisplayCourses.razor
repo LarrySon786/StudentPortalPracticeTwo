@@ -34,7 +34,9 @@
 </table>
 
 @if (editCourseDialog) {
-    <CreateCourse IsEditing="true" courseId="selectedCourseId" CloseDialog="() => ToggleEdit(selectedCourseId)"/> 
+    <Dialog OnClose="() => ToggleEdit(selectedCourseId)">
+        <CreateCourse IsEditing="true" courseId="selectedCourseId" CloseDialog="() => ToggleEdit(selectedCourseId)"/>
+    </Dialog>
 }
 
 

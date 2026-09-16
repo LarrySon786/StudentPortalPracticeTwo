@@ -7,15 +7,17 @@
 @rendermode InteractiveServer
 @inject StudentPortalPracticeTwo.Components.Services.Admin.DegreeService degreeService
 
-<div class="overlay"></div>
 
-<div class="overlay-container">
-    <div class="standard-card standard-dialog">
-    <h1>@(IsEditing ? "Edit Degree" : "Create Degree")</h1>
-        <EditForm Model="editableDegree" OnValidSubmit="HandleSubmit"
-                  FormName="@($"{(IsEditing ? "Edit" : "Create")}" + " Degree Form")">
-            <DataAnnotationsValidator />
+<EditForm Model="editableDegree" OnValidSubmit="HandleSubmit" FormName="@($"{(IsEditing ? "Edit" : "Create")}" + " Degree Form")">
+    <DataAnnotationsValidator />
+    @* HEADING *@
+    <div class="row">
+        <h1 class="col-12">@(IsEditing ? "Edit Degree" : "Create Degree")</h1>
+    </div>
 
+    @* FORM *@
+    <div class="row">
+        <div class="col-4 col-md-4">
             <div class="form-group">
                 <label class="form-label">Name</label>
                 <InputText class="form-control" @bind-Value="editableDegree!.Name" />
@@ -27,49 +29,63 @@
                 <InputText class="form-control" @bind-Value="editableDegree!.Description" />
                 <ValidationMessage For="(() => editableDegree!.Description)" />
             </div>
+            
+            @* Dialog's error handling *@
+            @if(!string.IsNullOrWhiteSpace(errors)) {
+                <p class="alert">@errors</p>
+            }
 
-            <div class="form-group">
-                <label class="form-label">Required Classes</label>
-                
-                @* List all courses in this degree *@
-                <li class="dialog-lists">
-                    @foreach (Course course in editableDegree.Courses) {
-                        <ul>@course.Code | @course.Name | @course.Credits
-                            <button class="btn btn-danger" type="button" @onclick="() => RemoveCourse(course)">X</button>
-                        </ul>
-                    }
-                </li>
-
-                @* BUTTONS TO CREATE NEW COURSE OR ADD EXISTING ONE *@
-                <div>
-                    <button class="btn btn-link" type="button" @onclick="ToggleAddExistingCoursesDialog">Add Existing Course</button>
-                    <button class="btn btn-link" type="button" @onclick="ToggleCreateCourseDialog">Add New Course</button>
-                </div>
-
-                @* Display Dialog to create courses *@
-                @if (createCourseDialog) {
-                    <CreateCourse CloseDialog="ToggleCreateCourseDialog" addToDegree="editableDegree" />
-                }
-                @if (addExistingCourseDialog == true) {
-                    <ViewCoursesDialog 
-                        coursesInDegree="editableDegree!.Courses" 
-                        AddCourses="true" 
-                        OnAdd="AddExistingCourses"
-                        OnClose="ToggleAddExistingCoursesDialog" />
-                }
-                <p><span style="font-weight: 800;">Total Credits: @totalCredits</span></p>
-            </div>
-
-        @if (createCourseDialog == false && addExistingCourseDialog == false) {
-            <div class="dialog-buttons">
+            @* Open and Close Buttons *@
+            @if (createCourseDialog == false && addExistingCourseDialog == false) {
+                <div class="dialog-buttons">
                     <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
                     <button class="btn btn-primary" type="submit">@(IsEditing ? "Save Edits" : "Create Degree" )</button>
                 </div>                
             }
-        </EditForm>
-    </div>
-</div>
+        </div>
+    
+        @* LISTING OF COURSES *@
+        <div class="form-group col-8 col-md-8 add-scroll-overflow dialog-display-scroll-info">
+            <label class="form-label">Required Classes</label>
+            
+            @* List all courses in this degree *@
+            <li class="dialog-lists">
+                @foreach (Course course in editableDegree!.Courses) {
+                    <ul>@course.Code | @course.Name | @course.Credits
+                        <button class="btn btn-danger" type="button" @onclick="() => RemoveCourse(course)">X</button>
+                    </ul>
+                }
+            </li>
 
+            <p><span style="font-weight: 800;">Total Credits: @totalCredits</span></p>
+
+            @* BUTTONS TO CREATE NEW COURSE OR ADD EXISTING ONE *@
+            <div>
+                <button class="btn btn-link" type="button" @onclick="ToggleAddExistingCoursesDialog">Add Existing Course</button>
+                <button class="btn btn-link" type="button" @onclick="ToggleCreateCourseDialog">Add New Course</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+@* Display Dialog to create courses *@
+@if (createCourseDialog) {
+    <Dialog OnClose="ToggleCreateCourseDialog">
+        <CreateCourse CloseDialog="ToggleCreateCourseDialog" addToDegree="editableDegree" />
+    </Dialog>
+    
+}
+@if (addExistingCourseDialog == true) {
+    <Dialog OnClose="ToggleAddExistingCoursesDialog">
+        <ViewCoursesDialog 
+            coursesInDegree="editableDegree!.Courses" 
+            AddCourses="true" 
+            OnAdd="AddExistingCourses"
+            OnClose="ToggleAddExistingCoursesDialog" />
+    </Dialog>
+    
+}
 
 
 @code {
@@ -81,6 +97,7 @@
     public bool createCourseDialog = false;
     public bool addExistingCourseDialog = false;
     public int totalCredits { get; set; } = 0;
+    private string errors { get; set; } = string.Empty;
 
     public List<string> errorMessages = new();
 
@@ -124,6 +141,8 @@
         else {
             @* CREATING A NEW DEGREE *@
             try {
+                errors = "";
+
                 @* Try to create degree *@
                 await degreeService.CreateDegree(editableDegree!);
                 Console.WriteLine("Degree successfully created.");
@@ -137,9 +156,11 @@
             catch (ValidationException ex) {
                 Console.WriteLine($"Vaidation Exception during degree creation. {ex}");
                 errorMessages.Add(ex.Message.ToString());
+                errors = "An error occured and your input could not be validated or saved.";
             }
             catch (Exception ex) {
                 Console.WriteLine($"Exception occured during degree creation: Ex: {ex}");
+                errors = "An error occured while saving.";
             }
         }
     }

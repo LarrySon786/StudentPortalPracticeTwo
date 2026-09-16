@@ -264,57 +264,11 @@ else {
     </div>
     @* CHOOSE SESSION DIALOG *@
     @if (chooseSessions) {
-        <div class="overlay">
-            <div class="overlay-container">
-                <div class="standard-card standard-dialog">
-                    @if (selectedCourse == null) {
-                        <p>No course found</p>
-                    }
-                    else if (selectedCourse.Sessions.Count == 0) {
-                        <p>No sessions found</p>
-                    }
-                    else {
-                        @foreach(ClassSession session in selectedCourse!.Sessions.Where(x => x.ClassStarted == false)) {
-                            <h4>@session.Course.Name Sessions</h4>
-                            <table class="table">
-                                <thead>
-                                    <th>Instructor</th>
-                                    <th>Term</th>
-                                    <th>Start/End Date</th>
-                                    <th>Start/End Time</th>
-                                    <th>Seats Available</th>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Instructor: @session.Instructor!.FirstName @session.Instructor.LastName</td>
-                                        <td>Term: @session.Term!.DisplayName</td>
-                                        <td>Start/End Date: @session.StartDate - @session.EndDate</td>
-                                        <td>Start/End Time: @session.StartTime - @session.EndTime</td>
-                                        <td>@session.CurrentCount / @session.Capacity</td>
-                                        <td>
-                                            @if (sessions.Contains(session)) {
-                                                <button class="btn btn-secondary" type="button" disabled>
-                                                    Added
-                                                </button>
-                                            } 
-                                            else {
-                                                <button class="btn btn-link" type="button" @onclick="() => sessions.Add(session)">
-                                                    Add Session
-                                                </button>
-                                            }
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            
-                        }
-                    }
-                    <button class="btn btn-secondary" type="button" @onclick="CloseChooseSessionDialog">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
+        <StudentChooseSessionDialog
+            selectedCourse="selectedCourse"
+            sessions="sessions"
+            OnAdd="AddSession"
+            OnClose="CloseChooseSessionDialog" />
     }
 }
 
@@ -396,6 +350,11 @@ else {
         chooseSessions = false;
         selectedCourse = null;
     }
+
+    public void AddSession(ClassSession session) {
+        if (!sessions.Contains(session)) sessions.Add(session);
+    }
+
     public void RemoveSession(ClassSession session) {
         sessions.Remove(session);
     }

@@ -19,13 +19,19 @@
 <button class="btn btn-primary" @onclick="ToggleClassSessionDialog">Create New Class Session</button>
 
 @if (createDegreeDialog == true) {
-    <CreateDegree CloseDialog="ToggleDegreeDialog" OnDegreeCreated="HandleDegreeCreated"/>
+    <Dialog OnClose="ToggleDegreeDialog">
+        <CreateDegree CloseDialog="ToggleDegreeDialog" OnDegreeCreated="HandleDegreeCreated" />
+    </Dialog>
 }
 else if (createCourseDialog == true) {
-    <CreateCourse CloseDialog="ToggleCourseDialog" OnCourseCreate="HandleCourseCreated"/>
+    <Dialog OnClose="ToggleCourseDialog">
+        <CreateCourse CloseDialog="ToggleCourseDialog" OnCourseCreate="HandleCourseCreated"/>
+    </Dialog>
 }
 else if (createClassSession == true) {
-    <CreateSessionDialog CloseDialog="ToggleClassSessionDialog" OnSessionCreated="HandleSessionCreated"/>
+    <Dialog OnClose="ToggleClassSessionDialog">
+        <CreateSessionDialog CloseDialog="ToggleClassSessionDialog" OnSessionCreated="HandleSessionCreated"/>
+    </Dialog>
 }
 
 

@@ -4,6 +4,7 @@
 @using StudentPortalPracticeTwo.Database.Models.Users.Faculty
 @using StudentPortalPracticeTwo.Database.Models.Ui
 @using StudentPortalPracticeTwo.Components.Ui
+@using StudentPortalPracticeTwo.Components.Ui.Admin
 @inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
 
 @* TODO *@
@@ -64,31 +65,7 @@
 
 @* DIALOG *@
 @if (createFacultyDialog == true) {
-    <div class="overlay">
-        <div class="overlay-container">
-            <div class="standard-card standard-dialog">
-                <h3>Create Faculty</h3>
-                <EditForm Model="newFaculty" OnValidSubmit="HandleSubmit" FormName="CreateFacultyForm">
-                    <DataAnnotationsValidator />
-
-                    <label class="form-label">First Name</label>
-                    <InputText class="form-control" @bind-Value="newFaculty!.FirstName"/>
-                    <ValidationMessage For="@(() => newFaculty.FirstName)"/>
-
-                    <label class="form-label">Last Name</label>
-                    <InputText class="form-control" @bind-Value="newFaculty.LastName" />
-                    <ValidationMessage For="@(() => newFaculty.LastName)" />
-
-                    <label class="form-label">Email</label>
-                    <InputText class="form-control" type="email" @bind-Value="newFaculty.Email" />
-                    <ValidationMessage For="@(() => newFaculty.Email)" />
-
-                    <button type="button" class="btn btn-secondary">Close</button>
-                    <button type="submit" class="btn btn-primary">Invite Faculty</button>
-                </EditForm>
-            </div>
-        </div>
-    </div>
+    <CreateFacultyDialog OnClose="ToggleCreateFacultyDialog" OnFacultyCreated="ReloadFaculty" />
 }
 
 
@@ -104,7 +81,6 @@
                 || x.LastName.Contains(query));
     public bool nullFaculties = false;
     public bool createFacultyDialog = false;
-    public PendingFaculty newFaculty { get; set; } = new();
     public string query { get; set; } = string.Empty;
     public List<BreadCrumbModel> crumbs { get; set; } = new() // Crumbs passed into component
     {
@@ -120,6 +96,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await ReloadFaculty();
+    }
+
+    private async Task ReloadFaculty()
+    {
         try {
             faculties = await facultyService.GetAllFaculty();
             if (faculties == null || faculties.Count() == 0) nullFaculties = true;
@@ -133,20 +114,6 @@
 
     public void ToggleCreateFacultyDialog() {
         createFacultyDialog = !createFacultyDialog;
-    }
-
-    public async Task HandleSubmit() {
-        try {
-            await facultyService.InviteFaculty(newFaculty!);
-            HandleClose();
-        }
-        catch (Exception ex) {
-            Console.WriteLine($"Could not create faculty. Ex: {ex}");
-        }
-    }
-
-    public void HandleClose() {
-        ToggleCreateFacultyDialog();
     }
 
     public void UpdateQuery(ChangeEventArgs e) {

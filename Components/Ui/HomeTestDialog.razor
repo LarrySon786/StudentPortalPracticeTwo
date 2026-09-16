@@ -1,0 +1,9 @@
+<Dialog OnClose="OnClose">
+    <h1>Test Dialog</h1>
+    <p>Hello there</p>
+    <button class="btn btn-secondary" type="button" @onclick="OnClose">Close</button>
+</Dialog>
+
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+}

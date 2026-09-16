@@ -6,48 +6,42 @@
 @inject StudentPortalPracticeTwo.Components.Services.Admin.CourseService courseService
 
 
-<div class="overlay"></div>
+<h1>All Courses</h1>
+<input class="form-control" placeholder="Search Course..." @oninput="SearchQuery" />
+<table class="table">
+    <thead>
+        <th>Code</th>
+        <th>Name</th>
+        <th></th>
+    </thead>
 
-<div class="overlay-container">
-    <div class="standard-card standard-dialog">
-        <h1>All Courses</h1>
-        <input class="form-control" placeholder="Search Course..." @oninput="SearchQuery" />
-        <table class="table">
-            <thead>
-                <th>Code</th>
-                <th>Name</th>
-                <th></th>
-            </thead>
-
-            @if (AddCourses) {
-                @if (pagedCourses == null) {<p>Loading...</p>}
-                else {
-                    @foreach(Course course in pagedCourses) {
-                    <tr>
-                        <td>@course.Code</td>
-                        <td class="name-data">@course.Name</td>
-                        @if (coursesInDegree.Contains(course) == false) {
-                            <button class="btn btn-primary" type="button" @onclick="() => HandleAdd(course)">Add</button>
-                        }
-                        else {
-                            <button class="btn btn-primary" type="button" disabled>Added</button>
-                        }
-                    </tr>
-                    }
-                    
+    @if (AddCourses) {
+        @if (pagedCourses == null) {<p>Loading...</p>}
+        else {
+            @foreach(Course course in pagedCourses) {
+            <tr>
+                <td>@course.Code</td>
+                <td class="name-data">@course.Name</td>
+                @if (coursesInDegree.Contains(course) == false) {
+                    <button class="btn btn-primary" type="button" @onclick="() => HandleAdd(course)">Add</button>
                 }
+                else {
+                    <button class="btn btn-primary" type="button" disabled>Added</button>
+                }
+            </tr>
             }
-        </table>
-        <div class="page-iteration">
-            @for (int i = 1; i < totalPages + 1; i++) {
-                var page = i; 
+            
+        }
+    }
+</table>
+<div class="page-iteration">
+    @for (int i = 1; i < totalPages + 1; i++) {
+        var page = i; 
 
-                <button class="btn btn-secondary" type="button" @onclick="() => HandlePageChange(page)">@(page)</button>
-            }
-        </div>
-        <button class="btn btn-secondary" type="button" @onclick="HandleClose">return</button>
-    </div>
+        <button class="btn btn-secondary" type="button" @onclick="() => HandlePageChange(page)">@(page)</button>
+    }
 </div>
+<button class="btn btn-secondary" type="button" @onclick="HandleClose">return</button>
 
 @code {
     [Parameter] public bool AddCourses { get; set; } = false;
