@@ -4,7 +4,7 @@
     left: 0;
     right: 0;
     padding-right:0.5rem;
-    background-color: var(--color-danger);
+    background-color: var(--color-primary);
     color:white;
     display: flex;
     justify-content: end;

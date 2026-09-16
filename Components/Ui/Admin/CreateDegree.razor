@@ -8,7 +8,7 @@
 @inject StudentPortalPracticeTwo.Components.Services.Admin.DegreeService degreeService
 
 
-<EditForm Model="editableDegree" OnValidSubmit="HandleSubmit" FormName="@($"{(IsEditing ? "Edit" : "Create")}" + " Degree Form")">
+<EditForm class="form" Model="editableDegree" OnValidSubmit="HandleSubmit" FormName="@($"{(IsEditing ? "Edit" : "Create")}" + " Degree Form")">
     <DataAnnotationsValidator />
     @* HEADING *@
     <div class="row">
@@ -26,7 +26,7 @@
 
             <div class="form-group">
                 <label class="form-label">Description</label>
-                <InputText class="form-control" @bind-Value="editableDegree!.Description" />
+                <InputTextArea class="form-control" @bind-Value="editableDegree!.Description" />
                 <ValidationMessage For="(() => editableDegree!.Description)" />
             </div>
             
@@ -34,37 +34,47 @@
             @if(!string.IsNullOrWhiteSpace(errors)) {
                 <p class="alert">@errors</p>
             }
+        </div>
+    
+        @* LISTING OF COURSES *@
+        <div class="form-group col-8 col-md-8  ">
+            <label class="form-label">Required Classes</label>
+            <div class="add-scroll-overflow add-dialog-scroll-content-border">
+                @* List all courses in this degree *@
+                <li class="dialog-lists">
+                    @if (editableDegree!.Courses.Count() == 0) {
+                        <ul class="course-row">No courses in degree</ul>
+                    }
+                    else {
+                        @foreach (Course course in editableDegree!.Courses) {
+                        <ul class="course-row"> 
+                            <span>@course.Code | @course.Name | @course.Credits</span>
+                            <button class="btn btn-danger btn-course-removal" type="button" @onclick="() => RemoveCourse(course)">X</button>
+                        </ul>
+                    }
+                    }
+                    
+                </li>
+            </div>
 
-            @* Open and Close Buttons *@
+            <p><span style="font-weight: 800;">Total Credits: @totalCredits</span></p>
+
+            
+        </div>
+    </div>
+    <div class="row">
+        @* Open and Close Buttons *@
             @if (createCourseDialog == false && addExistingCourseDialog == false) {
-                <div class="dialog-buttons">
+                <div class="col-6 col-md-6">
                     <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
                     <button class="btn btn-primary" type="submit">@(IsEditing ? "Save Edits" : "Create Degree" )</button>
                 </div>                
             }
-        </div>
-    
-        @* LISTING OF COURSES *@
-        <div class="form-group col-8 col-md-8 add-scroll-overflow dialog-display-scroll-info">
-            <label class="form-label">Required Classes</label>
-            
-            @* List all courses in this degree *@
-            <li class="dialog-lists">
-                @foreach (Course course in editableDegree!.Courses) {
-                    <ul>@course.Code | @course.Name | @course.Credits
-                        <button class="btn btn-danger" type="button" @onclick="() => RemoveCourse(course)">X</button>
-                    </ul>
-                }
-            </li>
-
-            <p><span style="font-weight: 800;">Total Credits: @totalCredits</span></p>
-
             @* BUTTONS TO CREATE NEW COURSE OR ADD EXISTING ONE *@
-            <div>
+            <div class="edit-courses-button col-6 col-md-6">
                 <button class="btn btn-link" type="button" @onclick="ToggleAddExistingCoursesDialog">Add Existing Course</button>
                 <button class="btn btn-link" type="button" @onclick="ToggleCreateCourseDialog">Add New Course</button>
             </div>
-        </div>
     </div>
 </EditForm>
 

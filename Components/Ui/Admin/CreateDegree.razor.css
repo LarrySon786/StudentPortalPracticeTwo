@@ -1,0 +1,21 @@
+
+.course-row span {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+.course-row {
+    display:flex;
+    flex-wrap: wrap;
+}
+
+.course-row button {
+    margin-left:auto;
+}
+
+
+.edit-courses-button {
+    display:flex;
+    justify-content: end;
+}

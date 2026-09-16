@@ -6,26 +6,26 @@
 @inject StudentPortalPracticeTwo.Components.Services.Admin.AssignmentService assignmentService
 
 <Dialog OnClose="OnClose">
-            <EditForm Model="assignment" OnValidSubmit="OnSave" FormName="AssignmentDialog">
-                <DataAnnotationsValidator />
+    <EditForm Model="assignment" OnValidSubmit="OnSave" FormName="AssignmentDialog">
+        <DataAnnotationsValidator />
 
-                <label class="form-label">Assignment Name</label>
-                <InputText class="form-control" @bind-Value="assignment.Name"/>
-                <ValidationMessage For="(() => assignment.Name)"/>
+        <label class="form-label">Assignment Name</label>
+        <InputText class="form-control" @bind-Value="assignment.Name"/>
+        <ValidationMessage For="(() => assignment.Name)"/>
 
-                <label class="form-label">Assignment Point Value</label>
-                <InputNumber class="form-control" @bind-Value="assignment.TotalPoints" />
-                <ValidationMessage For="(() => assignment.TotalPoints)" />
+        <label class="form-label">Assignment Point Value</label>
+        <InputNumber class="form-control" @bind-Value="assignment.TotalPoints" />
+        <ValidationMessage For="(() => assignment.TotalPoints)" />
 
-                <label class="form-label">Instructions For Students</label>
-                <InputTextArea class="form-control" @bind-Value="assignment.Instructions" />
-                <ValidationMessage For="(() => assignment.Instructions)" />
+        <label class="form-label">Instructions For Students</label>
+        <InputTextArea class="form-control" @bind-Value="assignment.Instructions" />
+        <ValidationMessage For="(() => assignment.Instructions)" />
 
-                <div>
-                    <button class="btn btn-secondary" type="button" @onclick="OnClose">Close</button>
-                    <button class="btn btn-primary" type="submit">Save Assignment</button>
-                </div>
-            </EditForm>
+        <div>
+            <button class="btn btn-secondary" type="button" @onclick="OnClose">Close</button>
+            <button class="btn btn-primary" type="submit">Save Assignment</button>
+        </div>
+    </EditForm>
 </Dialog>
 
 

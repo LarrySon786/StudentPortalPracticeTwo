@@ -203,15 +203,30 @@ h4, h5, h6 {
 
 .standard-dialog {
     min-width: 400px;
-    max-height:85vh;
+    max-width: 90vw;
+    max-height: 85vh;
+
     position: relative;
     padding: 24px;
-    padding-bottom: 30px;
     padding-top: 50px;
+    padding-bottom: 30px;
+
+    display: flex;
+    flex-direction: column;
 }
+
 
 .add-scroll-overflow {
     overflow-y:auto;
+    overflow-x: hidden;
+    padding:0.25rem;
+}
+
+.add-dialog-scroll-content-border {
+    border: solid var(--color-secondary) 1px;
+    padding: 0.25rem;
+    padding-left: 0;
+    max-height: 200px;
 }
 
 
@@ -237,18 +252,14 @@ h4, h5, h6 {
     justify-content: center;
 }
 
-.dialog-buttons {
-    
-}
+
 
 .dialog-lists {
     text-decoration: none;
     list-style-type: none;
 }
 
-.dialog-display-scroll-info {
-    max-height:75vh;
-}
+
 
 
 /* =========================================================
