@@ -11,6 +11,7 @@ public static class DatabaseFactory
         .SetBasePath(AppContext.BaseDirectory)
         .AddJsonFile("appsettings.Test.json")
         .AddUserSecrets<TestProjectMarker>(optional: true)
+        .AddEnvironmentVariables()
         .Build();
 
     private static readonly string ConnectionString =
