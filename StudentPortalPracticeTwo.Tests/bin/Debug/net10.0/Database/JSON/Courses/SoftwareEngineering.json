@@ -1,0 +1,48 @@
+[
+  { "code": "ENG101", "name": "English Composition I", "credits": 3 },
+  { "code": "ENG102", "name": "English Composition II", "credits": 3 },
+  { "code": "MAT151", "name": "Calculus I", "credits": 4 },
+  { "code": "MAT152", "name": "Calculus II", "credits": 4 },
+  { "code": "MAT250", "name": "Discrete Mathematics", "credits": 3 },
+  { "code": "STA201", "name": "Statistics", "credits": 3 },
+
+  { "code": "PHY201", "name": "Physics I", "credits": 4 },
+  { "code": "PHY202", "name": "Physics II", "credits": 4 },
+  { "code": "CHE101", "name": "General Chemistry", "credits": 4 },
+
+  { "code": "CSC101", "name": "Introduction to Programming", "credits": 3 },
+  { "code": "CSC102", "name": "Object-Oriented Programming", "credits": 3 },
+  { "code": "CSC201", "name": "Data Structures", "credits": 3 },
+  { "code": "CSC202", "name": "Algorithms", "credits": 3 },
+  { "code": "CSC220", "name": "Computer Organization", "credits": 3 },
+  { "code": "CSC230", "name": "Operating Systems", "credits": 3 },
+  { "code": "CSC240", "name": "Database Systems", "credits": 3 },
+  { "code": "CSC250", "name": "Computer Networks", "credits": 3 },
+
+  { "code": "SWE201", "name": "Software Engineering Fundamentals", "credits": 3 },
+  { "code": "SWE301", "name": "Software Design", "credits": 3 },
+  { "code": "SWE302", "name": "Software Testing & Quality Assurance", "credits": 3 },
+  { "code": "SWE303", "name": "Software Architecture", "credits": 3 },
+  { "code": "SWE304", "name": "Requirements Engineering", "credits": 3 },
+  { "code": "SWE305", "name": "Agile Software Development", "credits": 3 },
+  { "code": "SWE401", "name": "Senior Capstone I", "credits": 3 },
+  { "code": "SWE402", "name": "Senior Capstone II", "credits": 3 },
+
+  { "code": "CYB201", "name": "Cybersecurity Fundamentals", "credits": 3 },
+  { "code": "WEB201", "name": "Web Development", "credits": 3 },
+  { "code": "MOB301", "name": "Mobile Application Development", "credits": 3 },
+  { "code": "CLD301", "name": "Cloud Computing", "credits": 3 },
+  { "code": "DEV301", "name": "DevOps Practices", "credits": 3 },
+  { "code": "AI301", "name": "Introduction to Artificial Intelligence", "credits": 3 },
+
+  { "code": "COM101", "name": "Public Speaking", "credits": 3 },
+  { "code": "ECO101", "name": "Principles of Economics", "credits": 3 },
+  { "code": "ETH101", "name": "Ethics in Technology", "credits": 3 },
+  { "code": "HIS101", "name": "World History", "credits": 3 },
+  { "code": "PSY101", "name": "Introduction to Psychology", "credits": 3 },
+
+  { "code": "ELE101", "name": "Technical Elective I", "credits": 3 },
+  { "code": "ELE102", "name": "Technical Elective II", "credits": 3 },
+  { "code": "ELE103", "name": "Technical Elective III", "credits": 3 },
+  { "code": "ELE104", "name": "Technical Elective IV", "credits": 3 }
+]

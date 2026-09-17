@@ -1,0 +1,37 @@
+LEFT OFF
+- Creating a DbTestingConnection. See ChatGPT lesson tutorial. I was creating the database context factories.
+
+TESTING SET-UP
+dotnet new xunit -n StudentPortalPracticeTwo.Tests
+dotnet sln add StudentPortalPracticeTwo.Tests/StudentPortalPracticeTwo.Tests.csproj
+dotnet add StudentPortalPracticeTwo.Tests/StudentPortalPracticeTwo.Tests.csproj reference StudentPortalPracticeTwo/StudentPortalPracticeTwo.csproj
+
+Host=localhost;Port=5432;Database=student_portal_tests;Username=postgres;Password=password
+
+DOWNLOAD PACKAGES USED FOR TESTING
+dotnet add StudentPortalPracticeTwo.Tests package Microsoft.EntityFrameworkCore
+dotnet add StudentPortalPracticeTwo.Tests package Npgsql.EntityFrameworkCore.PostgreSQL
+
+Determine Code Coverage
+dotnet test --collect:"XPlat Code Coverage"
+
+SET USER SECRETS
+dotnet user-secrets init // Initializes that particular project with user-secrets
+dotnet user-secrets set "key" "Value"  ---- See below example
+dotnet user-secrets set "ConnectionStrings:TestingConnectionString" "Host=localhost;Port=5432;Database=StudentPortalPracticeTwo;Username=postgres;Password=password"
+dotnet user-secrets list // Displays all user secrets
+
+***Basically User secrets is an appsettings.JSON but does not get uploaded to github.
+Files like program.cs still access data the EXACT same way (assuming the names match between
+user-secrets and the program.cs)
+
+
+
+INSTRUCTIONS
+1. Use above library commands to set-up xUnit (aka, the most popular c# testing library)
+2. Create Folders for organization (Services, Models, Helpers)
+3. Create test files "______tests" (my preferred naming convention)
+
+
+
+
