@@ -1,82 +1,135 @@
-
-nav {
-    display:grid;
-    grid-template-columns: auto, 1fr, auto;
+.left-tab {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
-/* Account Edit Section */
+/* Account */
+
 .account-container {
-    display:grid;
+    display: grid;
     grid-template-columns: auto 1fr;
 }
 
 .profile-pic {
-    padding-top:1rem;
-    padding-left: 1rem;
-    padding-bottom: 1rem;
-    padding-right:0.5rem;
+    padding: 1rem 0.5rem 1rem 1rem;
     width: 70px;
-    margin:0;
+    margin: 0;
 }
 
 .account-name-container {
-    display:block;
+    display: block;
     text-align: left;
-    padding-top:1rem;
-    padding-right:1rem;
-    padding-bottom:1rem;
+    padding: 1rem 1rem 1rem 0;
 }
 
 .account-name {
     font-size: 1.2rem;
-    padding:0;
-    margin:0;
+    padding: 0;
+    margin: 0;
 }
 
 
-/* Navigation Menu */
+/* Navigation */
 
 .nav-group {
-    display:flex;
+    display: flex;
     flex-direction: column;
-    justify-content: center;
-    min-height: 30vh;
-
-    & a {
-        text-decoration: none;
-    }
+    gap: 0;
+    border-top: 1px solid var(--text);
 }
 
 .nav-item {
-    padding-top:24px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--text);
+    width: 100%;
+}
 
-    & a {
-        margin-left: 1.5rem;
-    }
+.nav-item a {
+    display: flex;
+    align-items: center;
+
+    min-height: 60px;
+    width: 100%;
+
+    padding: 0 1.5rem;
+    margin: 0;
+
+    color: var(--color-nav-text);
+    text-decoration: none;
+
+    border-left: 4px solid transparent;
+
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+/* Icons */
+
+.nav-item a svg {
+    width: 24px;
+    min-width: 24px;
+
+    margin-right: 14px;
+
+    font-size: 1.05rem;
+
+    color: #ffffff !important;
+    fill: currentColor;
 }
 
 
+/* Navigation text */
+
+.nav-item a span {
+    color: var(--color-nav-text);
+}
 
 
+/* Hover */
+
+.nav-item a:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
 
 
+/* Active page */
+
+.nav-item a.active {
+    background-color: rgba(42, 157, 143, 0.18);
+    border-left-color: var(--color-primary-light);
+}
 
 
-@media screen and (min-width:792px) {
+/* Logout */
+
+.form-logout-section {
+    display: block;
+    margin-left: 24px;
+    margin-top: auto;
+}
+
+.form-logout-section a,
+.form-logout-section button {
+    color: var(--color-nav-text);
+    text-decoration: none;
+}
+
+
+/* Desktop */
+
+@media screen and (min-width: 792px) {
+
     .left-tab {
-        /* Left Tab Display + Physics */
         position: fixed;
         left: 0;
         top: 0;
         bottom: 0;
+
         width: 270px;
+
         transition: transform 0.3s ease;
 
-        /* Left Tab Looks + Design */
-        background: linear-gradient(270deg, var(--primary-lighter), var(--primary));
-
+        background: var(--color-nav);
     }
 
     .left-tab.closed {
@@ -84,23 +137,19 @@ nav {
     }
 
     .nav-open-close-button {
-        /* Button looks */
-        padding:0;
-        width:17px;
-        background-color: var(--primary-lighter);
+        padding: 0;
+
+        width: 17px;
+
+        background-color: var(--color-nav);
+        color: var(--color-nav-text);
+
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
 
-        /* Positioning button */
-        position:absolute;
-        right:-17px;
-        top:40%;
-        bottom:40%;
+        position: absolute;
+        right: -17px;
+        top: 40%;
+        bottom: 40%;
     }
 }
-
-
-
-
-
-

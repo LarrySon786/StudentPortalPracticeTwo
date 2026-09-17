@@ -10,6 +10,12 @@
     --color-primary-border: hwb(175 14% 38%);
     --alternate: hwb(340 14% 44%);
 
+    /* Navigation */
+    --color-nav: #243B4A;
+    --color-nav-hover: #304F61;
+    --color-nav-active: #2A9D8F;
+    --color-nav-text: #FFFFFF;
+    --color-nav-muted: #C7D5DA;
 
     /* Text colors */
     --color-text: #243B4A;

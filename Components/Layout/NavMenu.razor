@@ -1,20 +1,21 @@
 @using StudentPortalPracticeTwo.Database.Models.Users
 @inject NavigationManager navigationManager
 
-
 <div class="left-tab @(NavOpen ? "" : "closed")">
     <nav>
+
         @* User Profile *@
-        @if (user != null) {
+        @if (user != null)
+        {
             <a href="/my-account">
                 <div class="account-container">
                     <div class="profile-pic">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
-                            <!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
                             <path d="M0 64C0 28.7 28.7 0 64 0L320 0c35.3 0 
-                            64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 
-                            64zM80 368c0 8.8 7.2 16 16 16l192 0c8.8 0 16-7.2 16-16 0-44.2-35.8-80-80-80l-64 
-                            0c-44.2 0-80 35.8-80 80zM192 248a56 56 0 1 0 0-112 56 56 0 1 0 0 112z" />
+                            64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L64 512c-35.3 
+                            0-64-28.7-64-64L0 64zM80 368c0 8.8 7.2 16 16 16l192 0c8.8 
+                            0 16-7.2 16-16 0-44.2-35.8-80-80-80l-64 0c-44.2 0-80 35.8-80 80zM192 
+                            248a56 56 0 1 0 0-112 56 56 0 1 0 0 112z" />
                         </svg>
                     </div>
 
@@ -25,134 +26,157 @@
                 </div>
             </a>
         }
-        @* Navigation Links *@
+
+        @* STUDENTS *@
         <AuthorizeView Roles="Student">
-            <Authorized >
+            <Authorized>
                 <div class="nav-group">
-                    <div class="nav-item" style="border-top:1px solid var(--text);">
-                        <NavLink href="/dashboard">
-                            Student Dashboard
-                        </NavLink>
-                    </div>
+
                     <div class="nav-item">
-                        <NavLink href="/dashboard/my-classes">
-                            My Classes
+                        <NavLink href="/dashboard" Match="NavLinkMatch.All">
+                            <i class="fa-solid fa-house"></i>
+                            <span>Student Dashboard</span>
                         </NavLink>
                     </div>
+
                     <div class="nav-item">
-                        <NavLink href="/dashboard/degree-progress">
-                            Degree Progress
+                        <NavLink href="/dashboard/my-classes" Match="NavLinkMatch.Prefix">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>My Classes</span>
                         </NavLink>
                     </div>
+
                     <div class="nav-item">
-                        <NavLink href="/dashboard/support">
-                            Student Support
+                        <NavLink href="/dashboard/degree-progress" Match="NavLinkMatch.Prefix">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>Degree Progress</span>
                         </NavLink>
                     </div>
+
+                    <div class="nav-item">
+                        <NavLink href="/dashboard/support" Match="NavLinkMatch.Prefix">
+                            <i class="fa-solid fa-headset"></i>
+                            <span>Student Support</span>
+                        </NavLink>
+                    </div>
+
                 </div>
             </Authorized>
         </AuthorizeView>
+
+
+        @* FACULTY *@
         <AuthorizeView Roles="Faculty">
             <Authorized>
                 <div class="nav-group">
-                    <div class="nav-item" style="border-top:1px solid var(--text);">
-                        <NavLink href="/faculty">
-                            Faculty Dashboard
+
+                    <div class="nav-item">
+                        <NavLink href="/faculty" Match="NavLinkMatch.All">
+                            <i class="fa-solid fa-house"></i>
+                            <span>Faculty Dashboard</span>
                         </NavLink>
                     </div>
-                    <div class="nav-item" style="border-top:1px solid var(--text);">
-                        <NavLink href="/faculty/classes">
-                            My Class Sessions
+
+                    <div class="nav-item">
+                        <NavLink href="/faculty/classes" Match="NavLinkMatch.Prefix">
+                            <i class="fa-solid fa-chalkboard"></i>
+                            <span>My Class Sessions</span>
                         </NavLink>
                     </div>
+
                 </div>
             </Authorized>
         </AuthorizeView>
+
+
+        @* ADMINS *@
         <AuthorizeView Roles="Admin">
             <Authorized>
                 <div class="nav-group">
-                    <div class="nav-item" style="border-top:1px solid var(--text);">
-                        <NavLink href="/admin">
-                            Admin Dashboard
+
+                    <div class="nav-item">
+                        <NavLink href="/admin" Match="NavLinkMatch.All">
+                            <i class="fa-solid fa-house nav-icon"></i>
+                            <span>Admin Dashboard</span>
                         </NavLink>
                     </div>
-                    <div class="nav-item" style="border-top:1px solid var(--text);">
-                        <NavLink href="/admin/students">
-                            CSU Students
+
+                    <div class="nav-item">
+                        <NavLink href="/admin/students" Match="NavLinkMatch.Prefix">
+                            <i class="fa-solid fa-user-group"></i>
+                            <span>CSU Students</span>
                         </NavLink>
                     </div>
-                    <div class="nav-item" style="border-top:1px solid var(--text);">
-                        <NavLink href="/admin/applicants">
-                            CSU Applicants
+
+                    <div class="nav-item">
+                        <NavLink href="/admin/applicants" Match="NavLinkMatch.Prefix">
+                            <i class="fa-solid fa-file-signature"></i>
+                            <span>CSU Applicants</span>
                         </NavLink>
                     </div>
-                    <div class="nav-item" style="border-top:1px solid var(--text);">
-                        <NavLink href="/admin/faculty">
-                            CSU Faculty
+
+                    <div class="nav-item">
+                        <NavLink href="/admin/faculty" Match="NavLinkMatch.Prefix">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                            <span>CSU Faculty</span>
                         </NavLink>
                     </div>
-                    <div class="nav-item" style="border-top:1px solid var(--text);">
-                        <NavLink href="/degree-listings">
-                            Degree Listings
+
+                    <div class="nav-item">
+                        <NavLink href="/degree-listings" Match="NavLinkMatch.Prefix">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                            <span>Degree Listings</span>
                         </NavLink>
                     </div>
-                    <div class="nav-item" style="border-top:1px solid var(--text);">
-                        <NavLink href="/admin/support">
-                            Support Tickets
+
+                    <div class="nav-item">
+                        <NavLink href="/admin/support" Match="NavLinkMatch.Prefix">
+                            <i class="fa-solid fa-ticket"></i>
+                            <span>Support Tickets</span>
                         </NavLink>
                     </div>
+
                 </div>
             </Authorized>
         </AuthorizeView>
-        
+
     </nav>
 
-    @* Logout | Admin Portal Link *@
-    <div style="display: grid; grid-template-columns: 1fr 1fr;">
+
+    @* Logout *@
+    <div class="form-logout-section">
         <form method="post" action="/account/logout">
             <button type="submit" class="btn btn-link">
                 Logout
             </button>
         </form>
-        <AuthorizeView Roles="Faculty">
-            <Authorized>
-                <a class="btn btn-link" href="/faculty">Faculty Portal</a>
-            </Authorized>
-        </AuthorizeView>
-        
-        <AuthorizeView Roles="Admin">
-            <Authorized>
-                <a class="btn btn-link"  href="/admin">Admin Portal</a>
-            </Authorized>
-        </AuthorizeView>
-
-        @* <AuthorizeView Roles="Admin, Faculty">
-            <Authorized>
-                <a class="btn btn-link" href="/faculty">Faculty Portal</a>
-                <a class="btn btn-link" href="/admin">Admin Portal</a>
-            </Authorized>
-        </AuthorizeView> *@
     </div>
 
+
     @* Button to open and close navigation *@
-    <button class="btn nav-open-close-button" @onclick="HandleToggle">@(NavOpen ? "⮜" : "⮞")</button>
+    <button class="btn nav-open-close-button" @onclick="HandleToggle">
+        @(NavOpen ? "⮜" : "⮞")
+    </button>
+
 </div>
+
 
 @code {
     [Parameter] public bool NavOpen { get; set; } = true;
     [Parameter] public EventCallback ToggleNav { get; set; }
-    public UserModel? user { get; set; } 
 
-    protected override async Task OnInitializedAsync() {
-        user = await authService.GetCurrentUserAsync(); // Get user for navigation account details
-        if (user == null) navigationManager.NavigateTo("/login"); //Return to login if null user
+    public UserModel? user { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await authService.GetCurrentUserAsync();
+
+        if (user == null)
+            navigationManager.NavigateTo("/login");
     }
 
-    public async Task HandleToggle() {
+    public async Task HandleToggle()
+    {
         await ToggleNav.InvokeAsync();
-
     }
-
 }
-
-
