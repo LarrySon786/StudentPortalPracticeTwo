@@ -95,6 +95,11 @@ authorized routes and links
 - I added breadcrumbs and pathfinding to the application. Every page after login should have them
 - I converted all UI Dialog boxes to use the new <Dialog> component for conventional formatting. Also convreted dialogs that 
 did not have components to now use components. I did the first design and then had AI replicate that design throughout the app
-
+- I resumed working on software testing. I completed the TermService test page and learned how to test for exceptions
+and practice assert statements. I learned that terminals can grow stale with loaded files (I had to delete the terminal and 
+reopen a new one)
+- I configured my first CI pipeline. I had to create a github 'temporary' database that hosts all my automated tests for 
+future push requests.
+- To practice writing integration tests, I wrote all the tests for degreeService by hand. Ai peer reviewed the work.
 
 

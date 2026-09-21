@@ -59,7 +59,7 @@ public class TermService
         return await _createDispose.ExecuteAsync(async db =>
         {
             var existing = await GetTermById(updated.Id, db);
-            if (existing == null) throw new Exception("No term found with this Id. Could not update");
+
             existing.Season = updated.Season;
             existing.Year = updated.Year;
             existing.ClassSessions = updated.ClassSessions;
