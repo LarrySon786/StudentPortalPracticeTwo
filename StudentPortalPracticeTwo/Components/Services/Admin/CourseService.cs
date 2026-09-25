@@ -84,8 +84,10 @@ public class CourseService
 
     public async Task DeleteCourse(int id, ApplicationDbContext? context = null)
     {
-        await _createDispose.ExecuteAsync(db => db.CourseDb
+        var deleteQuantity = await _createDispose.ExecuteAsync(db => db.CourseDb
                 .Where(x => x.Id == id)
                 .ExecuteDeleteAsync(), context);
+
+        if (deleteQuantity == 0) throw new Exception("No course found to delete. Delete failed.");
     }
 }

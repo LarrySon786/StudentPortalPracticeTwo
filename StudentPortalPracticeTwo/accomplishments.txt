@@ -101,5 +101,10 @@ reopen a new one)
 - I configured my first CI pipeline. I had to create a github 'temporary' database that hosts all my automated tests for 
 future push requests.
 - To practice writing integration tests, I wrote all the tests for degreeService by hand. Ai peer reviewed the work.
+- I planned and designed the integration tests for CourseService. They are doing pretty good. I had AI write most of them after
+I planned the test names, parameters, and similar things.
+- I created a TestData Helper that generates data value for my tests. It is reusable
+- I created the Class Session Tests. I also created my first query test. I did the archive class session and unarchive class session tests.
+
 
 

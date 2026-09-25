@@ -10,12 +10,11 @@ namespace StudentPortalPracticeTwo.Components.Services.Admin;
 
 public class ClassSessionService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _context;
+
     private readonly CreateDisposeContextHelper _createDispose;
 
-    public ClassSessionService(IDbContextFactory<ApplicationDbContext> context, CreateDisposeContextHelper createDispose)
+    public ClassSessionService(CreateDisposeContextHelper createDispose)
     {
-        _context = context;
         _createDispose = createDispose;
     }
 
@@ -73,9 +72,10 @@ public class ClassSessionService
     // DELETE existing class session
     public async Task DeleteClassSession(int id, ApplicationDbContext? context = null)
     {
-        await _createDispose.ExecuteAsync(db => db.ClassSessionDb
+        var result = await _createDispose.ExecuteAsync(db => db.ClassSessionDb
             .Where(x => x.Id == id)
             .ExecuteDeleteAsync(), context);
+        if (result == 0) throw new Exception("Could not delete class session. No matching id found.");
     }
 
     // Archive class session | Used to save records of completed class sessions
@@ -90,6 +90,11 @@ public class ClassSessionService
             foreach (UserProgramModel program in existing.StudentProgramModels)
             {
                 if (program.CurrentSessions.Any(x => x == existing)) throw new Exception("Could not archive class session. Some students are still enrolled in this session");
+            }
+            // Make sure no students are still registered in this class
+            foreach (UserProgramModel program in existing.RegisteredStudentProgramModels)
+            {
+                if (program.RegisteredSessions.Any(x => x == existing)) throw new Exception("Could not archive class session. Some students are registered in this session");
             }
 
             existing.ArchivedAndClosed = true;

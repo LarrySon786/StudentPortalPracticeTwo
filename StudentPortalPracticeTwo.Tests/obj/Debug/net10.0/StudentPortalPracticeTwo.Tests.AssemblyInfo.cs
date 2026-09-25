@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("StudentPortalPracticeTwo.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+00886111f6ca0f2a3cf03a20c2631af2975c6ac6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5f79871ee72dcee15cdcc101c342fcff7cfc99ec")]
 [assembly: System.Reflection.AssemblyProductAttribute("StudentPortalPracticeTwo.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StudentPortalPracticeTwo.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
