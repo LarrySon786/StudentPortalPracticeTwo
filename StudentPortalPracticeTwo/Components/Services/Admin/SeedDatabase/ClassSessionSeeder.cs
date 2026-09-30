@@ -48,7 +48,9 @@ public class ClassSessionSeeder
                 var createdSession = new ClassSession()
                 {
                     Course = course,
+                    CourseId = course.Id,
                     Instructor = instructor,
+                    InstructorId = instructor.Id,
                     Location = session.Location,
                     Capacity = session.Capacity,
                     CurrentCount = session.CurrentCount,
@@ -58,6 +60,8 @@ public class ClassSessionSeeder
                     EndTime = session.EndTime,
                     Description = session.Description,
                     Term = term,
+                    TermId = term.Id,
+
                 };
 
                 await _classSessionService.CreateClassSession(createdSession, db); // Create and save

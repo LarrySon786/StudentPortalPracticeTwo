@@ -117,6 +117,10 @@ else
                         }
                     </fieldset>
                     <p>@message</p>
+                    @if (!string.IsNullOrWhiteSpace(error))
+                    {
+                        <p class="alert">@error</p>
+                    }
                 </EditForm>
             </NotAuthorized>
         </AuthorizeView>
@@ -131,14 +135,22 @@ else
 @code {
     [Parameter] public UserModel? user { get; set; }
     public string message { get; set; } = "";
+    public string error { get; set; } = "";
 
 
     public async Task HandleSaveChanges() {
         try {
+            message = "";
+            error = "";
             await userService.UpdateUser(user!);
             message = "Changes Saved";
         }
+        catch (ValidationException ex)
+        {
+            error = ex.Message;
+        }
         catch (Exception ex) {
+            error = "An error occured. Changes could not be saved";
             Console.WriteLine($"Could not save changes on this user. Ex: {ex}");
         }
     }

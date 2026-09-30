@@ -14,6 +14,10 @@
         <label class="form-label">Email</label>
         <InputText class="form-control" type="email" @bind-Value="pendingAdmin.Email" />
         <ValidationMessage For="@(() => pendingAdmin.Email)" />
+        @if (!string.IsNullOrWhiteSpace(error))
+        {
+            <p class="alert">@error</p>
+        }
         <button type="button" class="btn btn-secondary" @onclick="HandleClose">Close</button>
         <button type="submit" class="btn btn-primary">Invite Admin</button>
     </EditForm>
@@ -23,13 +27,28 @@
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnAdminCreated { get; set; }
     private PendingAdmin pendingAdmin = new();
+    private string error { get; set; } = string.Empty;
 
     private async Task HandleSubmit()
     {
-        await adminService.InviteAdmin(pendingAdmin);
-        pendingAdmin = new();
-        await OnAdminCreated.InvokeAsync();
-        await HandleClose();
+        try
+        {
+            error = string.Empty;
+            await adminService.InviteAdmin(pendingAdmin);
+            pendingAdmin = new();
+            await OnAdminCreated.InvokeAsync();
+            await HandleClose();
+        }
+        catch(ValidationException ex)
+        {
+            error = ex.Message;
+        }
+        catch(Exception ex)
+        {
+            error = $"Could not invite admin. {ex.Message}";
+            Console.WriteLine($"Could not invite admin. Ex: {ex}");
+        }
+        
     }
 
     private Task HandleClose() => OnClose.InvokeAsync();

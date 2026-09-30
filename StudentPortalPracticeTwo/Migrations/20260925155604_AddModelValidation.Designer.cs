@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudentPortalPracticeTwo.Database;
@@ -11,9 +12,11 @@ using StudentPortalPracticeTwo.Database;
 namespace StudentPortalPracticeTwo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260925155604_AddModelValidation")]
+    partial class AddModelValidation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -267,8 +270,7 @@ namespace StudentPortalPracticeTwo.Migrations
 
                     b.Property<string>("CollegeTranscriptFileName")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("DraftApplicationId")
                         .HasColumnType("integer");
@@ -278,8 +280,7 @@ namespace StudentPortalPracticeTwo.Migrations
 
                     b.Property<string>("HighschoolTranscriptFileName")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -301,7 +302,6 @@ namespace StudentPortalPracticeTwo.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("TokenExpires")
@@ -328,8 +328,7 @@ namespace StudentPortalPracticeTwo.Migrations
 
                     b.Property<string>("ContactName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("text");
 
                     b.Property<int>("DraftApplicationId")
                         .HasColumnType("integer");
@@ -340,8 +339,7 @@ namespace StudentPortalPracticeTwo.Migrations
 
                     b.Property<string>("Relationship")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

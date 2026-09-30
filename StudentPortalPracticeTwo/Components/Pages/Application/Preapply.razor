@@ -2,10 +2,12 @@
 @layout ApplicationLayout
 @rendermode InteractiveServer
 @using StudentPortalPracticeTwo.Components.Services.Application
+@using StudentPortalPracticeTwo.Components.Services.Users
 @using StudentPortalPracticeTwo.Database.Models.Application
 @inject NavigationManager NavigationManager
 @inject DraftApplicationDb data
 @inject FinalApplicationDb finalApplication
+@inject UserService userService
 
 
 <div class="preapply-page">
@@ -29,10 +31,14 @@
             <EditForm Model="preapply" OnValidSubmit="HandleSubmit">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
+                @if (error == "codeInvalid")
+                {
+                    <p class="danger">Code was invalid</p>
+                }
 
                 <label class="form-label">Email</label>
                 <InputText class="form-control" @bind-Value="preapply.Email" />
-                <ValidationMessage For="@(() => preapply.Email)"/>
+                @* <ValidationMessage For="@(() => preapply.Email)"/> *@
 
 
                 @if (isSubmitting)
@@ -48,9 +54,9 @@
         else {
             <p>A code has been sent to your email. Please enter that code to access your student application.</p>
         
-            @if (error == "codeInvalid") {
+            @* @if (error == "codeInvalid") {
                 <p class="danger">Code was invalid</p>
-            }
+            } *@
 
             @* HTTP submission form to verify code *@
             <form method="Post" action="/application/login">
@@ -70,7 +76,7 @@
     public int existingId { get; set; }
     private string tokenCode { get; set; } = string.Empty;
     private string message = "";
-    [Parameter] public string? error { get; set; }
+    [SupplyParameterFromQuery] public string? error { get; set; }
     bool isSubmitting = false;
     bool validateExistingApplication = false;
 
@@ -81,7 +87,8 @@
 
             @* Verify that no previous student has applied with this email *@
             var duplicateEmail = await finalApplication.GetByEmail(preapply.Email);
-            if (duplicateEmail != null) {
+            var existingUser = await userService.GetUserByEmail(preapply.Email);
+            if (duplicateEmail != null || existingUser != null) {
                 message = "This email already has a student account. Please use a diffferent email";
                 isSubmitting = false;
                 return;
@@ -109,18 +116,6 @@
         }
         isSubmitting = false;
     }
-
-    @* private void ValidateExistingApplication() {
-
-        try {
-
-            NavigationManager.NavigateTo($"/apply/{existingId}");
-        }
-        catch(Exception ex) {
-            Console.WriteLine($"Could not access the application. Ex: {ex}");
-            message = "Could not access the appliation. Please try again."
-        }
-    } *@
 }
 
 

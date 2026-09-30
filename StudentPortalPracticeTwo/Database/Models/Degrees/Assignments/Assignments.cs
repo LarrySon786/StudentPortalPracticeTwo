@@ -20,8 +20,14 @@ public class Assignments
     public int SessionId { get; set; }
 
     // Properties
+    [Required(ErrorMessage = "Assignment name is required")]
+    [StringLength(200, ErrorMessage = "Assignment name cannot exceed 200 characters")]
     public string Name { get; set; } = string.Empty;
+
+    [StringLength(2000, ErrorMessage = "Assignment instructions cannot exceed 2000 characters")]
     public string Instructions { get; set; } = string.Empty;
+
+    [Range(1, int.MaxValue, ErrorMessage = "Assignment total points must be at least 1")]
     public int TotalPoints { get; set; }
 
 

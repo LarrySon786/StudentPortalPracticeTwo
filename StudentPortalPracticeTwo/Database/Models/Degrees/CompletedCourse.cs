@@ -25,7 +25,10 @@ public class CompletedCourse
 
 
     // Properties
+    [Range(0, 100, ErrorMessage = "Grade must be between 0 and 100")]
     public decimal Grade { get; set; }
+
+    [Range(0, 4, ErrorMessage = "GPA must be between 0 and 4")]
     public decimal GPA { get; set; }
     public DateOnly DateCompleted { get; set; }
 }

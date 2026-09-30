@@ -14,16 +14,19 @@ public class StudentInfoModel
     [Required(ErrorMessage = "First name is required")]
     [Display(Name = "First Name")]
     [StringLength(100, ErrorMessage = "First name cannot exceed 100 characters")]
+    [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "First name can only contain letters")]
     public required string FirstName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Middle name is required")]
     [Display(Name = "Middle Name")]
     [StringLength(100, ErrorMessage = "Middle name cannot exceed 100 characters")]
+    [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Middle name can only contain letters")]
     public required string MiddleName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Last name is required")]
     [Display(Name = "Last Name")]
     [StringLength(100, ErrorMessage = "Last name cannot exceed 100 characters")]
+    [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Last name can only contain letters")]
     public required string LastName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Date of birth is required.")]

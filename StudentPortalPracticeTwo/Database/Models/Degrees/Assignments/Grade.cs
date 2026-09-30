@@ -22,6 +22,7 @@ public class Grade
 
     // Properties
     public bool Submitted { get; set; } = false; // By default, marks as not yet graded (so zero points does not affect current grade)
+    [Range(0, double.MaxValue, ErrorMessage = "Scored points cannot be negative")]
     public decimal ScoredPoints { get; set; }
     public decimal PercentageGrade => Math.Round((decimal)(ScoredPoints / Assignment.TotalPoints), 2) * 100;
 }

@@ -10,5 +10,8 @@ public class UserContactModel
     public int UserId { get; set; }
     public UserModel? User { get; set; }
 
+    [Required(ErrorMessage = "Phone number is required")]
+    [Phone(ErrorMessage = "Enter a valid phone number")]
+    [StringLength(30, ErrorMessage = "Phone number cannot exceed 30 characters")]
     public required string Phone { get; set; }
 }

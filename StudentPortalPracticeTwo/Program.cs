@@ -192,15 +192,15 @@ app.MapPost("/application/login", async (HttpContext context, DraftApplicationDb
     var email = form["Email"];
 
     // Detect null fields
-    if (string.IsNullOrEmpty(code)) return Results.Redirect("?error=codeInvalid");
-    if (string.IsNullOrEmpty(email)) return Results.Redirect("?error=codeInvalid");
+    if (string.IsNullOrEmpty(code)) return Results.Redirect("/preapply?error=codeInvalid");
+    if (string.IsNullOrEmpty(email)) return Results.Redirect("/preapply?error=codeInvalid");
 
     DraftApplicationModel? existing;
     var result = await draftApplicationService.VerifyCodeSentInEmail(email!, code);
     if (result == true)
     {
         existing = await draftApplicationService.GetByEmail(email!);
-        if (existing == null) return Results.Redirect("?error=noDraftFound");
+        if (existing == null) return Results.Redirect("/preapply?error=codeInvalid");
 
         // CREATE AUTH COOKIE
         var claims = new List<Claim>() {
@@ -222,7 +222,7 @@ app.MapPost("/application/login", async (HttpContext context, DraftApplicationDb
         return Results.Redirect($"/apply");
     }
 
-    return Results.Redirect("?error=true");
+    return Results.Redirect("/preapply?error=codeInvalid");
 });
 
 // Download transcripts enpoints

@@ -6,6 +6,7 @@ using StudentPortalPracticeTwo.Database.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using StudentPortalPracticeTwo.Components.Services.Interfaces;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
+using System.ComponentModel.DataAnnotations;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users;
 
@@ -66,6 +67,13 @@ public class UserService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(updated); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not update student account. \n {errorMessage}");
+            }
+
             UserModel? existing = await GetUserById(updated.Id, db);
             if (existing == null) throw new Exception("Could not find an existing user to update");
 

@@ -1,5 +1,8 @@
 LEFT OFF
-- Creating a DbTestingConnection. See ChatGPT lesson tutorial. I was creating the database context factories.
+- Fixing class session tests to work with model behavior
+- Make sure application works as expected with new model behavior
+- write tests for validation after completion
+
 
 TESTING SET-UP
 dotnet new xunit -n StudentPortalPracticeTwo.Tests

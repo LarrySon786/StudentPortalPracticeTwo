@@ -9,6 +9,7 @@ using StudentPortalPracticeTwo.Database.Models.Users.Students;
 using StudentPortalPracticeTwo.Database.Models.DTOs;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users.Students;
 
@@ -54,6 +55,7 @@ public class StudentService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            
             // Check for existing user FIRST
             var existingUser = await _userManager.FindByEmailAsync(finalApplication.Email);
             if (existingUser != null) throw new Exception($"An account already exists for {finalApplication.Email}");
@@ -98,6 +100,7 @@ public class StudentService
             Student entity = new()
             {
                 FirstName = finalApplication.StudentInfo.FirstName,
+                MiddleName = finalApplication.StudentInfo.MiddleName,
                 LastName = finalApplication.StudentInfo.LastName,
                 DateOfBirth = finalApplication.StudentInfo.DateOfBirth,
                 Email = finalApplication.Email,
@@ -117,6 +120,13 @@ public class StudentService
                 IdentityUserId = applicationUser.Id,
             };
 
+            var ValidationErrors = ValidationHelper.ValidateModel(entity); // Server-side validation
+            if (ValidationErrors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, ValidationErrors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not create student account. \n {errorMessage}");
+            }
+
             db.StudentDb.Add(entity);
             await db.SaveChangesAsync();
             return new CreateStudentResultHelper
@@ -132,6 +142,13 @@ public class StudentService
     {
         await _createDispose.ExecuteAsync(async db =>
         {
+            var ValidationErrors = ValidationHelper.ValidateModel(user); // Server-side validation
+            if (ValidationErrors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, ValidationErrors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not create student account. \n {errorMessage}");
+            }
+
             var existingUser = await _userManager.FindByEmailAsync(user.Email);
             if (existingUser != null) throw new Exception($"An account already exists for {user.Email}");
 
@@ -332,6 +349,13 @@ public class StudentService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(updated); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not create student account. \n {errorMessage}");
+            }
+
             Student? existing = await GetStudentById(updated.Id, db);
             if (existing == null) throw new Exception("Could not find an existing user to update");
 

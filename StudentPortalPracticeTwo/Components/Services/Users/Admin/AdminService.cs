@@ -8,6 +8,7 @@ using StudentPortalPracticeTwo.Components.Services.Interfaces;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
+using System.ComponentModel.DataAnnotations;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users;
 
@@ -34,6 +35,8 @@ public class AdminService
     {
         if (string.IsNullOrWhiteSpace(pending.Email))
             throw new ArgumentException("An email is required", nameof(pending));
+
+        
 
         if (await _userManager.FindByEmailAsync(pending.Email) != null ||
             await GetAdminByEmail(pending.Email) != null)
@@ -145,6 +148,13 @@ public class AdminService
     {
         await _createDispose.ExecuteAsync(async db =>
         {
+            var validationErrors = ValidationHelper.ValidateModel(user); // Server-side validation
+            if (validationErrors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, validationErrors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not create admin user. \n {errorMessage}");
+            }
+
             var existingUser = await _userManager.FindByEmailAsync(user.Email);
             if (existingUser != null) throw new Exception($"An account already exists for {user.Email}");
 
@@ -176,6 +186,13 @@ public class AdminService
     {
         await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(updated); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not update admin user. \n {errorMessage}");
+            }
+
             AdminModel? existing = await GetAdminById(updated.Id, db);
             if (existing == null) throw new Exception("Could not find an existing user to update");
 

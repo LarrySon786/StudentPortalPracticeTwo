@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
@@ -40,6 +41,13 @@ public class ClassSessionService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(session); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not create class session. \n {errorMessage}");
+            }
+
             db.ClassSessionDb.Add(session);
             await db.SaveChangesAsync();
             return session;
@@ -50,6 +58,14 @@ public class ClassSessionService
     public async Task UpdateClassSession(ClassSession updated, ApplicationDbContext? context = null)
     {
         await _createDispose.ExecuteAsync( async db => {
+
+            var errors = ValidationHelper.ValidateModel(updated); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not update class session. \n {errorMessage}");
+            }
+
             ClassSession? existing = await GetClassSessionById(updated.Id, db);
             if (existing == null) throw new Exception("No existing class session was found. Update failed");
 

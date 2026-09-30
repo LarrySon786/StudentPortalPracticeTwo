@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 using StudentPortalPracticeTwo.Components.Services.Extensions;
@@ -47,6 +48,13 @@ public class SupportTicketService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(ticket); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not create ticket. \n {errorMessage}");
+            }
+
             // Assign the student ID
             ticket.StudentId = userId;
 
@@ -89,6 +97,13 @@ public class SupportTicketService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(response); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not write response. \n {errorMessage}");
+            }
+
             var existing = await GetTicketById(id, db);
             if (existing == null) throw new Exception("No existing ticket found");
 

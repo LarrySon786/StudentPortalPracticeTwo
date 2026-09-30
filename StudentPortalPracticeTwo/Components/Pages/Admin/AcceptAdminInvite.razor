@@ -1,6 +1,7 @@
 @page "/admin/accept-invite"
 @rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
+@using StudentPortalPracticeTwo.Components.Pages.Other
 @using StudentPortalPracticeTwo.Database.Models.Users.Admin
 @inject StudentPortalPracticeTwo.Components.Services.Users.AdminService adminService
 
@@ -82,6 +83,7 @@
         public DateOnly DateOfBirth { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
         [Required]
+        [Phone(ErrorMessage = "Must be a valid phone number.")]
         public string Phone { get; set; } = string.Empty;
 
         [Required, StringLength(100, MinimumLength = 6)]

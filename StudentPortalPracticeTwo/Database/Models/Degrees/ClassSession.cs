@@ -10,6 +10,7 @@ public class ClassSession
     [Key]
     public int Id { get; set; }
 
+    [Range(1, int.MaxValue, ErrorMessage = "Please select a course.")]
     public int CourseId { get; set; }
     public Course Course { get; set; } = null!;
 
@@ -29,15 +30,16 @@ public class ClassSession
     // public Class Assignments
     public List<Assignments> Assignments { get; set; } = new(); // This list of assignments needs to be looped and created for EACH student
 
+    [Range(1, int.MaxValue, ErrorMessage = "Please select an instructor.")]
     public int InstructorId { get; set; }
     public Faculty? Instructor { get; set; }
 
     // Session attributes
-    [Required]
-    [StringLength(200)]
+    [Required(ErrorMessage = "Class location is required")]
+    [StringLength(200, ErrorMessage = "Class location cannot exceed 200 characters")]
     public string Location { get; set; } = string.Empty;
 
-    [StringLength(1000)]
+    [StringLength(1000, ErrorMessage = "Class description cannot exceed 1000 characters")]
     public string Description { get; set; } = string.Empty;
 
     // Assign dates and times to the class (and school block)
@@ -57,10 +59,10 @@ public class ClassSession
 
 
 
-    [Range(0, int.MaxValue)]
+    [Range(0, int.MaxValue, ErrorMessage = "Current class count cannot be negative")]
     public int CurrentCount { get; set; } // TO DO: Make this property calculated by counting Users[]
 
-    [Range(1, int.MaxValue)]
+    [Range(1, int.MaxValue, ErrorMessage = "Class capacity must be at least 1")]
     public int Capacity { get; set; }
 
     public bool ArchivedAndClosed { get; set; } = false;

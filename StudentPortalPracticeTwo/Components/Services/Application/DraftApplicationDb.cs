@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using System.Text;
@@ -70,7 +71,6 @@ public class DraftApplicationDb
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
-
             DraftApplicationModel entity = new()
             {
                 Email = email,
@@ -93,6 +93,22 @@ public class DraftApplicationDb
     {
         await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(updated); // Server-side validation
+            errors = ValidationHelper.ValidateModel(updated.DraftStudentInfo, errors);
+            errors = ValidationHelper.ValidateModel(updated.DraftStudentContact, errors);
+            foreach(var contact in updated.DraftEmergencyContact)
+            {
+                errors = ValidationHelper.ValidateModel(contact, errors);
+            }
+            errors = ValidationHelper.ValidateModel(updated.DraftAcademicHistory, errors);
+            errors = ValidationHelper.ValidateModel(updated.DraftProgramSelection, errors);
+            errors = ValidationHelper.ValidateModel(updated.DraftEssays, errors);
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not update application. \n {errorMessage}");
+            }
+
             DraftApplicationModel? existing = await db.DraftApplicationDb
                 .Include(x => x.DraftStudentInfo)
                 .Include(x => x.DraftStudentContact)

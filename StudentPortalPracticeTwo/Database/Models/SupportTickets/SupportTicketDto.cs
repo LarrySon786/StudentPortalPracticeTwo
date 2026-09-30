@@ -11,7 +11,6 @@ public class SupportTicketDto
     public int Id { get; set; }
 
     // Student reference
-    [Required(ErrorMessage = "A student Id is required")]
     public int StudentId { get; set; }
     public Student Student { get; set; } = null!;
 

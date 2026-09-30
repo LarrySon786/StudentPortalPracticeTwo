@@ -13,14 +13,17 @@ public class DraftStudentInfoModel
 
     [Display(Name = "First Name")]
     [StringLength(100, ErrorMessage = "First name cannot exceed 100 characters")]
+    [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "First name can only contain letters")]
     public string? FirstName { get; set; }
 
     [Display(Name = "Middle Name")]
     [StringLength(100, ErrorMessage = "Middle name cannot exceed 100 characters")]
+    [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Middle name can only contain letters")]
     public string? MiddleName { get; set; }
 
     [Display(Name = "Last Name")]
     [StringLength(100, ErrorMessage = "Last name cannot exceed 100 characters")]
+    [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Last name can only contain letters")]
     public string? LastName { get; set; }
 
     [Display(Name = "Date of Birth")]

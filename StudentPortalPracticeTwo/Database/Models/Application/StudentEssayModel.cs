@@ -12,19 +12,19 @@ public class StudentEssayModel
 
 
     [Required(ErrorMessage = "Essay responses are required.")]
-    [MaxLength(700, ErrorMessage = "Essay response one must be less that 700 characters")]
-    [MinLength(300, ErrorMessage = "Essay response one must be over 300 characters")]
+    [MaxLength(3000, ErrorMessage = "Essay response one cannot exceed 3000 characters")]
+    [MinLength(300, ErrorMessage = "Essay response one must be at least 300 characters")]
     public string ResponseOne { get; set; } = null!;
 
 
     [Required(ErrorMessage = "Essay responses are required.")]
-    [MaxLength(700, ErrorMessage = "Essay response two must be less that 700 characters")]
-    [MinLength(300, ErrorMessage = "Essay response two must be over 300 characters")]
+    [MaxLength(3000, ErrorMessage = "Essay response two cannot exceed 3000 characters")]
+    [MinLength(300, ErrorMessage = "Essay response two must be at least 300 characters")]
     public string ResponseTwo { get; set; } = null!;
     
     
     [Required(ErrorMessage = "Essay responses are required.")]
-    [MaxLength(700, ErrorMessage = "Essay response three must be less that 700 characters")]
-    [MinLength(300, ErrorMessage = "Essay response three must be over 300 characters")]
+    [MaxLength(3000, ErrorMessage = "Essay response three cannot exceed 3000 characters")]
+    [MinLength(300, ErrorMessage = "Essay response three must be at least 300 characters")]
     public string ResponseThree { get; set; } = null!;
 }

@@ -7,13 +7,10 @@
 @using StudentPortalPracticeTwo.Components.Ui.Admin
 @inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
 
-@* TODO *@
-
-@* Allow search of faculty members *@
-@* Allow deactivation of faculty member accounts *@
-
 
 @* DONE *@
+@* Allow search of faculty members *@
+@* Allow deactivation of faculty member accounts *@
 @* Display all existing faculty members *@
 @* Allow creation of faculty members *@
 
@@ -75,10 +72,10 @@
         String.IsNullOrWhiteSpace(query)
             ? faculties!
             : faculties!.Where(x => 
-                x.Email.Contains(query) 
-                || x.DateOfBirth.ToString().Contains(query) 
-                || x.FirstName.Contains(query) 
-                || x.LastName.Contains(query));
+                x.Email.Contains(query, StringComparison.OrdinalIgnoreCase) 
+                || x.DateOfBirth.ToString().Contains(query, StringComparison.OrdinalIgnoreCase) 
+                || x.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) 
+                || x.LastName.Contains(query, StringComparison.OrdinalIgnoreCase));
     public bool nullFaculties = false;
     public bool createFacultyDialog = false;
     public string query { get; set; } = string.Empty;

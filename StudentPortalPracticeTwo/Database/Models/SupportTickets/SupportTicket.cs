@@ -26,6 +26,7 @@ public class SupportTicket
     public SupportTopic Topic { get; set; } = SupportTopic.Other;
 
     [Required(ErrorMessage = "A title is required")]
+    [StringLength(200, ErrorMessage = "A support ticket title cannot exceed 200 characters")]
     public required string Title { get; set; } = null!;
 
 

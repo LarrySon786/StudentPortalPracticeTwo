@@ -19,6 +19,7 @@ public class ResponseTicket
 
     // Properties
     [Required(ErrorMessage = "Support ticket input is required")]
+    [StringLength(4000, ErrorMessage = "Support ticket input cannot exceed 4000 characters")]
     public string StudentTicketInput { get; set; } = null!; // The student's questions, concerns, and other matters
 
 

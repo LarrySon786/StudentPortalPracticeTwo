@@ -1,4 +1,5 @@
 
+using StudentPortalPracticeTwo.Database;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Enums;
 using StudentPortalPracticeTwo.Database.Models.Users;
@@ -11,7 +12,7 @@ namespace StudentPortalPracticeTwo.Tests.Helpers;
 public static class TestData
 {
     // Create Identity User
-    public static ApplicationUser CreateDataIdentityUser(string id = "test-id-1")
+    public static ApplicationUser CreateDataIdentityUser(ApplicationDbContext db, string id = "test-id-1")
     {
         var user = new ApplicationUser()
         {
@@ -19,15 +20,17 @@ public static class TestData
             EmailConfirmed = true,
             Id = id,
         };
+
+        db.Add(user);
         return user;
     }
     
     // Create Student
-    public static Student CreateDataStudent(string? identityId = null)
+    public static Student CreateDataStudent(ApplicationDbContext db, string identityId)
     {
-        return new Student()
+        var student = new Student()
         {
-            IdentityUserId = identityId ?? "student-test-id",
+            IdentityUserId = identityId,
             FirstName = "Test",
             MiddleName = "Middle",
             LastName = "Student",
@@ -46,19 +49,21 @@ public static class TestData
             ],
             MyProgram = new(),
         };
+
+        db.Add(student);
+        return student;
     }
 
     // Instructor
-    public static Faculty CreateDataFaculty(string? identityId = null)
+    public static Faculty CreateDataFaculty(ApplicationDbContext db, string identityId, int? facultyId = null, string? email = "test.faculty@gmail.com")
     {
-        var user = CreateDataIdentityUser();
-
-        return new()
+        var faculty = new Faculty()
         {
+            Id = facultyId ?? 1,
             FirstName = "Test",
             MiddleName = "Middle",
             LastName = "Name",
-            Email = "test.faculty@gmail.com",
+            Email = email!,
             DateOfBirth = new DateOnly(2000, 1, 1),
             ContactDetails = new()
             {
@@ -71,54 +76,66 @@ public static class TestData
                     Phone = "555-666-7777"
                 }
             ],
-            IdentityUserId = identityId ?? "faculty-test-id",
+            IdentityUserId = identityId,
         };
+
+        db.Add(faculty);
+        return faculty;
     }
 
     // Create Term
-    public static Term CreateDataTerm()
+    public static Term CreateDataTerm(ApplicationDbContext db, int? termId = null)
     {
-        return new Term()
+        var term = new Term()
         {
+            Id = termId ?? 1,
             Season = TermSeason.Fall,
             Year = 2030,
         };
+
+        db.Add(term);
+        return term;
     }
 
     // DEGREE, COURSE, CLASS SESSION
     // Create and return test data degree
-    public static Degree CreateDataDegree()
+    public static Degree CreateDataDegree(ApplicationDbContext db, int? degreeId = null)
     {
         var degree = new Degree()
         {
+            Id = degreeId ?? 1,
             Name = "Test Degree",
             Description = "Test Description",
             Courses = new List<Course>()
         };
 
+        db.Add(degree);
         return degree;
     }
 
-    public static Course CreateDataCourse()
+    public static Course CreateDataCourse(ApplicationDbContext db, int? courseId = null)
     {
         var course = new Course()
         {
+            Id = courseId ?? 1,
             Name = "Test Course",
             Code = "TST",
             Credits = 3,
         };
 
+        db.Add(course);
         return course;
     }
 
-    public static ClassSession CreateDataClassSession( string identityId, int? sessionId = null, Course? course = null)
+    public static ClassSession CreateDataClassSession(ApplicationDbContext db, string identityId,
+            int? sessionId = null, Course? course = null, Faculty? faculty = null, Term? term = null)
     {
         var session = new ClassSession()
         {
             Id = sessionId ?? 1,
-            Course = course ?? CreateDataCourse(),
-            Term = CreateDataTerm(),
-            Instructor = CreateDataFaculty(identityId),
+            Course = course ?? CreateDataCourse(db),
+            Term = term ?? CreateDataTerm(db),
+            Instructor = faculty ?? CreateDataFaculty(db, identityId),
             StartDate = new DateOnly(2030, 08, 20),
             EndDate = new DateOnly(2030, 12, 14),
             StartTime = new TimeOnly(9, 0),
@@ -130,42 +147,50 @@ public static class TestData
 
         };
 
+        db.Add(session);
         return session;
     }
 
     // Assignments
-    public static Assignments CreateDataAssignment(int classSessionId, int? totalPoints = null)
+    public static Assignments CreateDataAssignment(ApplicationDbContext db, int classSessionId, int? totalPoints = null)
     {
-        return new Assignments()
+        var assignment = new Assignments()
         {
             Name = "Test Assignment",
             Instructions = "Test Instructions",
             TotalPoints = totalPoints ?? 100,
             SessionId = classSessionId,
         };
+
+        db.Add(assignment);
+        return assignment;
     }
 
     // Grades
-    public static Grade CreateDataGrade(int assignmentId, int studentProgramId, int sessionId, int? scoredPoints = null)
+    public static Grade CreateDataGrade(ApplicationDbContext db, int assignmentId, int studentProgramId, int sessionId, int? scoredPoints = null)
     {
-        return new Grade()
+        var grade = new Grade()
         {
             AssignmentId = assignmentId,
             StudentProgramId = studentProgramId,
             SessionId = sessionId,
             ScoredPoints = scoredPoints ?? 0,
         };
+
+        db.Add(grade);
+        return grade;
     }
 
     // User program model
-    public static UserProgramModel CreateDataUserProgram(Student? student = null, Degree? degree = null)
+    public static UserProgramModel CreateDataUserProgram(ApplicationDbContext db, Student? student = null, Degree? degree = null)
     {
         UserProgramModel program = new()
         {
             User = student,
-            MyDegree = degree ?? CreateDataDegree(),
+            MyDegree = degree ?? CreateDataDegree(db),
         };
 
+        db.Add(program);
         return program;
     }
 }

@@ -6,6 +6,7 @@ using StudentPortalPracticeTwo.Components.Services.Admin;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database.Models.Degrees;
 using StudentPortalPracticeTwo.Database.Models.Users;
+using StudentPortalPracticeTwo.Database.Models.Users.Faculty;
 using StudentPortalPracticeTwo.Database.Models.Users.Students;
 using StudentPortalPracticeTwo.Tests.Helpers;
 using StudentPortalPracticeTwo.Tests.Infrastructure;
@@ -54,7 +55,7 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
         await _context.ExecuteAsync(async db =>
         {
             // Arrange
-            ApplicationUser facultyOne = TestData.CreateDataIdentityUser("faculty-one-id");
+            ApplicationUser facultyOne = TestData.CreateDataIdentityUser(db, "faculty-one-id");
 
             ClassSession sessionOne = new ClassSession
             {
@@ -66,13 +67,13 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
                 EndTime = new TimeOnly(10, 0),
                 CurrentCount = 10,
                 Capacity = 30,
-                Course = TestData.CreateDataCourse(),
-                Term = TestData.CreateDataTerm(),
-                Instructor = TestData.CreateDataFaculty(facultyOne.Id),
+                Course = TestData.CreateDataCourse(db, 1),
+                Term = TestData.CreateDataTerm(db, 1),
+                Instructor = TestData.CreateDataFaculty(db, facultyOne.Id, 1),
 
             };
 
-            ApplicationUser facultyTwo = TestData.CreateDataIdentityUser("faculty-two-id");
+            ApplicationUser facultyTwo = TestData.CreateDataIdentityUser(db, "faculty-two-id");
 
             ClassSession sessionTwo = new ClassSession
             {
@@ -84,9 +85,9 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
                 EndTime = new TimeOnly(12, 0),
                 CurrentCount = 15,
                 Capacity = 25,
-                Course = TestData.CreateDataCourse(),
-                Term = TestData.CreateDataTerm(),
-                Instructor = TestData.CreateDataFaculty(facultyTwo.Id),
+                Course = TestData.CreateDataCourse(db, 2),
+                Term = TestData.CreateDataTerm(db, 2),
+                Instructor = TestData.CreateDataFaculty(db, facultyTwo.Id, 2),
             };
             db.Users.AddRange(facultyOne, facultyTwo);
             db.ClassSessionDb.AddRange(sessionOne, sessionTwo);
@@ -115,7 +116,7 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
 
         await _context.ExecuteAsync(async db =>
         {
-            var facultyOne = TestData.CreateDataIdentityUser();
+            var facultyOne = TestData.CreateDataIdentityUser(db);
 
             // Arrange
             ClassSession session = new ClassSession
@@ -128,9 +129,9 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
                 EndTime = new TimeOnly(10, 0),
                 CurrentCount = 5,
                 Capacity = 20,
-                Course = TestData.CreateDataCourse(),
-                Term = TestData.CreateDataTerm(),
-                Instructor = TestData.CreateDataFaculty(facultyOne.Id),
+                Course = TestData.CreateDataCourse(db),
+                Term = TestData.CreateDataTerm(db),
+                Instructor = TestData.CreateDataFaculty(db, facultyOne.Id),
             };
 
             db.Users.Add(facultyOne);
@@ -182,7 +183,10 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
 
         await _context.ExecuteAsync(async db =>
         {
-            var facultyOne = TestData.CreateDataIdentityUser();
+            var facultyOne = TestData.CreateDataIdentityUser(db, "5");
+            var course = TestData.CreateDataCourse(db);
+            var term = TestData.CreateDataTerm(db);
+            var instructor = TestData.CreateDataFaculty(db, facultyOne.Id);
 
             // Arrange
             ClassSession session = new ClassSession
@@ -195,12 +199,15 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
                 EndTime = new TimeOnly(14, 0),
                 CurrentCount = 0,
                 Capacity = 25,
-                Course = TestData.CreateDataCourse(),
-                Term = TestData.CreateDataTerm(),
-                Instructor = TestData.CreateDataFaculty(facultyOne.Id),
+                CourseId = course.Id,
+                TermId = term.Id,
+                InstructorId = instructor.Id
             };
 
             db.Users.Add(facultyOne);
+            db.CourseDb.Add(course);
+            db.TermDb.Add(term);
+            db.FacultyDb.Add(instructor);
 
             // Act
             var result = await _classSessionService
@@ -235,7 +242,7 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
 
         await _context.ExecuteAsync(async db =>
         {
-            var facultyOne = TestData.CreateDataIdentityUser();
+            var facultyOne = TestData.CreateDataIdentityUser(db);
 
             // Arrange
             ClassSession existingSession = new ClassSession
@@ -248,9 +255,9 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
                 EndTime = new TimeOnly(10, 0),
                 CurrentCount = 5,
                 Capacity = 20,
-                Course = TestData.CreateDataCourse(),
-                Term = TestData.CreateDataTerm(),
-                Instructor = TestData.CreateDataFaculty(facultyOne.Id),
+                Course = TestData.CreateDataCourse(db),
+                Term = TestData.CreateDataTerm(db),
+                Instructor = TestData.CreateDataFaculty(db, facultyOne.Id),
             };
 
             db.Users.Add(facultyOne);
@@ -300,7 +307,13 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
 
         await _context.ExecuteAsync(async db =>
         {
+
             // Arrange
+            var term = TestData.CreateDataTerm(db);
+            var course = TestData.CreateDataCourse(db);
+            var user = TestData.CreateDataIdentityUser(db);
+            var instructor = TestData.CreateDataFaculty(db, user.Id);
+
             ClassSession session = new ClassSession
             {
                 Id = 999999,
@@ -311,16 +324,17 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
                 StartTime = new TimeOnly(9, 0),
                 EndTime = new TimeOnly(10, 0),
                 CurrentCount = 0,
-                Capacity = 20
+                Capacity = 20,
+                TermId = term.Id,
+                CourseId = course.Id,
+                InstructorId = instructor.Id
             };
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<Exception>(
                 () => _classSessionService.UpdateClassSession(session, db));
 
-            Assert.Equal(
-                "No existing class session was found. Update failed",
-                exception.Message);
+            Assert.Equal("No existing class session was found. Update failed", exception.Message);
         });
     }
 
@@ -336,7 +350,7 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
 
         await _context.ExecuteAsync(async db =>
         {
-            var facultyOne = TestData.CreateDataIdentityUser();
+            var facultyOne = TestData.CreateDataIdentityUser(db);
             // Arrange
             ClassSession session = new ClassSession
             {
@@ -348,9 +362,9 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
                 EndTime = new TimeOnly(10, 0),
                 CurrentCount = 0,
                 Capacity = 20,
-                Course = TestData.CreateDataCourse(),
-                Term = TestData.CreateDataTerm(),
-                Instructor = TestData.CreateDataFaculty(facultyOne.Id),
+                Course = TestData.CreateDataCourse(db),
+                Term = TestData.CreateDataTerm(db),
+                Instructor = TestData.CreateDataFaculty(db, facultyOne.Id),
             };
 
             db.Users.Add(facultyOne);
@@ -398,7 +412,7 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
         await _fixture.ResetDatabaseAsync();
         await _context.ExecuteAsync(async db =>
         {
-            var facultyOne = TestData.CreateDataIdentityUser();
+            var facultyOne = TestData.CreateDataIdentityUser(db);
             // Arrange
             ClassSession session = new ClassSession
             {
@@ -410,9 +424,9 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
                 EndTime = new TimeOnly(10, 0),
                 CurrentCount = 0,
                 Capacity = 20,
-                Course = TestData.CreateDataCourse(),
-                Term = TestData.CreateDataTerm(),
-                Instructor = TestData.CreateDataFaculty(facultyOne.Id),
+                Course = TestData.CreateDataCourse(db),
+                Term = TestData.CreateDataTerm(db),
+                Instructor = TestData.CreateDataFaculty(db, facultyOne.Id),
             };
             db.Users.Add(facultyOne);
             db.ClassSessionDb.Add(session);
@@ -436,16 +450,15 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
         await _context.ExecuteAsync(async db =>
         {
             // Arrange | Create a registered student 
-            ApplicationUser faculty = TestData.CreateDataIdentityUser("instructor-id");
-            ClassSession session = TestData.CreateDataClassSession(faculty.Id);
-            ApplicationUser user = TestData.CreateDataIdentityUser("test-student-1");
-            Student student = TestData.CreateDataStudent(user.Id);
-            UserProgramModel program = TestData.CreateDataUserProgram(student);
+            ApplicationUser facultyUser = TestData.CreateDataIdentityUser(db, "test-instrutor-1");
+            Faculty instructor = TestData.CreateDataFaculty(db, facultyUser.Id, 2);
+            ClassSession session = TestData.CreateDataClassSession(db, facultyUser.Id, null, null, instructor);
+            ApplicationUser user = TestData.CreateDataIdentityUser(db, "test-student-1");
+            Student student = TestData.CreateDataStudent(db, user.Id);
+            UserProgramModel program = TestData.CreateDataUserProgram(db, student);
             program.RegisteredSessions.Add(session);
             session.RegisteredStudentProgramModels.Add(program);
 
-            db.Users.AddRange(user, faculty);
-            db.ClassSessionDb.Add(session);
             await db.SaveChangesAsync();
 
             // Act
@@ -462,16 +475,15 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
         await _context.ExecuteAsync(async db =>
         {
             // Arrange | Create a registered student 
-            ApplicationUser faculty = TestData.CreateDataIdentityUser("instructor-id");
-            ClassSession session = TestData.CreateDataClassSession(faculty.Id);
-            ApplicationUser user = TestData.CreateDataIdentityUser("test-student-1");
-            Student student = TestData.CreateDataStudent(user.Id);
-            UserProgramModel program = TestData.CreateDataUserProgram(student);
+            ApplicationUser faculty = TestData.CreateDataIdentityUser(db, "instructor-id");
+            Faculty instructor = TestData.CreateDataFaculty(db, faculty.Id, 2);
+            ClassSession session = TestData.CreateDataClassSession(db, faculty.Id, null, null, instructor);
+            ApplicationUser user = TestData.CreateDataIdentityUser(db, "test-student-1");
+            Student student = TestData.CreateDataStudent(db, user.Id);
+            UserProgramModel program = TestData.CreateDataUserProgram(db, student);
             program.CurrentSessions.Add(session);
             session.StudentProgramModels.Add(program);
 
-            db.Users.AddRange(faculty, user);
-            db.ClassSessionDb.Add(session);
             await db.SaveChangesAsync();
 
             // Act
@@ -491,8 +503,8 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
         await _context.ExecuteAsync(async db =>
         {
             // Arrange
-            var faculty = TestData.CreateDataIdentityUser();
-            var session = TestData.CreateDataClassSession(faculty.Id);
+            var faculty = TestData.CreateDataIdentityUser(db);
+            var session = TestData.CreateDataClassSession(db, faculty.Id);
 
             db.Users.Add(faculty);
             db.ClassSessionDb.Add(session);
@@ -541,14 +553,15 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
         await _context.ExecuteAsync(async db =>
         {
             // Arrange
-            ApplicationUser faculty = TestData.CreateDataIdentityUser("test-id");
-            ClassSession session = TestData.CreateDataClassSession(faculty.Id);
-            Assignments assignment = TestData.CreateDataAssignment(session.Id);
-            ApplicationUser user = TestData.CreateDataIdentityUser("test-student-id");
-            Student student = TestData.CreateDataStudent(user.Id);
-            Degree degree = TestData.CreateDataDegree();
-            UserProgramModel program = TestData.CreateDataUserProgram(student, degree);
-            Grade grade = TestData.CreateDataGrade(assignment.Id, program.Id, session.Id);
+            ApplicationUser faculty = TestData.CreateDataIdentityUser(db, "test-id");
+            Faculty instructor = TestData.CreateDataFaculty(db, faculty.Id, 2);
+            ClassSession session = TestData.CreateDataClassSession(db, faculty.Id, null, null, instructor);
+            Assignments assignment = TestData.CreateDataAssignment(db, session.Id);
+            ApplicationUser user = TestData.CreateDataIdentityUser(db, "test-student-id");
+            Student student = TestData.CreateDataStudent(db, user.Id);
+            Degree degree = TestData.CreateDataDegree(db);
+            UserProgramModel program = TestData.CreateDataUserProgram(db, student, degree);
+            Grade grade = TestData.CreateDataGrade(db, assignment.Id, program.Id, session.Id);
             assignment.Grades.Add(grade);
             program.Grade.Add(grade);
             session.Assignments.Add(assignment);
@@ -556,9 +569,6 @@ public class ClassSessionServiceTests : IClassFixture<DatabaseFixture>
             session.StudentProgramModels.Add(program);
             session.RegisteredStudentProgramModels.Add(program);
 
-            db.Users.AddRange(faculty, user);
-            db.StudentDb.Add(student);
-            db.ClassSessionDb.Add(session);
             await db.SaveChangesAsync();
 
             // Act

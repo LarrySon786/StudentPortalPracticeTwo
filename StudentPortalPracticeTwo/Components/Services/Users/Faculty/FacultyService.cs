@@ -7,6 +7,7 @@ using StudentPortalPracticeTwo.Database.Models.Users;
 using StudentPortalPracticeTwo.Components.Services.Interfaces;
 using System.Security.Cryptography;
 using System.Text;
+using System.ComponentModel.DataAnnotations;
 
 namespace StudentPortalPracticeTwo.Components.Services.Users.Instructors;
 
@@ -55,6 +56,12 @@ public class FacultyService
     public async Task InviteFaculty(PendingFaculty pending)
     {
         // Server side Validation
+        var errors = ValidationHelper.ValidateModel(pending); // Server-side validation
+        if (errors.Count() > 0)
+        {
+            string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+            throw new ValidationException($"Could not create pending faculty. \n {errorMessage}");
+        }
 
         // Form Email and Token
         string firstLastName = $"{pending.FirstName} {pending.LastName}";
@@ -90,6 +97,13 @@ public class FacultyService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(faculty); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not update faculty user. \n {errorMessage}");
+            }
+
             // Check if faculty user already exists / if email is in use
             var existing = await GetByEmail(faculty.Email, db);
             if (existing != null) throw new Exception("A faculty or student user already exist with this email");
@@ -128,6 +142,13 @@ public class FacultyService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(updated); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not update faculty user. \n {errorMessage}");
+            }
+
             // Check if faculty user already exists / if email is in use
             var existing = await GetById(updated.Id, db);
             if (existing == null) throw new Exception("No faculty member could be found to update");

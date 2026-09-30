@@ -61,6 +61,13 @@ public class AssignmentService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(assignment); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not create assignment. \n {errorMessage}");
+            }
+
             var existingSession = await _sessionService.GetClassSessionById(classSessionId, db);
             if (existingSession == null) throw new Exception("No existing session found to add an assignment to.");
 
@@ -103,6 +110,13 @@ public class AssignmentService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(updated); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not update assignment. \n {errorMessage}");
+            }
+            
             var existing = await GetAssignmentById(updated.Id, db);
 
             if (existing == null)
@@ -139,6 +153,7 @@ public class AssignmentService
             foreach (Grade grade in grades)
             {
                 if (grade.ScoredPoints < 0) throw new ValidationException("Scores cannot be negative.");
+                
             }
 
             var ids = grades

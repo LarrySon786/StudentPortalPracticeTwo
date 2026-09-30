@@ -1,5 +1,6 @@
 
 
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database;
@@ -39,6 +40,13 @@ public class DegreeService
     {
         await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(newDegree); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not create degree. \n {errorMessage}");
+            }
+
             db.DegreeDb.Add(newDegree);
             await db.SaveChangesAsync();
         }, context);
@@ -49,6 +57,13 @@ public class DegreeService
     {
         await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(updated); // Server Side Validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not update degree. \n {errorMessage}");
+            }
+
             Degree? existing = await GetDegreeById(updated.Id, db);
             if (existing == null) throw new Exception("No existing degree found. Cannot update");
 
@@ -60,7 +75,6 @@ public class DegreeService
         }, context);
     }
 
-    
 
     // DELETE existing Degree
     public async Task DeleteDegree(int id, ApplicationDbContext? context = null)
@@ -83,5 +97,9 @@ public class DegreeService
             .Include(x => x.StudentPrograms)
                 .ThenInclude(x => x.User);
     }
+
+
+
+
 }
 

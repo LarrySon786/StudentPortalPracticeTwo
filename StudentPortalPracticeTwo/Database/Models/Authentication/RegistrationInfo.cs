@@ -5,10 +5,10 @@ namespace StudentPortalPracticeTwo.Database.Models.Authentication;
 
 public class RegistrationInfo
 {
-    [Required]
+    [Required(ErrorMessage = "Password is required")]
     public string Password { get; set; } = string.Empty;
 
-    [Required]
-    [Compare(nameof(Password))]
+    [Required(ErrorMessage = "Password confirmation is required")]
+    [Compare(nameof(Password), ErrorMessage = "Password and confirmation do not match")]
     public string ConfirmPassword { get; set; } = string.Empty;
 }

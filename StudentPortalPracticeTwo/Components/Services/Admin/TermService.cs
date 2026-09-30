@@ -1,5 +1,6 @@
 
 
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using StudentPortalPracticeTwo.Components.Services.Extensions;
 using StudentPortalPracticeTwo.Database;
@@ -47,6 +48,13 @@ public class TermService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(term); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not create term. \n {errorMessage}");
+            }
+
             db.Add(term);
             await db.SaveChangesAsync();
             return term;
@@ -58,6 +66,13 @@ public class TermService
     {
         return await _createDispose.ExecuteAsync(async db =>
         {
+            var errors = ValidationHelper.ValidateModel(updated); // Server-side validation
+            if (errors.Count() > 0)
+            {
+                string errorMessage = string.Join(Environment.NewLine, errors.Select(x => x.ErrorMessage));
+                throw new ValidationException($"Could not update term. \n {errorMessage}");
+            }
+
             var existing = await GetTermById(updated.Id, db);
 
             existing.Season = updated.Season;
