@@ -208,7 +208,7 @@
             var newApplication = await data.CreateApplication(Model);
 
             if (newApplication != null)
-                NavigationManager.NavigateTo($"submission-complete/{newApplication.Id}");
+                NavigationManager.NavigateTo($"/submission-complete");
         }
         catch(ValidationException ex) {
             

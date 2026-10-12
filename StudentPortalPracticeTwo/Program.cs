@@ -17,6 +17,9 @@ using StudentPortalPracticeTwo.Components.Services.SupportTicketServices;
 using StudentPortalPracticeTwo.Database.Models.Application;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using QuestPDF.Infrastructure;
+using StudentPortalPracticeTwo.Components.Services.PdfServices;
+QuestPDF.Settings.License = LicenseType.Community; // Sets QuestPDF pdf writer license
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +81,8 @@ builder.Services.AddScoped<SupportTicketService>(); // Allows support ticket ope
 builder.Services.AddControllers();
 builder.Services.AddScoped<TermServiceHelper>();
 builder.Services.AddScoped<CreateDisposeContextHelper>(); // Allows creation / dispose of database connection
+builder.Services.AddScoped<PdfService>(); // PDF writing and related services
+
 // DATABASE SEEDING
 // Database Reset / Seeding
 builder.Services.AddScoped<ResetDatabase>();
@@ -211,7 +216,8 @@ app.MapPost("/application/login", async (HttpContext context, DraftApplicationDb
 
         // CREATE AUTH COOKIE
         var claims = new List<Claim>() {
-            new Claim("ApplicationId", existing.Id.ToString())
+            new Claim("ApplicationId", existing.Id.ToString()),
+            new Claim("ApplicationEmail", existing.Email)
         };
 
         var identity = new ClaimsIdentity(claims, "ApplicationFormCookie");
