@@ -59,7 +59,9 @@
 
     private async Task DownloadPdf()
     {
-        byte[]? pdf = pdfService.GenerateApplicationPdf();
+        if (Final == null) return; // Prevents execution if null
+
+        byte[]? pdf = pdfService.GenerateApplicationPdf(Final);
         string base64 = Convert.ToBase64String(pdf);
 
         @* Uses javascript code to allow downloading PDF *@

@@ -19,6 +19,9 @@ Admin management of pending applications, approved applications, denied applicat
 Switch to IDbContextFactory instead of normal DbContext
 Refactored UserModel into Students, Faculty, and AdminModel (which all inherit from UserModel shared details)
 Fixed bugs related to refactoring including classSession creation faults, course queries from db, and DegreeProgress incomplete courses not rendering
+Fixed bugs related to verificaition code and applications for students. Also made it so the injection was scoped and not singleton
+Improved CSS of landing page and student application.
+Create a PDF writer using QuestPDFs. After I got it set-up, I had AI design the PDF to match color scheme and look professional.
 
 
 
