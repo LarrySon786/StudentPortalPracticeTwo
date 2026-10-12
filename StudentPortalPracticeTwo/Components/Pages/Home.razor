@@ -1,73 +1,73 @@
-﻿@page "/"
+﻿
+@page "/"
+@using StudentPortalPracticeTwo.Components.Ui
 @layout ApplicationLayout
 @rendermode InteractiveServer
-@using StudentPortalPracticeTwo.Components.Ui
-<PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<PageTitle>Home | CSU University Portal</PageTitle>
 
-Welcome to your new app.
+<div class="home-page">
 
-<a class="btn btn-primary" href="/preapply">Student Application</a>
-<a class="btn btn-primary" href="/login">Login</a>
-<a class="btn btn-primary" href="/dashboard">Student Dashboard</a>
-<a class="btn btn-primary" href="/faculty">Faculty</a>
-<a class="btn btn-primary" href="/admin">Admin</a>
-<a class="btn btn-primary" href="/catalog">School Degree Catalog</a>
+    @* Section One | Portal Tools *@
+    <section class="portal-tools-section" aria-label="University portal tools">
+        <div class="portal-tools-container">
 
+            <PortalTools Title="Student Application"
+                         Description="Take the first step toward your future at Cascade State University."
+                         ActionButton="Apply Now" ImageRef="images/apply.jpg" ImageAlt="College application paperwork on a desk"
+                         HrefLink="/preapply" />
 
+            <PortalTools Title="Program Catalog"
+                         Description="Explore academic programs and find the degree that fits your goals."
+                         ImageRef="images/catalog.jpg" ImageAlt="Academic materials and university books"
+                         ActionButton="Explore Programs" HrefLink="/catalog" />
 
-@* COLOR PALLETE and CSS planning BELOW *@
-<div class="mt-4">
-    <div class="standard-card-container">
-        <div class="standard-card">
-            <h1>Color Pallete</h1>
-            <p>Example Text for this website</p>
+            <PortalTools Title="Student Login"
+                         Description="Access your student portal, manage your information, and continue your journey."
+                         ImageRef="images/login.jpg" ImageAlt="Laptop and notebook on a university study desk"
+                         ActionButton="Sign In" HrefLink="/login" />
+
         </div>
-        <div class="standard-card">
-            
+    </section>
+
+    @* Section Two | About the Author *@
+    <section class="about-author">
+        <div class="about-author-content">
+            <span class="section-eyebrow">BEHIND THE PROJECT</span>
+            <h2>About the Author</h2>
+            <div class="author-divider"></div>
+            <h3>Brandon Richards</h3>
+            <p>
+                This university portal was created as a software development
+                project to demonstrate web application design, data management,
+                and modern .NET development.
+            </p>
         </div>
-    </div>
-    
-    
+    </section>
 
+    @* Section Three | Footer *@
+    <footer class="home-footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <a href="/" class="footer-logo">CSU</a>
+                <p>Cascade State University</p>
+                <a href="https://github.com/LarrySon786/StudentPortalPracticeTwo" target="_blank"
+                   rel="noopener noreferrer" class="footer-github">
+                    View the project on GitHub ↗
+                </a>
+            </div>
 
-    <div>
-        <button class="btn btn-link">Link</button>
-        <button class="btn btn-primary">Primary</button>
-        <button class="btn btn-secondary">Secondary</button>
-        <button class="btn btn-danger">Danger</button>
-    </div>
-
-    <div class="info">
-        <p>Info</p>
-    </div>
-    <div class="alert">
-        <p>Alert</p>
-    </div>
-    <div class="success">
-        <p>Success</p>
-    </div>
-
-    <button class="btn btn-secondary" @onclick="OpenDialog">Open Dialog</button>
-
-    @if(Dialog) {
-        <HomeTestDialog OnClose="CloseDialog" />
-    }
+            <div class="quick-link-container">
+                <h3>Quick Links</h3>
+                <nav class="quick-links" aria-label="Quick links">
+                    <a href="/dashboard">Student Portal</a>
+                    <a href="/faculty">Faculty Portal</a>
+                    <a href="/admin">Admin Portal</a>
+                    <a href="/dev">Developer Tools</a>
+                </nav>
+            </div>
+        </div>
+    </footer>
 
 </div>
-
-@code {
-    private bool Dialog { get; set; } = false;
-
-    private void OpenDialog() {
-        Dialog = true;
-    }
-
-    private void CloseDialog() {
-        Dialog = false;
-    }
-}
-
-
 

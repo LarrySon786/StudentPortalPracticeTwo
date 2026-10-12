@@ -10,17 +10,17 @@
 @inject UserService userService
 
 
-<div class="preapply-page">
-    <div>
-        <img src="/images/csu-logo-no-background.webp" alt="CSU Logo" class="logo-image"/>
+<div class="preapply-page">    
+    <div class="standard-card preapply-card">
+        <div class="form-head">
+            <h1 class="preapply-header">Apply to Cascade Falls University</h1>
+            <img src="/images/csu-logo-letters-no-background.webp" alt="CSU Logo" class="logo-image"/>
+        </div>
+        <div class="header-divider"></div>
         
-    </div>
-    
-    <div class="standard-card">
-        <h1 class="header-underline">Apply to Cascade Falls University</h1>
         @if (validateExistingApplication == false)
         {
-            <p>
+            <p class="instructions">
                 Enter an email to start your student application.
                 If you have already started an application with your email, you can resume
                 your application by inputing your email below.
@@ -47,7 +47,7 @@
                 }
                 else
                 {
-                    <button class="btn btn-primary" type="submit">Begin / Continue Application</button>
+                    <button class="btn btn-primary preapply-submit" type="submit">Begin / Continue Application</button>
                 }
             </EditForm>
         }

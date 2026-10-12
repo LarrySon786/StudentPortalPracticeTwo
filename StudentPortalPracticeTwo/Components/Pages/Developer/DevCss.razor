@@ -1,0 +1,58 @@
+@page "/dev/css"
+@layout ApplicationLayout
+@using StudentPortalPracticeTwo.Components.Ui
+
+@* COLOR PALLETE and CSS planning BELOW *@
+<div class="mt-4">
+    <div class="standard-card-container">
+        <div class="standard-card">
+            <h1>Color Pallete</h1>
+            <p>Example Text for this website</p>
+        </div>
+        <div class="standard-card">
+            
+        </div>
+    </div>
+    
+    
+
+
+    <div class="mb-2">
+        <button class="btn btn-link">Link</button>
+        <button class="btn btn-primary">Primary</button>
+        <button class="btn btn-secondary">Secondary</button>
+        <button class="btn btn-danger">Danger</button>
+    </div>
+
+    <div class="info">
+        <p>Info</p>
+    </div>
+    <div class="alert">
+        <p>Alert</p>
+    </div>
+    <div class="success">
+        <p>Success</p>
+    </div>
+
+    <button class="btn btn-secondary" @onclick="OpenDialog">Open Dialog</button>
+
+    @if(Dialog) {
+        <HomeTestDialog OnClose="CloseDialog" />
+    }
+
+</div>
+
+@code {
+    private bool Dialog { get; set; } = false;
+
+    private void OpenDialog() {
+        Dialog = true;
+    }
+
+    private void CloseDialog() {
+        Dialog = false;
+    }
+}
+
+
+

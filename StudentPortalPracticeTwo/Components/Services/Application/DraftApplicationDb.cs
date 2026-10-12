@@ -186,7 +186,7 @@ public class DraftApplicationDb
                 .FirstOrDefaultAsync(x => x.DraftApplication!.Email == email &&
                     x.ExpirationTime > DateTime.UtcNow &&
                     x.Used == false);
-            if (result == null) throw new Exception("No results found in database. ");
+            if (result == null) throw new Exception("No valid code found. ");
 
             // Compare entered code with database stored code
             if (result.HashedCode == hashedInput)

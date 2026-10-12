@@ -6,7 +6,7 @@
     /* Primary brand colors */
     --color-primary: hwb(175 14% 44%);
     --color-primary-light: #2A9D8F;
-    --color-primary-hover: hwb(175 14% 60%);
+    --color-primary-hover: hwb(174 27% 34%);
     --color-primary-border: hwb(175 14% 38%);
     --alternate: hwb(340 14% 44%);
 
@@ -235,6 +235,16 @@ h4, h5, h6 {
     max-height: 200px;
 }
 
+.single-form-parent {
+    display:flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.single-form-page {
+    max-width:760px
+}
+
 
 /* =========================================================
    DIALOGS
@@ -332,7 +342,6 @@ label {
 
 .form-control {
     margin-bottom: 1rem;
-    max-width: 500px;
 }
 
 .form-container {
@@ -357,6 +366,10 @@ label {
 a,
 .btn-link {
     color: var(--color-text);
+}
+
+.white-link-decorated {
+    color: white;
 }
 
 

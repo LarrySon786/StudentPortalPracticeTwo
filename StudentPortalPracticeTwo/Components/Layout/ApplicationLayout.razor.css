@@ -1,0 +1,80 @@
+main {
+    min-height: 100vh;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 66px;
+    padding: 12px 20px;
+    background: linear-gradient(100deg,
+            var(--color-nav) 0%,
+            #1B6F6A 65%,
+            var(--color-primary-light) 100%);
+    box-shadow: 0 2px 8px rgba(36, 59, 74, 0.14);
+}
+
+.home-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.university-mark {
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+}
+
+.university-name,
+.university-portal,
+.header-divider {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.95rem;
+}
+
+.header-divider {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.home-link:hover .university-portal {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.home-link:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 5px;
+    border-radius: 3px;
+}
+
+.body-content {
+    min-height: calc(100vh - 66px);
+    padding: 0;
+    color: var(--color-text);
+}
+
+@media (max-width: 580px) {
+    .top-bar {
+        min-height: 60px;
+        padding: 12px;
+    }
+
+    .home-link {
+        gap: 7px;
+    }
+
+    .university-name,
+    .university-portal,
+    .header-divider {
+        font-size: 0.82rem;
+    }
+}
+

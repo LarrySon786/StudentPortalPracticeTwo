@@ -1,6 +1,8 @@
 
 
 LEFT off
+- Using the AI example to come up with Ideas for each page's css. Improve the CSS manually. Try to learn new things based on the landing page
+css that AI created.
 - I also began re-doing my color pallete a little so I can do more elite css throughout the website
 - I began creating the my account details page. It need overhalled a little for what I have in mind. 
 Plan and redesign the existing component to meet needs so admin, faculty, and students can all Access

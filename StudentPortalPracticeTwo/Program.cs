@@ -71,7 +71,7 @@ builder.Services.AddScoped<StudentService>(); // Service to manage creation of S
 builder.Services.AddScoped<FacultyService>(); // Service to manage creation of faculty members
 builder.Services.AddScoped<AdminService>(); // Service to manage creation of Admin members
 builder.Services.AddScoped<AuthLogin>(); // Login, logout, and other auth methods
-builder.Services.AddSingleton<ApplicationAuthenticationState>();
+builder.Services.AddScoped<ApplicationAuthenticationState>(); // "/apply" route application ID stored here
 builder.Services.AddScoped<RegisterCourses>(); // Allows students to register, drop, and manage their courses
 builder.Services.AddScoped<TermManagement>(); // Allows instructors to manage class sessions for each term
 builder.Services.AddScoped<SupportTicketService>(); // Allows support ticket operations between students and admins
@@ -107,46 +107,53 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 
 
+app.UseAuthentication();
+app.UseAuthorization();
 
+app.UseAntiforgery();
 
 // Protect student applications with this route.
 app.Use(async (context, next) =>
 {
-    if (context.Request.Path.StartsWithSegments("/apply"))
+    bool isApplyRequest = context.Request.Path.StartsWithSegments("/apply");
+    bool isBlazorCircuitRequest = context.Request.Path.StartsWithSegments("/_blazor");
+
+    if (isApplyRequest || isBlazorCircuitRequest)
     {
         var result = await context.AuthenticateAsync("ApplicationFormCookie");
+        var applicationId = result.Principal?.FindFirst("ApplicationId")?.Value;
+        bool validApplication = result.Succeeded && int.TryParse(applicationId, out _);
 
-        if (!result.Succeeded || result.Principal == null)
+        if (isApplyRequest && !validApplication)
         {
             context.Response.Redirect("/preapply");
             return;
         }
-
-        var applicationId = result.Principal.FindFirst("ApplicationId")?.Value;
-
-        if (!int.TryParse(applicationId, out var id))
+        if (validApplication)
         {
-            context.Response.Redirect("/preapply");
-            return;
+            context.User = result.Principal!;
         }
-
-        // Make application identity available to the request
-        context.User = result.Principal;
-
-        // Store the application ID for the Blazor circuit
-        var applicationState =
-            context.RequestServices.GetRequiredService<ApplicationAuthenticationState>();
-
-        applicationState.ApplicationId = id;
     }
 
     await next();
 });
 
-app.UseAuthentication();
-app.UseAuthorization();
+// Student Application Verifying current cookie and returning the applicationId.
+app.MapGet("/application/current", async (HttpContext context) =>
+{
+    var result = await context.AuthenticateAsync("ApplicationFormCookie");
 
-app.UseAntiforgery();
+    if (!result.Succeeded || result.Principal == null)
+        return Results.Unauthorized();
+
+    var applicationId = result.Principal
+        .FindFirst("ApplicationId")?.Value;
+
+    if (!int.TryParse(applicationId, out var id))
+        return Results.Unauthorized();
+
+    return Results.Ok(new { ApplicationId = id });
+});
 
 // Login Http Endpoint
 app.MapPost("/account/login", async (HttpContext context, SignInManager<ApplicationUser> signInManager

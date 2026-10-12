@@ -1,0 +1,42 @@
+
+<a href="@HrefLink" class="tool-link">
+    <div class="standard-card title-card">
+
+        @if (!string.IsNullOrWhiteSpace(ImageRef))
+        {
+            <img class="background-image" src="@ImageRef" alt="@ImageAlt" loading="lazy" />
+        }
+
+        <div class="tool-overlay"></div>
+
+        <div class="tool-details">
+            @if (!string.IsNullOrWhiteSpace(Title))
+            {
+                <h3>@Title</h3>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Description))
+            {
+                <p>@Description</p>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(ActionButton))
+            {
+                <span class="tool-action">
+                    @ActionButton
+                    <span aria-hidden="true">→</span>
+                </span>
+            }
+        </div>
+    </div>
+</a>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string ImageRef { get; set; } = string.Empty;
+    [Parameter] public string ImageAlt { get; set; } = string.Empty;
+    [Parameter] public string Description { get; set; } = string.Empty;
+    [Parameter] public string HrefLink { get; set; } = string.Empty;
+    [Parameter] public string ActionButton { get; set; } = string.Empty;
+}
+
