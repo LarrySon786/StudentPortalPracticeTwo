@@ -346,8 +346,6 @@ label {
 
 .form-container {
     background-color: var(--color-surface);
-    max-width: 75%;
-    min-height: 80vh;
     padding: 32px;
     margin: 1.5rem;
     border-radius: 16px;

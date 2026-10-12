@@ -96,7 +96,7 @@ public class DraftApplicationDb
             var errors = ValidationHelper.ValidateModel(updated); // Server-side validation
             errors = ValidationHelper.ValidateModel(updated.DraftStudentInfo, errors);
             errors = ValidationHelper.ValidateModel(updated.DraftStudentContact, errors);
-            foreach(var contact in updated.DraftEmergencyContact)
+            foreach(var contact in updated.DraftEmergencyContact!)
             {
                 errors = ValidationHelper.ValidateModel(contact, errors);
             }

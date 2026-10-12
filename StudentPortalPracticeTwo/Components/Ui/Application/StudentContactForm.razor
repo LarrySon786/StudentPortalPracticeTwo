@@ -1,6 +1,8 @@
 @using StudentPortalPracticeTwo.Database.Models.Application
 
 <FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
+    <legend>Student Contact</legend>
+
     <label class="form-label">Phone</label>
     <InputText class="form-control" @bind-Value="Model.DraftStudentContact!.Phone" />
     <ValidationMessage For="@(() => Model.DraftStudentContact.Phone)" />

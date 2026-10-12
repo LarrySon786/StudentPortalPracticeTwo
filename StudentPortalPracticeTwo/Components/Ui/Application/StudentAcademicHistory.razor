@@ -7,26 +7,34 @@
     <div class="form-group">
         @if (string.IsNullOrWhiteSpace(Model.DraftAcademicHistory.HighschoolTranscriptFileName) == false) {
             <p><span style="font-weight: 800;">Current Highschool Transcript:</span> @Model.DraftAcademicHistory.HighschoolTranscriptFileName</p>
-                <button type="button" class="btn btn-link" style="display:inline" @onclick="() => RemoveTranscript(TranscriptType.Highschool)">Remove
-                    Transcript</button>
+            <button type="button" class="btn btn-link" style="display:inline" @onclick="() => 
+                RemoveTranscript(TranscriptType.Highschool)">Remove Transcript</button>
         }
-        <label class="form-label" style="display:block;">*Highschool Transcript</label>
-        <InputFile OnChange="UploadHighschoolTranscript" />
+        else
+        {
+            <label class="form-label" style="display:block;">*Highschool Transcript</label>
+            <InputFile OnChange="UploadHighschoolTranscript" />
+            
+            <ValidationMessage For="(() => Model.DraftAcademicHistory.HighschoolTranscript)"/>
+        }
         
-        <ValidationMessage For="(() => Model.DraftAcademicHistory.HighschoolTranscript)"/>
     </div>
 
     <div class="form-group" >
-            @if (string.IsNullOrWhiteSpace(Model.DraftAcademicHistory.CollegeTranscriptFileName) == false)
-            {
-                <p><span style="font-weight: 800;">Current College Transcript:</span> @Model.DraftAcademicHistory.CollegeTranscriptFileName</p>
-                        <button type="button" class="btn btn-link" style="display:block;" @onclick=" ()=>
-                            RemoveTranscript(TranscriptType.College)">Remove Transcript</button>
+        @if (string.IsNullOrWhiteSpace(Model.DraftAcademicHistory.CollegeTranscriptFileName) == false)
+        {
+            <p class="mt-4"><span style="font-weight: 800;">Current College Transcript:</span> @Model.DraftAcademicHistory.CollegeTranscriptFileName</p>
+            <button type="button" class="btn btn-link" style="display:block;" @onclick=" ()=>
+                RemoveTranscript(TranscriptType.College)">Remove Transcript</button>
 
-            }
-        <label class="form-label">College Transcript (optional)</label>
-        <InputFile OnChange="UploadCollegeTranscript" />
-        <ValidationMessage For="(() => Model.DraftAcademicHistory.CollegeTranscript)" />
+        }
+        else
+        {
+            <label class="form-label mt-4" style="display:block;">College Transcript (optional)</label>
+            <InputFile OnChange="UploadCollegeTranscript" />
+            <ValidationMessage For="(() => Model.DraftAcademicHistory.CollegeTranscript)" />
+        }
+        
     </div>
 
 </FormNavigation>

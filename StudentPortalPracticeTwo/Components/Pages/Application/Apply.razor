@@ -10,7 +10,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ApplicationAuthenticationState ApplicationAuth
 
-<div class="center-me">
+<div class="center-me mt-4">
     <FormProgressBar CurrentPage="@currentPage" TotalPages="@totalPages" />
     <div class="form-container">
         <div class="header-container"> 
@@ -49,7 +49,7 @@
             }
             else if (currentPage == 3) {
                 <StudentEmergencyContact Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />
-            }  
+            }   
             @* Program Selection *@
             else if (currentPage == 4) {
                 <StudentProgramSelection Model="@Application" Next="@Next" Prev="@Prev" CurrentPage="@currentPage" TotalPages="@totalPages" />

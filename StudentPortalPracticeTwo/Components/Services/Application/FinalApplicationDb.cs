@@ -130,9 +130,9 @@ public class FinalApplicationDb
             {
                 EmergencyContactModel EmergencyContact = new()
                 {
-                    ContactName = contact.ContactName,
-                    Relationship = contact.Relationship,
-                    Phone = contact.Phone,
+                    ContactName = contact.ContactName!,
+                    Relationship = contact.Relationship!,
+                    Phone = contact.Phone!,
                 };
                 EmergencyContactList.Add(EmergencyContact);
             }

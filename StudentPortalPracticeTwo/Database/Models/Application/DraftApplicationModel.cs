@@ -20,7 +20,7 @@ public class DraftApplicationModel
 
     public DraftStudentContactModel DraftStudentContact { get; set; } = new();
 
-    public List<DraftEmergencyContactModel?>? DraftEmergencyContact { get; set; } = new();
+    public List<DraftEmergencyContactModel> DraftEmergencyContact { get; set; } = new();
 
     public DraftStudentProgram DraftProgramSelection { get; set; } = new();
 

@@ -7,8 +7,7 @@
     <legend>Emergency Contacts</legend>
     @foreach (DraftEmergencyContactModel contact in Model.DraftEmergencyContact!)
     {
-        <div>
-            <h4>Contact Information:</h4>
+        <div class="mb-5">
             <label class="form-label">Contact Name</label>
             <InputText class="form-control" @bind-Value="contact.ContactName"/>
             <ValidationMessage For="@(() => contact.ContactName)"/>
@@ -62,7 +61,7 @@
             Phone = "",
             Relationship = ""
         };
-        Model.DraftEmergencyContact.Add(startingContact);
+        Model.DraftEmergencyContact!.Add(startingContact);
         contactCount = Model.DraftEmergencyContact.Count();
 
         StateHasChanged();
@@ -70,7 +69,7 @@
 
     private void DecrementContacts()
     {
-        DraftEmergencyContactModel lastContact = Model.DraftEmergencyContact[contactCount - 1];
+        DraftEmergencyContactModel lastContact = Model.DraftEmergencyContact![contactCount - 1]!;
         Model.DraftEmergencyContact.Remove(lastContact);
         contactCount = Model.DraftEmergencyContact.Count();
 

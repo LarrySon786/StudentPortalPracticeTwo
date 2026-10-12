@@ -1,7 +1,7 @@
 @using StudentPortalPracticeTwo.Database.Models.Application
 
 <FormNavigation Model="@Model" Next="@Next" Prev="@Prev" CurrentPage="@CurrentPage" TotalPages="@TotalPages">
-    <p>For this section, please enter a response for each question (Between 300 - 700 words)</p>
+    <p>For this section, please enter a response for each question (Between 300 - 3000 characters)</p>
     
     <div class="form-group">
         <label class="form-label">Essay Entry One:</label>
@@ -23,7 +23,7 @@
 </FormNavigation>
 
 
-@code {
+@code { 
     [Parameter] public required DraftApplicationModel Model { get; set; }
     [Parameter] public EventCallback Next { get; set; }
     [Parameter] public EventCallback Prev { get; set; }
@@ -31,3 +31,9 @@
     [Parameter] public int TotalPages { get; set; }
 
 }
+
+<style>
+    textarea {
+        height: 300px;
+    }
+</style>

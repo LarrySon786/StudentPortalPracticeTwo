@@ -6,34 +6,32 @@
 @inject FinalApplicationDb data
 @inject NavigationManager NavigationManager
 
+<div class="m-4 center-content">
+    <div class="standard-card thank-you">
+        <h1>Application Received</h1>
 
-<h1>Application Received</h1>
+        @if (Final == null) {
+            @* LOADING UNTIL DATABASE FETCH COMPELTES *@
+            <p>Application Loading...</p>
+        }
+        else {
+            @* USER EXPECTATIONS AND INSTRUCTIONS *@
+            <p>
+                You application has been received and will be reviewed by our enrollment department. You can reach them here at:
+                <span class="weighted">enroll@csu.edu</span>. 
+            </p>
+            <p>
+                Please allow 3 weeks for your application to be reviewed. You will receive an email with the status
+                of your enrollment at <span class="weighted">@Final.Email</span>
+            </p>
 
-@if (Final == null) {
-    @* LOADING UNTIL DATABASE FETCH COMPELTES *@
-    <p>Application Loading...</p>
-}
-else {
-    @* USER EXPECTATIONS AND INSTRUCTIONS *@
-    <p>
-        You application has been received and will be reviewed by our enrollment department. You can reach them here at:
-        enroll@csu.edu. Please allow 3 weeks for your application to be reviewed. You will receive an email with the status
-        of your enrollment at @Final.Email
-    </p>
-
-    @* ACTION ITEMS *@
-    <div>
-        <a class="btn btn-primary" href="/">Return to login</a>
-        <button type="button" class="btn btn-primary">Download a copy of your Application</button>
+            @* ACTION ITEMS *@
+            <div>
+                <button type="button" class="btn btn-primary submit-button mt-2">Download a copy of your Application</button>
+            </div>
+        }
     </div>
-
-    @* SUBMISSION DETAILS *@
-    <div>
-
-    </div>
-}
-
-
+</div>
 
 @code {
     [Parameter] public int FinalApplicationId { get; set; }
@@ -53,4 +51,20 @@ else {
     @* LEARNING IDEA - Create an official Application Document that a student can download and keep as record of applying *@
 
 }
+
+<style>
+    .weighted {
+        font-weight: 700;
+    }
+    .center-content {
+        display:flex;
+        justify-content: center;
+    }
+    .thank-you {
+        max-width: 650px;
+    }
+    .submit-button {
+        width:100%;
+    }
+</style>
 

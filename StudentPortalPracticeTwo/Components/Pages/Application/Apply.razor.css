@@ -3,7 +3,6 @@
     grid-template-columns: 1fr auto;
     align-items: center;
     column-gap: 1.25rem;
-    margin-bottom: 1rem;
 }
 
 .center-me {
