@@ -146,6 +146,21 @@ body {
     background-color: var(--color-background);
 }
 
+/* Landing pages */
+.landing-body-container {
+    min-height: 75vh;
+    margin: 24px;
+    margin-left: 36px;
+    margin-right: 36px;
+}
+
+.landing-table-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+
 
 /* =========================================================
    HEADERS
@@ -275,7 +290,31 @@ h4, h5, h6 {
     list-style-type: none;
 }
 
+/* =========================================================
+   TABLES
+   ========================================================= */
+.default-table {
+    /* padding:20px; */
+    width:100%;
+    box-shadow: 0 10px 30px var(--color-shadow);
+}
+.default-table thead {
 
+}
+.default-table th {
+    color:white;
+    background-color: var(--color-nav);
+    padding:24px;
+}
+.default-table tbody {
+}
+.default-table tr {
+
+}
+.default-table td {
+    background-color: white;
+    padding:24px;
+}
 
 
 /* =========================================================

@@ -2,29 +2,39 @@
 @layout ApplicationLayout
 @rendermode InteractiveServer
 @using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Components.Ui
 @inject StudentPortalPracticeTwo.Components.Services.Admin.DegreeService degreeService
 
-<div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Course</th>
-                <th>View</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(Degree degree in degrees) {
+
+
+<div class="landing-body-container">
+    @* <h1>Course Catalog</h1> *@
+    <div class="landing-table-container">
+        <table class="table default-table table-head">
+            <thead>
                 <tr>
-                    <td>@degree.Name</td>
-                    <td>
-                        <a href="/catalog/@degree.Id" class="btn btn-link">View</a>
-                    </td>
+                    <th>Degrees, Programs, and Courses</th>
                 </tr>
-                
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach(Degree degree in degrees) {
+                    <tr>
+                        <td>
+                            <div class="table-data">
+                                <p>@degree.Name</p>
+                                <a href="/catalog/@degree.Id" class="btn btn-secondary">Learn More</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
+<div class="footer-container">
+    <Footer />
+</div>
+
 
 
 
@@ -40,3 +50,17 @@
         }
     }
 }
+
+<style>
+    .table-head {
+        text-align: center;
+    }
+    th {
+        font-size: 1.65rem;
+    }
+    .table-data {
+        padding:24px 48px;
+        display:flex;
+        justify-content: space-between;
+    }
+</style>

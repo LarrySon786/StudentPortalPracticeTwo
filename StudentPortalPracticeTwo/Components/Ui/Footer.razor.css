@@ -1,0 +1,116 @@
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.home-footer {
+    margin-top: auto;
+    padding: 36px max(28px, calc((100% - 1124px) / 2)) 0;
+    background: var(--color-nav);
+    color: var(--color-nav-text);
+}
+
+.footer-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 36px;
+    padding-bottom: 32px;
+}
+
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.footer-logo {
+    color: #ffffff;
+    font-size: 1.8rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+}
+
+.footer-brand p {
+    margin: 0 0 8px;
+    color: var(--color-nav-muted);
+}
+
+.footer-github {
+    color: #8fe1d7;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-github:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.quick-link-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.quick-link-container h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1rem;
+}
+
+.quick-links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    
+}
+
+.quick-links a,
+.footer-bottom a {
+    color: var(--color-nav-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.quick-links a:hover,
+.footer-bottom a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    color: var(--color-nav-muted);
+    font-size: 0.85rem;
+}
+
+/* =========================================================
+   RESPONSIVE LAYOUT
+   ========================================================= */
+
+@media (max-width: 580px) {
+
+    .home-footer {
+        padding: 28px 22px 0;
+    }
+
+    .footer-main {
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    .footer-bottom {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+}

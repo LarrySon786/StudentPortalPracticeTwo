@@ -2,37 +2,41 @@
 @layout ApplicationLayout
 @rendermode InteractiveServer
 @using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Components.Ui
 @inject StudentPortalPracticeTwo.Components.Services.Admin.DegreeService degreeService
 
 @if (degree == null) {
     <p>No Degree Found...</p>
 }
 else {
-    <div>
+    <div class="landing-body-container">
         <h1>@degree.Name</h1>
         <p>@degree.Description</p>
-
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Course Code</th>
-                    <th>Course Name</th>
-                    <th>Credit Value</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (Course course in degree.Courses) {
+        <div class="landing-table-container">
+            <table class="table default-table">
+                <thead>
                     <tr>
-                        <td>@course.Code</td>
-                        <td>@course.Name</td>
-                        <td>@course.Credits</td>
+                        <th>Course Code</th>
+                        <th>Course Name</th>
+                        <th>Credit Value</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (Course course in degree.Courses) {
+                        <tr>
+                            <td>@course.Code</td>
+                            <td>@course.Name</td>
+                            <td>@course.Credits</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 }
+<div>
+    <Footer />
+</div>
 
 
 
@@ -57,3 +61,4 @@ else {
         }
     }
 }
+

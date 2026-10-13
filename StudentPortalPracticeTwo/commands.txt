@@ -8,20 +8,14 @@ css that AI created.
 Plan and redesign the existing component to meet needs so admin, faculty, and students can all Access
 anyone's account, but be redirected depending on authorized level, or only have certain features displayed to them.
 Some roles can enable edit mode which will then allow them to save changes. 
-- I finished adding breadcrumbs and return links throughout the app.
-- I finished setting up the admin and faculty layouts
-- I finished setting up all queries on the website
 
 
 - TO DO
 - Polish CSS
-- Polish validation throughout site
-- Server side validation on ALL forms
 - I created a test Project for software testing
 - Student Update Account Details
 - Admin: Logs of edits made on students, courses, and degrees.
 - Admin: Logs of edits made on accounts by students.
-- Set up PDF Creator | Student Applications | Student Summaries | Student Transcripts (CSU editions)
 - Real DB connection and updates (in production)
 - Deploy Website on Azure
 
