@@ -253,11 +253,22 @@ h4, h5, h6 {
 .single-form-parent {
     display:flex;
     justify-content: center;
-    margin-top: 24px;
+    align-items: center;
+    height: calc(90vh - 66px);
 }
 
 .single-form-page {
-    max-width:760px
+    max-width:760px;
+    width:100%;
+}
+
+.single-form-page h1 {
+    padding-bottom: 24px;
+    border-bottom: solid var(--color-text-label) 1px;
+}
+
+.single-form-page p {
+    opacity: 0.75;
 }
 
 

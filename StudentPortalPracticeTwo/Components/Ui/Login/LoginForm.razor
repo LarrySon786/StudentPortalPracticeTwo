@@ -14,9 +14,10 @@
     <label class="form-label">Password</label>
     <input class="form-control" name="Password" type="password" required />
 
-    <button type="submit" class="btn btn-primary">Login</button>
-    <a href="reset-password">Forgot Password</a>
-
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Login</button>
+        <a href="reset-password">Forgot Password</a>
+    </div>
     @if (!String.IsNullOrWhiteSpace(messages)) {
         <p class="alert-danger">@messages</p>
     }

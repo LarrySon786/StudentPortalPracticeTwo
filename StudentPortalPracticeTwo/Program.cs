@@ -118,30 +118,46 @@ app.UseAuthorization();
 app.UseAntiforgery();
 
 // Protect student applications with this route.
+
+
 app.Use(async (context, next) =>
 {
     bool isApplyRequest = context.Request.Path.StartsWithSegments("/apply");
+
     bool isBlazorCircuitRequest = context.Request.Path.StartsWithSegments("/_blazor");
 
     if (isApplyRequest || isBlazorCircuitRequest)
     {
         var result = await context.AuthenticateAsync("ApplicationFormCookie");
-        var applicationId = result.Principal?.FindFirst("ApplicationId")?.Value;
-        bool validApplication = result.Succeeded && int.TryParse(applicationId, out _);
 
+        var applicationId = result.Principal?.FindFirst("ApplicationId")?.Value;
+
+        bool validApplication =
+            result.Succeeded &&
+            int.TryParse(applicationId, out _);
+
+        // Protect the initial application page request.
         if (isApplyRequest && !validApplication)
         {
             context.Response.Redirect("/preapply");
             return;
         }
+
+        // Preserve the existing Identity principal while adding
+        // the application identity for the Blazor circuit.
         if (validApplication)
         {
-            context.User = result.Principal!;
+            var identities = context.User.Identities
+                .Concat(result.Principal!.Identities);
+
+            context.User = new ClaimsPrincipal(identities);
         }
     }
 
     await next();
 });
+
+
 
 // Student Application Verifying current cookie and returning the applicationId.
 app.MapGet("/application/current", async (HttpContext context) =>

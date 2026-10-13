@@ -28,8 +28,8 @@ public class PdfService
             document.Page(page =>
             {
                 page.Size(PageSizes.Letter);
-                page.MarginHorizontal(36);
-                page.MarginVertical(30);
+                // page.MarginHorizontal(36);
+                // page.MarginVertical(30);
 
                 page.DefaultTextStyle(style => style
                     .FontFamily("Lato")
@@ -41,7 +41,7 @@ public class PdfService
                 {
                     header.Item()
                         .Background(Navy)
-                        .PaddingBottom(11)
+                        .Padding(11)
                         .Row(row =>
                         {
                             row.RelativeItem().Column(left =>
@@ -77,6 +77,7 @@ public class PdfService
                 // DOCUMENT CONTENT
                 page.Content()
                     .PaddingTop(12)
+                    .PaddingHorizontal(36)
                     .Column(content =>
                     {
                         content.Spacing(8);
@@ -298,6 +299,8 @@ public class PdfService
                 // REPEATED FOOTER
                 page.Footer()
                     .PaddingTop(6)
+                    .PaddingBottom(30)
+                    .PaddingHorizontal(36)
                     .BorderTop(1)
                     .BorderColor(LightTeal)
                     .Row(row =>
