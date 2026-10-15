@@ -1,6 +1,7 @@
 @page "/dashboard/degree-progress"
 @attribute [Authorize(Roles = "Student")]
 @rendermode InteractiveServer
+@using StudentPortalPracticeTwo.Components.Ui.StudentPortal
 @using StudentPortalPracticeTwo.Database.Models.Users
 @using StudentPortalPracticeTwo.Database.Models.Users.Students
 @using StudentPortalPracticeTwo.Database.Models.Degrees
@@ -15,7 +16,6 @@
 
 <div>
     <BreadCrumbs Crumbs="crumbs"/>
-    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
 </div>
 
 
@@ -24,96 +24,83 @@
 }
 else {
     <div>
-        @* My Program Details *@
-        <div>
-            <h1>@user.MyProgram.MyDegree!.Name | @user.FirstName @user.LastName</h1>
-            <p><span style="font-weight:700;">Start Date:</span> [insert_date]</p>
-
-            @* Percentage Complete *@
-            <p><span style="font-weight:700;">Degree Completion:</span> 
-                @user.MyProgram.PercentageComplete.ToString("F1")%
-            </p>
-            <p><span style="font-weight:700;">Current GPA:</span>
-                @if (user.MyProgram.CompletedCourses.Count() > 0) {
-                    @(CalculateGPAHelper.CalculateAverageGPA(user.MyProgram.CompletedCourses.Select(x => x.GPA).ToList()).ToString("F2"));
-                }
-                else {
-                    <span>--</span>
-                }
-            </p>
-            <p><span style="font-weight:700;">Expected Graduation:</span> @(GraduationDateHelper.PredictGraduationDate(user.MyProgram, user.MyProgram.MyDegree))</p>
-            <p class="text-muted" style="font-size:smaller;">
-                *Expected Graduation Date is based on a full-time 15 credit work load each semester.
-            </p>
-        </div>
+        <h1>@user.MyProgram.MyDegree!.Name</h1>
+        <h2>@user.FirstName @user.LastName</h2>
 
         @* My Program Tools *@
-        <div>
+        <div class="action-links">
             @* Link to Recommended course path *@
-            <a href="/catalog/@user.MyProgram.DegreeId" class="btn btn-link">My Recommended Path</a>
+            <a href="/catalog/@user.MyProgram.DegreeId" class="btn btn-primary">My Recommended Path</a>
             @* View My Initial School Application *@
-            <a>My CSU Application</a>
+            <button class="btn btn-primary">My CSU Application</button>
         </div>
 
-        @* My Completed Classes *@
-        <div>
-            <h3>Completed Courses</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Course Code</th>
-                        <th>Course Name</th>
-                        <th>Credits</th>
-                        <th>Date Completed</th>
-                        <th>GPA</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach(CompletedCourse course in user.MyProgram.CompletedCourses){
+        @* My Program Details *@
+        <div class="standard-card current-course-container mt-4 mb-4">
+            @* Current Courses *@
+            <h3 class="current-course-header">Current Courses</h3>
+            <div>
+                <table class="table default-table">
+                    <thead>
                         <tr>
-                            <td>@course.Course.Code</td>
-                            <td>@course.Course.Name</td>
-                            <td>@course.Course.Credits</td>
-                            <td>@course.DateCompleted</td>
-                            <td>@course.GPA.ToString("F2")</td>
+                            <th>Course Code</th>
+                            <th>Course Name</th>
+                            <th>Credits</th>
+                            <th></th>
                         </tr>
+                        
+                    </thead>
+                    <tbody>
+                        @if (user.MyProgram.CurrentSessions.Count() == 0)
+                        {
+                            <tr>
+                                <td colspan="100%">No active courses</td>
+                            </tr>
+                        }
+                        @foreach (ClassSession session in user.MyProgram.CurrentSessions)
+                        {
+                            <tr>
+                                <td>@session.Course.Code</td>
+                                <td>@session.Course.Name</td>
+                                <td>@session.Course.Credits</td>
+                                <td>
+                                    <a class="btn btn-link" href="/" type="button">See My Class</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="progress-summary-container">
+                <p class="progress-summary-header">Degree Progress</p>
+                
+
+                @* Percentage Complete *@
+                <p><span style="font-weight:700;">Degree Completion:</span> 
+                    @user.MyProgram.PercentageComplete.ToString("F1")%
+                </p>
+                <p><span style="font-weight:700;">Current GPA: </span>
+                    @if (user.MyProgram.CompletedCourses.Count() > 0) {
+                        @(CalculateGPAHelper.CalculateAverageGPA(user.MyProgram.CompletedCourses.Select(x => x.GPA).ToList()).ToString("F2"));
                     }
-                </tbody>
-            </table>
+                    else {
+                        <span>--</span>
+                    }
+                </p>
+                <p><span style="font-weight:700;">Start Date:</span> [insert_date]</p>
+                <p><span style="font-weight:700;">Expected Graduation:</span> @(GraduationDateHelper.PredictGraduationDate(user.MyProgram, user.MyProgram.MyDegree))</p>
+                <p class="text-muted" style="font-size:smaller;">
+                    *Expected Graduation Date is based on a full-time 15 credit work load each semester.
+                </p>
+            </div>
         </div>
 
-        @* Current Courses *@
-        <div>
-            <h3>Current Courses</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Course Code</th>
-                        <th>Course Name</th>
-                        <th>Credits</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (ClassSession session in user.MyProgram.CurrentSessions)
-                    {
-                        <tr>
-                            <td>@session.Course.Code</td>
-                            <td>@session.Course.Name</td>
-                            <td>@session.Course.Credits</td>
-                            <td>
-                                <a class="btn btn-link" href="/" type="button">See My Class</a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        
 
         @* Registered Classes *@
-        <div>
+        <div class="standard-card mt-4 mb-4">
             <h3>Registered Courses</h3>
-            <table class="table">
+            <table class="table default-table">
                 <thead>
                     <tr>
                         <th>Course Code</th>
@@ -123,6 +110,12 @@ else {
                     </tr>
                 </thead>
                 <tbody>
+                    @if (user.MyProgram.RegisteredSessions.Count() == 0)
+                    {
+                        <tr>
+                            <td colspan="100%">No registered courses</td>
+                        </tr>
+                    }
                     @foreach (ClassSession session in user.MyProgram.RegisteredSessions)
                     {
                         <tr>
@@ -136,159 +129,97 @@ else {
                     }
                 </tbody>
             </table>
+            @* Button to begin Registering courses *@
+            <button class="btn btn-primary register-button mt-2" type="button" @onclick="ToggleBeginRegisteration">@(!IsRegistering ? "Register Courses" : "Cancel Registration")</button>
         </div>
 
-        @* Incomplete Courses *@
-        <div>
-            <h3>Incomplete Courses</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Course Code</th>
-                        <th>Course Name</th>
-                        <th>Credits</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (Course course in user.MyProgram.MyDegree.Courses
-                        .Where(course => !user.MyProgram.CompletedCourses
-                        .Any(completed => completed.Course == course)))
-                    {
-                        <tr>
-                            <td>@course.Code</td>
-                            <td>@course.Name</td>
-                            <td>@course.Credits</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        @* Button to begin Registering courses *@
-        <button class="btn btn-primary" type="button" @onclick="ToggleBeginRegisteration">@(!IsRegistering ? "Register Courses" : "Cancel Registration")</button>
-
-        @if (IsRegistering) {
-            @* REGISTER NEW CLASSES TABLE *@
+        
+        
+        <div class="standard-card incomplete-complete-container mt-4 mb-4">
+            @* Incomplete Courses *@
             <div>
-                <h3>Course Available For Registration</h3>
-                @* Populates courses NOT sessions. Sessions are selected after course population *@
-                <label>
-                    <InputCheckbox @bind-Value="displayAllCourses" />
-                    Courses In My Program ONLY
-                </label>
-                <div>
-                    <input class="form-control" type="text" placeholder="Search courses..." @oninput="UpdateCourseQuery" />
-                </div>
-                <table class="table">
+                <h3>Incompleted Courses</h3>
+                <table class="table default-table smaller-rows-table">
                     <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Course</th>
-                            <th>Available Sessions</th>
-                            <th>Choose Session</th>
+                            <th>Course Code</th>
+                            <th>Course Name</th>
+                            <th>Credits</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (displayAllCourses && coursesInProgram != null) {
-                                @foreach(Course course in QueriedCourses) {
-                                    <tr>
-                                        <td>@course.Code</td>
-                                        <td>@course.Name</td>
-                                        <td>@course.Code</td>
-                                        <td>
-                                            <button type="button" class="btn btn-link" @onclick="() => ChooseSessionsDialog(course)">
-                                                Choose Session
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                        }
-                        else if (!displayAllCourses && allCourses != null) {
-                            @foreach (Course course in QueriedCourses)
-                            {
-                                <tr>
-                                    <td>@course.Code</td>
-                                    <td>@course.Name</td>
-                                    <td>@course.Code</td>
-                                    <td>
-                                        <button type="button" class="btn btn-link" @onclick="() => ChooseSessionsDialog(course)">
-                                            Choose Session
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else {
-                            <p>Could not load any available courses</p>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            @* CLASSES SELECTED FOR REGISTERATION *@
-            <h3>Classes Selected for Registeration</h3>
-            <div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Instructor</th>
-                            <th>Start/End Date</th>
-                            <th>Start/End Time</th>
-                            <th></th>
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach(ClassSession session in sessions) {
+                        @foreach (Course course in user.MyProgram.MyDegree.Courses
+                            .Where(course => !user.MyProgram.CompletedCourses
+                            .Any(completed => completed.Course == course)))
+                        {
                             <tr>
-                                <td>@session.Course.Code</td>
-                                <td>@session.Course.Name</td>
-                                <td>@session.Instructor!.FirstName @session.Instructor.LastName</td>
-                                <td>@session.StartDate - @session.EndDate</td>
-                                <td>@session.StartTime - @session.EndTime</td>
-                                <td>
-                                    <button class="btn btn-danger" type="button" @onclick="() => RemoveSession(session)">Remove Session</button>
-                                </td>
-                                
+                                <td>@course.Code</td>
+                                <td>@course.Name</td>
+                                <td>@course.Credits</td>
                             </tr>
                         }
                     </tbody>
                 </table>
-                <button class="btn btn-primary" type="button" @onclick="RegisterCourses">
-                    Confirm Registeration
-                </button>
             </div>
+
+            @* My Completed Classes *@
+            <div>
+                <h3>Completed Courses</h3>
+                    <table class="table default-table smaller-rows-table">
+                    <thead>
+                        <tr>
+                            <th>Course Code</th>
+                            <th>Course Name</th>
+                            <th>Credits</th>
+                            <th>Date Completed</th>
+                            <th>GPA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (user.MyProgram.CompletedCourses.Count() == 0)
+                        {
+                            <tr>
+                                <td colspan="100%">No completed courses</td>
+                            </tr>
+                            }
+                        @foreach(CompletedCourse course in user.MyProgram.CompletedCourses){
+                            <tr>
+                                <td>@course.Course.Code</td>
+                                <td>@course.Course.Name</td>
+                                <td>@course.Course.Credits</td>
+                                <td>@course.DateCompleted</td>
+                                <td>@course.GPA.ToString("F2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        
+
+        @if (IsRegistering) {
+            @* REGISTER NEW CLASSES TABLE *@
+            <Dialog OnClose="ToggleBeginRegisteration">
+                <RegisterCoursesDialog 
+                    User="user" 
+                    AllCourses="allCourses" 
+                    CurrentRegisteredSessions="sessions"
+                    RegisterCourses="RegisterCourses"
+                />
+            </Dialog>
         }
+        
     </div>
-    @* CHOOSE SESSION DIALOG *@
-    @if (chooseSessions) {
-        <StudentChooseSessionDialog
-            selectedCourse="selectedCourse"
-            sessions="sessions"
-            OnAdd="AddSession"
-            OnClose="CloseChooseSessionDialog" />
-    }
 }
 
 @code {
     public UserModel? auth { get; set; }
     public Student? user { get; set; }
     public IEnumerable<Course>? allCourses { get; set; }
-    public IEnumerable<Course>? coursesInProgram => allCourses?
-        .Where(x => user!.MyProgram.MyDegree!.Courses.Any(c => c.Code == x.Code));
-    private string courseQuery = string.Empty;
-    public IEnumerable<Course> QueriedCourses => (displayAllCourses ? coursesInProgram ?? Enumerable.Empty<Course>() : allCourses ?? Enumerable.Empty<Course>())
-        .Where(course =>
-            string.IsNullOrWhiteSpace(courseQuery) ||
-            course.Code.Contains(courseQuery, StringComparison.OrdinalIgnoreCase) ||
-            course.Name.Contains(courseQuery, StringComparison.OrdinalIgnoreCase));
+
     public List<ClassSession> sessions { get; set; } = new();
     public bool IsRegistering { get; set; } = false;
-    public bool displayAllCourses { get; set; } = false;
-    public bool chooseSessions { get; set; }
-    public Course? selectedCourse { get; set; }
     public List<BreadCrumbModel> crumbs { get; set; } = new() // Crumbs passed into component
     {
         new BreadCrumbModel {
@@ -323,11 +254,10 @@ else {
             Console.WriteLine(ex);
         }
     }
+
     public void ToggleBeginRegisteration() { // Toggles the registeration table
         IsRegistering = !IsRegistering;
     }
-
-    private void UpdateCourseQuery(ChangeEventArgs args) => courseQuery = args.Value?.ToString() ?? string.Empty;
 
     public async Task RegisterCourses() { // This will finalize and save a student's selected courses they want to register.
         try
@@ -335,28 +265,22 @@ else {
             await registerCourses.RegisterNewCourses(user!, sessions);
             sessions = [];
             IsRegistering = false;
+            await ReloadRegisteredSessions();
         }
         catch (Exception ex) {
             Console.WriteLine($"Could not register classes. {ex}");
         }
     }
 
-    public void ChooseSessionsDialog(Course course) {
-        selectedCourse = course;
-        chooseSessions = true;
-    }
-
-    public void CloseChooseSessionDialog() {
-        chooseSessions = false;
-        selectedCourse = null;
-    }
-
-    public void AddSession(ClassSession session) {
-        if (!sessions.Contains(session)) sessions.Add(session);
-    }
-
-    public void RemoveSession(ClassSession session) {
-        sessions.Remove(session);
+    public async Task ReloadRegisteredSessions()
+    {
+        user = await studentService.GetStudentById(auth!.Id); // Get Student Details
+        if (user == null)
+        {
+            navigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+        sessions = user!.MyProgram.RegisteredSessions ?? []; // Set student's current session plans
     }
 
 }

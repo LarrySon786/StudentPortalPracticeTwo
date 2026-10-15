@@ -1,135 +1,270 @@
+/* =========================================================
+   NAVIGATION COLOR VARIABLES
+   ========================================================= */
+
+
+
+
+/* =========================================================
+   SIDEBAR LAYOUT
+   ========================================================= */
+
 .left-tab {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+
+    background-color: var(--side-bar-background);
+    color: var(--side-bar-text);
+
+    border-right: 1px solid var(--side-bar-border);
 }
 
-/* Account */
+.left-tab nav {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+
+
+
+/* =========================================================
+   ACCOUNT / PROFILE
+   ========================================================= */
+
+.left-tab nav>a {
+    display: block;
+    color: var(--side-bar-text);
+    text-decoration: none;
+}
 
 .account-container {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 56px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+
+    padding: 20px 18px;
+    margin-bottom: 8px;
+
+    border-bottom: 1px solid var(--side-bar-border);
 }
 
 .profile-pic {
-    padding: 1rem 0.5rem 1rem 1rem;
-    width: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 48px;
+    height: 48px;
+    padding: 12px;
     margin: 0;
+
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.profile-pic svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    fill: var(--side-bar-icon);
 }
 
 .account-name-container {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+
+    padding: 0;
     text-align: left;
-    padding: 1rem 1rem 1rem 0;
 }
 
 .account-name {
-    font-size: 1.2rem;
-    padding: 0;
     margin: 0;
+    padding: 0;
+
+    color: var(--side-bar-text);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.account-name:first-child {
+    margin-bottom: 2px;
+
+    color: var(--side-bar-muted);
+    font-size: 0.8rem;
+    font-weight: 400;
+}
+
+.account-name:last-child {
+    font-weight: 600;
 }
 
 
-/* Navigation */
+/* =========================================================
+   NAVIGATION GROUPS
+   ========================================================= */
 
 .nav-group {
     display: flex;
     flex-direction: column;
-    gap: 0;
-    border-top: 1px solid var(--text);
+    gap: 5px;
+
+    padding: 14px 12px;
+    border-top: 1px solid var(--side-bar-border);
 }
 
 .nav-item {
     width: 100%;
+    min-width: 0;
 }
+
+
+/* Navigation links */
 
 .nav-item a {
     display: flex;
     align-items: center;
+    gap: 14px;
 
-    min-height: 60px;
     width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
 
-    padding: 0 1.5rem;
+    padding: 10px 14px;
     margin: 0;
 
-    color: var(--color-nav-text);
+    color: var(--side-bar-text);
     text-decoration: none;
 
-    border-left: 4px solid transparent;
+    border-left: 3px solid transparent;
+    border-radius: 8px;
 
     transition:
-        background-color 0.15s ease,
-        border-color 0.15s ease;
+        background-color 0.18s ease,
+        border-color 0.18s ease;
 }
 
-/* Icons */
 
+/* Icons: Font Awesome and SVG */
+
+.nav-item a i,
 .nav-item a svg {
-    width: 24px;
-    min-width: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    margin-right: 14px;
+    width: 22px;
+    min-width: 22px;
+    margin: 0;
 
-    font-size: 1.05rem;
-
-    color: #ffffff !important;
+    color: var(--side-bar-icon);
     fill: currentColor;
+    font-size: 1.05rem;
 }
 
 
-/* Navigation text */
+/* Navigation labels */
 
 .nav-item a span {
-    color: var(--color-nav-text);
+    color: var(--side-bar-text);
+    font-size: 0.92rem;
+    font-weight: 500;
+    line-height: 1.4;
+    text-decoration: none;
 }
 
-
-/* Hover */
+/* Hover state */
 
 .nav-item a:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: var(--side-bar-hover);
 }
 
 
 /* Active page */
 
 .nav-item a.active {
-    background-color: rgba(42, 157, 143, 0.18);
-    border-left-color: var(--color-primary-light);
+    background-color: var(--side-bar-active);
+    border-left-color: #D8F1ED;
+}
+
+.nav-item a.active span,
+.nav-item a.active i,
+.nav-item a.active svg {
+    color: #FFFFFF;
+}
+
+.nav-item a.active span {
+    font-weight: 600;
 }
 
 
-/* Logout */
+/* Keyboard accessibility */
+
+.nav-item a:focus-visible,
+.account-container:focus-visible,
+.form-logout-section button:focus-visible,
+.nav-open-close-button:focus-visible {
+    outline: 3px solid #A8E5D9;
+    outline-offset: 2px;
+}
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
 
 .form-logout-section {
     display: block;
-    margin-left: 24px;
     margin-top: auto;
+    padding: 16px 20px 20px;
+
+    border-top: 1px solid var(--side-bar-border);
 }
 
-.form-logout-section a,
+.form-logout-section form {
+    margin: 0;
+}
+
 .form-logout-section button {
-    color: var(--color-nav-text);
+    padding: 8px 12px;
+
+    color: var(--side-bar-text);
+    background-color: transparent;
+    border: 0;
+    border-radius: 8px;
+
     text-decoration: none;
+    font-size: 0.92rem;
+
+    transition: background-color 0.18s ease;
+}
+
+.form-logout-section button:hover {
+    color: #FFFFFF;
+    background-color: var(--side-bar-hover);
 }
 
 
-/* Desktop */
+/* =========================================================
+   DESKTOP SIDEBAR
+   ========================================================= */
 
 @media screen and (min-width: 792px) {
-
     .left-tab {
         position: fixed;
-        left: 0;
         top: 0;
         bottom: 0;
+        left: 0;
 
         width: 270px;
 
         transition: transform 0.3s ease;
-
-        background: var(--color-nav);
     }
 
     .left-tab.closed {
@@ -137,19 +272,64 @@
     }
 
     .nav-open-close-button {
+        position: absolute;
+        top: 40%;
+        bottom: 40%;
+        right: -18px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 18px;
         padding: 0;
 
-        width: 17px;
-
-        background-color: var(--color-nav);
-        color: var(--color-nav-text);
+        color: #FFFFFF;
+        background-color: var(--side-bar-background);
+        border: 1px solid var(--side-bar-border);
+        border-left: 0;
 
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
-
-        position: absolute;
-        right: -17px;
-        top: 40%;
-        bottom: 40%;
     }
+
+    .nav-open-close-button:hover {
+        color: #FFFFFF;
+        background-color: var(--side-bar-hover);
+    }
+}
+
+
+/* =========================================================
+   SMALL SCREENS
+   ========================================================= */
+
+@media screen and (max-width: 791px) {
+    .left-tab {
+        position: relative;
+        width: 100%;
+    }
+
+    .nav-open-close-button {
+        display: none;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .left-tab,
+    .nav-item a,
+    .form-logout-section button {
+        transition: none;
+    }
+}
+
+/* Override Bootstrap reboot link decoration in the sidebar */
+a {
+    text-decoration: none;
 }

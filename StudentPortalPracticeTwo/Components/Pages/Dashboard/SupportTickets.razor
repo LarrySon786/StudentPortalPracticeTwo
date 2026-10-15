@@ -14,7 +14,6 @@
 
 <div>
     <BreadCrumbs Crumbs="crumbs"/>
-    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
 </div>
 
 @if (user == null)
@@ -30,15 +29,15 @@ else
         <div>
             @if (CreateTicket == false)
             {
-                <button class="btn btn-primary" type="button" @onclick="ToggleCreateTicket">Create New Ticket</button>
+                <button class="btn btn-primary mb-4" type="button" @onclick="ToggleCreateTicket">Create New Ticket</button>
             }
             @if (CreateTicket == true)
             {
                 <EditForm Model="Response" OnValidSubmit="HandleCreateTicket" FormName="Create Ticket">
-
+                    <legend>Create New Ticket</legend>
                     @* Select Topic *@
                     <label class="form-label">*Topic</label>
-                    <InputSelect class="form-select" @bind-Value="SupportTicketDto.Topic">
+                    <InputSelect class="form-select mb-3" @bind-Value="SupportTicketDto.Topic">
                         @foreach (var topic in Enum.GetValues<SupportTopic>())
                         {
                             <option value="@topic">@topic.GetDisplayName()</option>
@@ -52,20 +51,26 @@ else
                     <ValidationMessage For="(() => SupportTicketDto.Title)" />
 
                     <label class="form-label">*Student Inquiry</label>
-                    <InputText class="form-control" @bind-Value="Response.StudentTicketInput" />
+                    <InputTextArea class="form-control" style="min-height:100px;" @bind-Value="Response.StudentTicketInput" />
                     <ValidationMessage For="(() => Response.StudentTicketInput)" />
 
-                    <button class="btn btn-primary" type="submit">Create New Ticket</button>
+                    <div class="mb-4">
+                        <button class="btn btn-secondary" type="button" @onclick="ToggleCreateTicket">Cancel</button>
+                        <button class="btn btn-primary" type="submit">Create New Ticket</button>
+                    </div>
+                    
                 </EditForm>
+                <div class="divider-line mb-4"></div>
             }
         </div>
 
         @* Populate existing ticket links *@
+        <legend>Tickets</legend>
         <div>
             <input class="form-control" placeholder="Search tickets..." @oninput="UpdateTicketQuery" />
         </div>
         <div>
-            <table class="table">
+            <table class="table default-table">
                 <thead>
                     <tr>
                         <th>Title</th>
@@ -74,6 +79,12 @@ else
                     </tr>
                 </thead>
                 <tbody>
+                    @if (QueriedTickets.Count() == 0)
+                    {
+                        <tr>
+                            <td colspan="100%">No tickets found</td>
+                        </tr>
+                    }
                     @foreach (SupportTicket ticket in QueriedTickets)
                     {
                         <tr>
@@ -155,3 +166,13 @@ else
     }
 
 }
+
+<style>
+    .divider-line {
+        background-color: var(--color-primary);
+        width:100%;
+        height:5px;
+        margin 0 12px;
+        border-radius: 3px;
+    }
+</style>

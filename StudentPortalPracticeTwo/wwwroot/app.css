@@ -17,6 +17,15 @@
     --color-nav-text: #FFFFFF;
     --color-nav-muted: #C7D5DA;
 
+    --side-bar-background: #176B63;
+    --side-bar-hover: #245F58;
+    --side-bar-active: #2A9D8F;
+    --side-bar-border: #367C73;
+
+    --side-bar-text: #FFFFFF;
+    --side-bar-muted: #D1E7E3;
+    --side-bar-icon: #A8E5D9;
+
     /* Text colors */
     --color-text: #243B4A;
     --color-text-label: #486581;
@@ -380,7 +389,6 @@ h4, h5, h6 {
 legend {
     color: var(--color-heading);
     font-weight: 500;
-    margin-top: 16px;
     margin-bottom: 12px;
 }
 
@@ -414,6 +422,10 @@ label {
 a,
 .btn-link {
     color: var(--color-text);
+}
+
+.nav-item a {
+    text-decoration: none;
 }
 
 .white-link-decorated {

@@ -1,0 +1,161 @@
+@using StudentPortalPracticeTwo.Database.Models.Authentication
+@using StudentPortalPracticeTwo.Database.Models.Degrees
+@using StudentPortalPracticeTwo.Database.Models.Users.Students
+<div class="dialog-container">
+    @* Registered Classes *@
+    <h3>Classes Selected for Registeration</h3>
+    <div>
+        <table class="table default-table selected-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Start/End Date</th>
+                    <th>Start/End Time</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (CurrentRegisteredSessions.Count() == 0)
+                {
+                    <tr>
+                        <td colspan="100%">No Sessions Registered</td>
+                    </tr>
+                }
+                @foreach(ClassSession session in CurrentRegisteredSessions) {
+                    <tr>
+                        <td>@session.Course.Code</td>
+                        <td>@session.Course.Name</td>
+                        <td>@session.StartDate - @session.EndDate</td>
+                        <td>@session.StartTime - @session.EndTime</td>
+                        <td>
+                            <button class="btn btn-danger" type="button" @onclick="() => RemoveSession(session)">Remove Session</button>
+                        </td>
+                        
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button class="btn btn-primary save-button" type="button" @onclick="HandleRegister">
+            Confirm Registeration
+        </button>
+    </div>
+
+    <h3 class="register-new-courses-header mt-4">Course Available For Registration</h3>
+    @* Populates courses NOT sessions. Sessions are selected after course population *@
+    <label>
+        <InputCheckbox @bind-Value="displayAllCourses" />
+        Courses In My Program ONLY
+    </label>
+    <div>
+        <input class="form-control" type="text" placeholder="Search courses..." @oninput="UpdateCourseQuery" />
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Course</th>
+                <th>Available Sessions</th>
+                <th>Choose Session</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (displayAllCourses && coursesInProgram != null) {
+                    @foreach(Course course in QueriedCourses) {
+                        <tr>
+                            <td>@course.Code</td>
+                            <td>@course.Name</td>
+                            <td>@course.Code</td>
+                            <td>
+                                <button type="button" class="btn btn-link" @onclick="() => ChooseSessionsDialog(course)">
+                                    Choose Session
+                                </button>
+                            </td>
+                        </tr>
+                    }
+            }
+            else if (!displayAllCourses && AllCourses != null) {
+                @foreach (Course course in QueriedCourses)
+                {
+                    <tr>
+                        <td>@course.Code</td>
+                        <td>@course.Name</td>
+                        <td>@course.Code</td>
+                        <td>
+                            <button type="button" class="btn btn-link" @onclick="() => ChooseSessionsDialog(course)">
+                                Choose Session
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+            else {
+                <p>Could not load any available courses</p>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+    @* CHOOSE SESSION DIALOG *@
+    @if (chooseSessions)
+    {
+        <StudentChooseSessionDialog 
+            selectedCourse="selectedCourse" 
+            sessions="CurrentRegisteredSessions" 
+            registeredSessions="CurrentRegisteredSessions"
+            OnAdd="AddSession" 
+            OnClose="CloseChooseSessionsDialog" />
+    }
+
+@code {
+    [Parameter] required public Student User { get; set; }
+    [Parameter] public EventCallback RegisterCourses { get; set; }
+    [Parameter] public List<ClassSession> CurrentRegisteredSessions { get; set; } = new();
+    [Parameter] required public IEnumerable<Course> AllCourses { get; set; } // All courses available for registeration
+    public IEnumerable<Course>? coursesInProgram => AllCourses?
+        .Where(x => User!.MyProgram.MyDegree!.Courses.Any(c => c.Code == x.Code));
+    public IEnumerable<Course> QueriedCourses => (displayAllCourses ? coursesInProgram ?? Enumerable.Empty<Course>() :
+        AllCourses ?? Enumerable.Empty<Course>())
+            .Where(course =>
+                string.IsNullOrWhiteSpace(courseQuery) ||
+                course.Code.Contains(courseQuery, StringComparison.OrdinalIgnoreCase) ||
+                course.Name.Contains(courseQuery, StringComparison.OrdinalIgnoreCase));
+    private string courseQuery = string.Empty;
+    public bool displayAllCourses { get; set; } = false;
+    public bool chooseSessions { get; set; }
+    public Course? selectedCourse { get; set; }
+
+
+    private async Task HandleRegister()
+    {
+        await RegisterCourses.InvokeAsync();
+    }
+
+    private void UpdateCourseQuery(ChangeEventArgs args) => 
+        courseQuery = args.Value?.ToString() ?? string.Empty;
+
+    public void ChooseSessionsDialog(Course course)
+    {
+        selectedCourse = course;
+        chooseSessions = true;
+    }
+    public void CloseChooseSessionsDialog()
+    {
+        chooseSessions = false;
+        selectedCourse = null;
+    }
+
+    public void AddSession(ClassSession session)
+    {
+        if (!CurrentRegisteredSessions.Contains(session)) 
+            CurrentRegisteredSessions.Add(session);
+    }
+
+    public void RemoveSession(ClassSession session)
+    {
+        CurrentRegisteredSessions.Remove(session);
+    }
+
+}

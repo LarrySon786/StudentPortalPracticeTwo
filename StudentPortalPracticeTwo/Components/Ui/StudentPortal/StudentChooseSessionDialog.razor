@@ -1,20 +1,23 @@
+@using Microsoft.EntityFrameworkCore.Internal
 @using StudentPortalPracticeTwo.Database.Models.Degrees
 
+
+    
+
 <Dialog OnClose="HandleClose">
-    @if (selectedCourse == null)
-    {
-        <p>No course found</p>
-    }
-    else if (selectedCourse.Sessions.Count == 0)
-    {
-        <p>No sessions found</p>
-    }
-    else
-    {
-        @foreach (ClassSession session in selectedCourse.Sessions.Where(x => x.ClassStarted == false))
+    <div class="dialog-container">
+        @if (selectedCourse == null)
+        {
+            <p>No course found</p>
+        }
+        else if (selectedCourse.Sessions.Count == 0)
+        {
+            <p>No sessions found</p>
+        }
+        else
         {
             <h4>@selectedCourse.Name Sessions</h4>
-            <table class="table">
+            <table class="table default-table">
                 <thead>
                     <tr>
                         <th>Instructor</th>
@@ -26,6 +29,8 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @foreach (ClassSession session in selectedCourse.Sessions.Where(x => x.ClassStarted == false))
+                    {
                     <tr>
                         <td>@session.Instructor!.FirstName @session.Instructor.LastName</td>
                         <td>@session.Term!.DisplayName</td>
@@ -33,7 +38,7 @@
                         <td>@session.StartTime - @session.EndTime</td>
                         <td>@session.CurrentCount / @session.Capacity</td>
                         <td>
-                            @if (sessions.Contains(session))
+                            @if (sessions.Any(x => x.Id == session.Id))
                             {
                                 <button class="btn btn-secondary" type="button" disabled>Added</button>
                             }
@@ -43,18 +48,34 @@
                             }
                         </td>
                     </tr>
+                    }
                 </tbody>
             </table>
         }
-    }
-    <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+        <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+    </div>
 </Dialog>
 
 @code {
     [Parameter] public Course? selectedCourse { get; set; }
+    [Parameter] public List<ClassSession> registeredSessions { get; set; } = new();
     [Parameter] public List<ClassSession> sessions { get; set; } = new();
     [Parameter] public EventCallback<ClassSession> OnAdd { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        foreach (ClassSession s in registeredSessions)
+        {
+            var x = sessions.Where(x => x.Id == s.Id).FirstOrDefault();
+            if (x != null)
+            {
+                sessions.Remove(x);
+                sessions.Add(s);
+            }
+        }
+
+    }
 
     private Task HandleAdd(ClassSession session) => OnAdd.InvokeAsync(session);
     private Task HandleClose() => OnClose.InvokeAsync();

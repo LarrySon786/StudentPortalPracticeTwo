@@ -12,7 +12,6 @@
 
 <div>
     <BreadCrumbs Crumbs="crumbs" />
-    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
 </div>
 
 
@@ -20,20 +19,24 @@
     <p>Could not load student and session details..</p>
 }
 else {
-    <h3>@session.Course.Name</h3>
+    <h1>@session.Course.Name</h1>
     <div>
-        <h3>Details</h3>
-        <p>@* // Total Score Dividing by Total Points *@
+        <h2 class="mb-3">Class Details</h2>
+        <p class="percentage-grade"> Grade: @* // Total Score Dividing by Total Points *@
             @if ((student.MyProgram.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y =>
                 y.Assignment.TotalPoints)) * 100 != 0) {
-                @Math.Round((student.MyProgram.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints) /
+                    @Math.Round((student.MyProgram.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints) /
                     student.MyProgram.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100, 2)
+            }
+            else
+            {
+                <span>--</span>
             }
             %</p>
     </div>
 
     <div>
-        <table class="table">
+        <table class="table default-table">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -43,6 +46,12 @@ else {
                 </tr>
             </thead>
             <tbody>
+                @if (session.Assignments.Count() == 0)
+                {
+                    <tr>
+                        <td colspan="100%">No Assignments Yet</td>
+                    </tr>
+                }
                 @foreach(Assignments assignment in session.Assignments ) {
                     <tr>
                         <td>@assignment.Name</td>
@@ -63,7 +72,10 @@ else {
 }
 @if (selectedAssignment != null)
 {
-    <AssignmentInstructionsDialog assignment="selectedAssignment" OnClose="CloseDialog" />
+    <div class="dialog-container">
+        <AssignmentInstructionsDialog assignment="selectedAssignment" OnClose="CloseDialog" />
+    </div>
+    
 }
 
 @code {
@@ -120,3 +132,5 @@ else {
     }
 
 }
+
+

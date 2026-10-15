@@ -1,0 +1,22 @@
+.dialog-container {
+    max-width: 768px;
+}
+
+.selected-table tr td {
+    font-size: 0.9rem;
+}
+
+.save-button {
+    width:100%;
+    padding: 12px 0;
+}
+
+h3 {
+    text-align: center;
+}
+
+.register-new-courses-header {
+    border-top: solid var(--color-text-label) 3px;
+    padding-top:24px;
+
+}

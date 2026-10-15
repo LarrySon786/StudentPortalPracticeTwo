@@ -1,0 +1,33 @@
+h1 {
+    margin: 0 0 8px;
+    color: var(--color-heading);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+}
+
+h2 {
+    margin: 0;
+    color: #627977;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.percentage-grade {
+    background-color: var(--color-nav);
+    width:fit-content;
+    padding: 6px;
+    font-size: 0.9rem;
+    color: var(--color-nav-text);
+    border-radius: 3px;
+
+    & span {
+        color: var(--color-nav-text)
+    }
+}
+
+.dialog-container {
+    max-width: 768px;
+}
