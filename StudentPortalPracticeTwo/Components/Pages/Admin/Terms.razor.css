@@ -1,0 +1,15 @@
+h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+
+}
+
+.heading-button-container {
+    display:flex;
+    justify-content: space-between;
+}
+
+.action-buttons-container {
+    display:flex;
+    justify-content: end;
+}

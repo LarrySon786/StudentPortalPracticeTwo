@@ -1,0 +1,11 @@
+h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.filter-button-container {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}

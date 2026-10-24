@@ -26,7 +26,6 @@
 
 <div>
     <BreadCrumbs Crumbs="crumbs" />
-    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
 </div>
 
 @if (faculty == null)
@@ -37,13 +36,22 @@ else
 {
     <div>
         @* Create a new class Session for this instructor *@
-        <button class="btn btn-primary" type="button" @onclick="OpenCreateSessionDialog">Create a Class Session</button>
+        <div class="create-button-container">
+            <h2>My Class Sessions</h2>
+            <button class="btn btn-primary mb-3 create-button" type="button" @onclick="OpenCreateSessionDialog">Create a Class Session</button>
+        </div>
         <div>
-            <InputCheckbox class="form-checkbox" @bind-Value="displayArchived"/><label class="form-label"> Display Archived Sessions</label>
+            <div>
+               <InputCheckbox class="form-checkbox" @bind-Value="displayArchived"/>
+               <label class="form-label select-archived"> Display Archived Sessions</label>
+            </div>
             <div>
                 <input class="form-control" type="text" placeholder="Search sessions..." @oninput="UpdateSessionQuery" />
             </div>
-            <table class="table">
+        </div>
+            
+        <div>
+            <table class="table default-table">
                 <thead>
                     <tr>
                         <th>Code</th>

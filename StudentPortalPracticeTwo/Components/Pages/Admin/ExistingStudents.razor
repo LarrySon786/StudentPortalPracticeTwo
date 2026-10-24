@@ -16,12 +16,11 @@
 
 
 
-<h1>Existing Students</h1>
+
 <div>
     <BreadCrumbs Crumbs="crumbs"/>
-    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
 </div>
-
+<h1>Existing Students</h1>
 
 @* Search bar to query all existing students *@
 <div class="search-bar">
@@ -29,7 +28,7 @@
 </div>
 
 @* Table to display all existing students *@
-<table class="table">
+<table class="table default-table">
     <thead>
         <th>Name</th>
         <th>Email</th>
@@ -37,6 +36,11 @@
         <th></th>
     </thead>
     <tbody>
+        @if (paginatedFilteredResults.Count() == 0) { 
+            <tr>
+                <td>No students found</td>
+            </tr>
+        }
         @* ITERATES THROUGH ALL USERS IN EXISTING STUDENTS *@
         @foreach (Student user in paginatedFilteredResults) {
             <tr>
@@ -44,24 +48,25 @@
                 <td>@user.Email</td>
                 <td>@user.DateOfBirth</td>
                 <td>
-                    <button type="button" class="btn btn-link"@onclick="() => NavigateToStudent(user.Id)">View/Edit Student Account</button>
+                    <button type="button" class="btn btn-link"@onclick="() => NavigateToStudent(user.Id)">View Student Account</button>
                 </td>
             </tr>
         }
-        @* CREATED PAGINATION AT BOTTOM *@
-        @for (int i = 1; i <= totalPages; i++) {
-            var pages = i;
-            <button class="btn btn-secondary" @onclick="() => UpdatePage(pages)">@pages</button>
-            @if (totalPages > 10) {
-                <p class="btn"> ... </p>
-                break;
-            }
-        }
-        @* No results if no student found by query *@
-        @if (totalPages == 0) { <p>No results found.</p> }
-
     </tbody>
 </table>
+
+
+@* CREATED PAGINATION AT BOTTOM *@
+<div class="mb-3">
+    @for (int i = 1; i <= totalPages; i++) {
+        var pages = i;
+        <button class="btn btn-secondary" @onclick="() => UpdatePage(pages)">@pages</button>
+        @if (totalPages > 10) {
+            <p class="btn"> ... </p>
+            break;
+        }
+    }
+</div>
 
 
 @code {

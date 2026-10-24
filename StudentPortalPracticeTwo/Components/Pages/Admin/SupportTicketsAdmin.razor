@@ -9,16 +9,12 @@
 <div class="standard-card">
     <div>
         <BreadCrumbs Crumbs="crumbs" />
-        <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
     </div>
 
-    @* SEARCH BAR *@
-        <div>
-            <input class="form-control" placeholder="Search..." type="text" @oninput="UpdateQuery"/>
-        </div>
+    <h1>Support Tickets</h1>
 
     @* Filter Buttons *@
-        <div>
+        <div class="filter-button-container mb-3">
             <button class="btn @(filter == SupportStatus.Any ? "btn-primary" : "btn-secondary")" type="button" @onclick="() => ChangeFilter(SupportStatus.Any)">
                 Any
             </button>
@@ -33,37 +29,39 @@
             </button>
         </div>
 
-    @if (queriedTickets.Count() == 0)
-    {
-        <p>No Results.</p>
-    }
-    else {
-        @* DISPLAY tickets *@
-        <table class="table">
-            <thead>
+    @* SEARCH BAR *@
+    <div>
+        <input class="form-control" placeholder="Search..." type="text" @oninput="UpdateQuery"/>
+    </div>
+
+    @* DISPLAY tickets *@
+    <table class="table default-table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Ticket Title</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (queriedTickets.Count() == 0)
+            {
+                <td>No Support Tickets Found</td>
+            }
+            @foreach (SupportTicket ticket in queriedTickets)
+            {
                 <tr>
-                    <th>Student</th>
-                    <th>Ticket Title</th>
-                    <th>Status</th>
-                    <th></th>
+                    <td>@ticket.Student.FirstName @ticket.Student.LastName</td>
+                    <td>@ticket.Title</td>
+                    <td>@ticket.Status</td>
+                    <td>
+                        <a href="/dashboard/support/ticket/@ticket.Id">View</a>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (SupportTicket ticket in queriedTickets)
-                {
-                    <tr>
-                        <td>@ticket.Student.FirstName @ticket.Student.LastName</td>
-                        <td>@ticket.Title</td>
-                        <td>@ticket.Status</td>
-                        <td>
-                            <a href="/dashboard/support/ticket/@ticket.Id">View</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        
-    }
+            }
+        </tbody>
+    </table>
 </div>
 
 @code {

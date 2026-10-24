@@ -8,20 +8,13 @@
 @inject StudentPortalPracticeTwo.Components.Services.Users.Instructors.FacultyService facultyService
 
 
-@* DONE *@
-@* Allow search of faculty members *@
-@* Allow deactivation of faculty member accounts *@
-@* Display all existing faculty members *@
-@* Allow creation of faculty members *@
-
-
 <div class="standard-card">
     <div>
         <BreadCrumbs Crumbs="crumbs" />
-        <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
     </div>
     @* Create New Faculty Member *@
-    <div>
+    <div class="mb-3 heading-container">
+        <h1>Faculty Management</h1>
         <button class="btn btn-primary" type="button" @onclick="ToggleCreateFacultyDialog">Create Faculty</button>
     </div>
 
@@ -31,7 +24,7 @@
             @* Search Feature *@
             <input class="form-control" placeholder="Search..." @oninput="UpdateQuery" />
         </div>
-        <table class="table">
+        <table class="table default-table">
             <thead>
                 <tr>
                     <th>Name</th>

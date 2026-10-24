@@ -4,27 +4,20 @@
 @inject IJSRuntime JS;
 
 <div>
-    <input class="form-control" type="text" placeholder="Search..." @oninput="UpdateQuery"/>
+    <input class="form-control" type="text" placeholder="Search degrees and programs..." @oninput="UpdateQuery"/>
 </div>
 
-<table class="table">
+<table class="table default-table">
     <thead>
         <th>Degree</th>
-        <th></th>
-        <th></th>
         <th></th>
     </thead>
     <tbody>
         @foreach(Degree degree in queriedDegrees) {
             <tr>
                 <td>@degree.Name</td>
-                <td>
+                <td class="degree-action-buttons-container">
                     <button class="btn btn-primary" type="button" @onclick="() => ToggleEditDegree(degree)">Edit Degree</button>
-                </td>
-                <td>
-                    <button class="btn btn-secondary" type="button">View Courses</button>
-                </td>
-                <td>
                     <button class="btn btn-danger" type="button" @onclick="() => DeleteDegree(degree.Id)">Delete</button> 
                 </td>
             </tr>

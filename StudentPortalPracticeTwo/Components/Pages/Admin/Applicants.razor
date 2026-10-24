@@ -7,19 +7,17 @@
 @inject StudentPortalPracticeTwo.Components.Services.Application.FinalApplicationDb studentApplication;
 @inject NavigationManager navigationManager;
 
-<h1>New Student Applications</h1>
+
 <div>
     <BreadCrumbs Crumbs="crumbs" />
-    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
 </div>
+<h1>New Student Applications</h1>
 
 <div class="standard-card">
     @* Search Filter *@
     <div class="search-bar">
-        <input class="form-control" id="searchFilter" placeholder="Search..." @oninput="SearchQuery"/>
-
         @* Buttons to decide filter for table *@
-        <div> 
+        <div class="filter-button-container mb-3"> 
             <button class="btn @(selectedFilter == Status.All ? "btn-secondary" : "btn-primary")" type="button"
                     @onclick="() => ChangeFilter(Status.All)">All</button>
             <button class="btn @(selectedFilter == Status.Pending ? "btn-secondary" : "btn-primary")" type="button"
@@ -29,10 +27,14 @@
             <button class="btn @(selectedFilter == Status.Denied ? "btn-secondary" : "btn-primary")" type="button"
                     @onclick="() => ChangeFilter(Status.Denied)">Denied</button>
         </div>
+
+        <p class="info">Hint: Double-click to open an application</p>
+        
+        <input class="form-control" id="searchFilter" placeholder="Search..." @oninput="SearchQuery"/>
     </div>
 
     @* Table to display ALL STUDENT APPLICANTS PENDING *@
-    <table class="table">
+    <table class="table default-table">
         <thead>
             <th>Student</th>
             <th>Date of Birth</th>
@@ -41,10 +43,10 @@
         </thead>
         <tbody>
             @if (isLoading) {
-                <p>Loading Pending Applications...</p>
+                <td>Loading Pending Applications...</td>
             }
             else if (!filteredApplications.Any()) {
-                <p>No applications found</p>
+                <td>No applications found</td>
             }
             else {
                 @foreach (ApplicationModel application in filteredApplications!) {
@@ -56,19 +58,20 @@
                         <td>INSERT_DATE RECEIVED</td>
                     </tr>
                 }
-                for (int i = 1; i <= totalPages; i++) {
-                    var pages = i;
-                    <button class="btn btn-link" type="button" @onclick="() => SetPage(pages)">@pages</button> 
-                    @if (totalPages > 10)
-                    {
-                        <p class="btn"> ... </p>
-                        break;
-                    }
-                }
-                @if (totalPages == 0) {<p>No results found.</p>}
+                
             }
         </tbody>
     </table>
+    @for (int i = 1; i <= totalPages; i++) {
+        var pages = i;
+        <button class="btn btn-secondary" type="button" @onclick="() => SetPage(pages)">@pages</button> 
+        @if (totalPages > 10)
+        {
+            <p class="btn"> ... </p>
+            break;
+        }
+    }
+    @if (totalPages == 0) {<p>No results found.</p>}
 </div>
 
 

@@ -1,0 +1,15 @@
+.create-button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.select-archived {
+    transform: translateY(-2px);
+    padding-left: 2px;
+}
+
+td, th {
+    text-align: center;
+}
+

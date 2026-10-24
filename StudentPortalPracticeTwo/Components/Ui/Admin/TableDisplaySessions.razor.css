@@ -1,0 +1,10 @@
+.degree-action-buttons-container {
+    display: flex;
+    justify-content: end;
+    gap: 12px;
+}
+
+td,
+th {
+    text-align: center;
+}

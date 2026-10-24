@@ -7,7 +7,7 @@
     <input class="form-control" type="text" placeholder="Search courses..." @oninput="UpdateQuery" />
 </div>
 
-<table class="table">
+<table class="table default-table">
     <thead>
         <th>Course Code</th>
         <th>Name</th>
@@ -22,12 +22,10 @@
                 <td>@course.Code</td>
                 <td>@course.Name</td>
                 <td>@course.Credits</td>
-                <div>
-                    <td><button class="btn btn-primary" @onclick="() => ToggleEdit(course.Id)">Edit Course</button></td>
-                    <td><button class="btn btn-secondary">View Degrees</button></td>
-                    <td><button class="btn btn-secondary">View Sessions</button></td>
-                    <td><button class="btn btn-danger" @onclick="() => HandleDelete(course.Id)">Delete</button></td>
-                </div>
+                <td class="degree-action-buttons-container">
+                    <button class="btn btn-primary" @onclick="() => ToggleEdit(course.Id)">Edit Course</button>
+                    <button class="btn btn-danger" @onclick="() => HandleDelete(course.Id)">Delete</button>
+                </td>
             </tr>
         }
     </tbody>

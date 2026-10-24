@@ -20,9 +20,6 @@ Switch to IDbContextFactory instead of normal DbContext
 Refactored UserModel into Students, Faculty, and AdminModel (which all inherit from UserModel shared details)
 Fixed bugs related to refactoring including classSession creation faults, course queries from db, and DegreeProgress incomplete courses not rendering
 Fixed bugs related to verificaition code and applications for students. Also made it so the injection was scoped and not singleton
-Improved CSS of landing page and student application.
-Create a PDF writer using QuestPDFs. After I got it set-up, I had AI design the PDF to match color scheme and look professional.
-Completed Most of the front-end for the student portal (student role). Can make few more improvements if I want to later.
 
 
 
@@ -108,6 +105,9 @@ future push requests.
 I planned the test names, parameters, and similar things.
 - I created a TestData Helper that generates data value for my tests. It is reusable
 - I created the Class Session Tests. I also created my first query test. I did the archive class session and unarchive class session tests.
-
+- Improved CSS of landing page and student application.
+- Create a PDF writer using QuestPDFs. After I got it set-up, I had AI design the PDF to match color scheme and look professional.
+- Completed Most of the front-end for the student portal (student role). Can make few more improvements if I want to later.
+- I completed Most of the front-end for the student portal (faculty and admin role)
 
 

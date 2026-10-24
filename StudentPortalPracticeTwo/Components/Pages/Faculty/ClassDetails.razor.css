@@ -1,0 +1,62 @@
+h1, h2, h3 {
+    text-align: center;
+}
+
+/* **********************  */
+/* BUTTON NAVIGATION */
+/* ********************** */
+.button-nav-container {
+    display:flex;
+}
+.button-nav-container > * {
+    width:100%;
+    flex:1;
+}
+.button-nav-container button{
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-radius: 0;
+    border-color: var(--color-primary);
+}
+.return-link {
+    align-self: center;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-radius: 0;
+}
+
+
+/* **********************  */
+/* Assignments Table */
+/* ********************** */
+
+.create-assignment-btn {
+    width:100%;
+    padding: 12px 0;
+}
+
+.assignments-header {
+    border-bottom: var(--color-nav);
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.5rem;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+th, td {
+    text-align: center;
+}
+
+
+
+/* GRADUATES AND FAILED */
+.graduate-failed-container {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.graduate-failed-container h3 {
+    text-align: center;
+}

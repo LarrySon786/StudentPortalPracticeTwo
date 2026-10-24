@@ -14,21 +14,38 @@
 @inject StudentPortalPracticeTwo.Components.Services.Admin.TermManagement termManagement
 
 
+@* TOP BREADCRUMBS *@
 <div>
     <BreadCrumbs Crumbs="crumbs" />
-    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
 </div>
+
+
+@* ERROR HANDLING *@
+<div>
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <p class="info">@message</p>
+    }
+    @if (errors.Count() != 0)
+    {
+        <p class="alert">
+            @foreach (string err in errors)
+            {
+                @err;
+            }
+        </p>
+    }
+</div>
+
 
 @if (session == null) {
     <p>Session details not found</p>
+    <a href="@crumbs[^2].Link" class="btn btn-secondary">⬅ Back</a>
 }
 else {
-    @* Top Bar *@
-    <div>
-        @* 
-        This button should allow instructors to activate their class to be active for the term
-        Students will then see this class appear in their concurrent active classes.
-         *@
+    @* TOP ACTION BAR *@
+    <div class="button-nav-container mb-4">
+        <a href="@crumbs[^2].Link" class="btn btn-secondary return-link">⬅ Back</a>
 
         @if (session.ClassStarted  == false && session.ArchivedAndClosed == false) {
             <button class="btn btn-primary" type="button" @onclick="StartTerm">Begin Class for Term</button> 
@@ -47,26 +64,24 @@ else {
         }
     </div>
 
-    @* ERROR HANDLING *@
-    <p>@message</p>
-    <p>
-        @foreach (string err in errors)
-        {
-            @err;
-        }
-    </p>
+    
 
-    @* Assignment Management - Display all class assignments *@
-    <div>
-        <h2>Assignments</h2>
+    @* ASSIGNMENT Management - Display all class assignments *@
+    <div class="standard-card assignments-container mb-4">
+        
         <div>
-            <input class="form-control" type="text" placeholder="Search assignments..." @oninput="UpdateAssignmentQuery" />
+            <h2>Assignments</h2>
+            <div class="mb-4">
+                @* <label class="form-label">Assignment Search</label> *@
+                <input class="form-control" type="text" placeholder="Search assignments..." @oninput="UpdateAssignmentQuery" />
+            </div>
         </div>
-        @if (session.ArchivedAndClosed == false) {
-            <button class="btn btn-primary" type="button" @onclick="OpenCreateDialog">Create New Assignment</button>
-        }
-        <table class="table">
+
+        <table class="table default-table mb-4">
             <thead>
+                <tr>
+                    <th colspan="100%" class="assignments-header">Assignments</th>
+                </tr>
                 <tr>
                     <th>Name</th>
                     <th>Total Points</th>
@@ -75,6 +90,14 @@ else {
                 </tr>
             </thead>
             <tbody>
+                @if (filteredAssignments.Count() == 0)
+                {
+                    <tr>
+                        <td colspan="100%">
+                            No Assignments Found
+                        </td>
+                    </tr>
+                }
                 @foreach (Assignments assignment in filteredAssignments) {
                     <tr>
                         <td>@assignment.Name</td>
@@ -94,22 +117,35 @@ else {
                 }
             </tbody>
         </table>
+
+        @if (session.ArchivedAndClosed == false) {
+            <button class="btn btn-primary create-assignment-btn" type="button" @onclick="OpenCreateDialog">Create New Assignment</button>
+        }
+
     </div>
 
     @* DISPLAY registered students if class has not yet started *@
     @if (session.ClassStarted == false && session.ArchivedAndClosed == false) {
-        <div>
+        <div class="standard-card">
             <h2>Registered Students</h2>
             <div>
                 <input class="form-control" type="text" placeholder="Search registered students..." @oninput="UpdateRegisteredStudentQuery" />
             </div>
-            <table class="table">
+            <table class="table default-table">
                 <thead>
                     <tr>
                         <th>Name</th>
                     </tr>
                 </thead>
                 <tbody>
+                    @if (filteredRegisteredStudents.Count() == 0)
+                    {
+                        <tr>
+                            <td colspan="100%">
+                                No Registered Students Found
+                            </td>
+                        </tr>
+                    }
                     @foreach (UserProgramModel programModel in filteredRegisteredStudents)
                     {
                         @if (programModel.User != null)
@@ -127,12 +163,12 @@ else {
     @* DISPLAY student management if the class is not archived *@
     if (session.ArchivedAndClosed== false && session.ClassStarted == true) {
         @* Student Management *@
-        <div>
+        <div class="standard-card">
             <h2>Students</h2>
             <div>
                 <input class="form-control" type="text" placeholder="Search current students..." @oninput="UpdateCurrentStudentQuery" />
             </div>
-            <table class="table">
+            <table class="table default-table">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -141,6 +177,14 @@ else {
                     </tr>
                 </thead>
                 <tbody>
+                    @if (filteredCurrentStudents.Count() == 0)
+                    {
+                        <tr>
+                            <td colspan="100%">
+                                No Assignments Found
+                            </td>
+                        </tr>
+                    }
                     @foreach (UserProgramModel programModel in filteredCurrentStudents) {
                         @if (programModel.User != null) {
                             <tr>
@@ -176,74 +220,76 @@ else {
 
     @* ARCHIVED CLASS INFORMATION *@
     @if (session.ArchivedAndClosed == true) {
-        <div>
+        <div class="standard-card graduate-failed-container">
             @* DISPLAY students who succeeded to graduate (if class is archived) *@
-            <h1>Graduates</h1>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Grade Received</th>
-                        <th>View</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (UserProgramModel programModel in session.Graduates.Select(x => x.StudentProgram)) {
-                        @if (programModel.User != null)
-                        {
-                            <tr>
-                                <td>@programModel.User!.FirstName @programModel.User.LastName</td>
-                                <td>
-                                    @* // Total Score Dividing by Total Points *@
-                                    @if ((programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100 != 0)
-                                    {
-                                        @Math.Round((programModel.User.MyProgram.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints) / programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100, 2)
-                                    }
-                                    %
-                                </td>
-                                <td>
-                                    <button class="btn btn-link" type="button" @onclick="() => OpenStudentDialog(programModel.User)">View</button>
-                                </td>
-                            </tr>
-                        }
+            <div>
+                <h3>Graduates</h3>
+                <table class="table default-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Grade Received</th>
+                            <th>View</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (UserProgramModel programModel in session.Graduates.Select(x => x.StudentProgram)) {
+                            @if (programModel.User != null)
+                            {
+                                <tr>
+                                    <td>@programModel.User!.FirstName @programModel.User.LastName</td>
+                                    <td>
+                                        @* // Total Score Dividing by Total Points *@
+                                        @if ((programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100 != 0)
+                                        {
+                                            @Math.Round((programModel.User.MyProgram.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints) / programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100, 2)
+                                        }
+                                        %
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-link" type="button" @onclick="() => OpenStudentDialog(programModel.User)">View</button>
+                                    </td>
+                                </tr>
+                            }
 
-                    }
-                </tbody>
-            </table>
-        
-            @* DISPLAY students that failed to graduate (only if class is archived) *@
-            <h1>Failed Course</h1>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Grade Received</th>
-                        <th>View</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (UserProgramModel programModel in session.FailedCourses.Select(x => x.StudentProgram)) {
-                        @if (programModel.User != null)
-                        {
-                            <tr>
-                                <td>@programModel.User!.FirstName @programModel.User.LastName</td>
-                                <td>
-                                    @* // Total Score Dividing by Total Points *@
-                                    @if ((programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100 != 0)
-                                    {
-                                        @Math.Round((programModel.User.MyProgram.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints) / programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100, 2)
-                                    }
-                                    %
-                                </td>
-                                <td>
-                                    <button class="btn btn-link" type="button" @onclick="() => OpenStudentDialog(programModel.User)">View</button>
-                                </td>
-                            </tr>
                         }
-                    }
-                </tbody>
-            </table>
-            
+                    </tbody>
+                </table>
+            </div>
+            @* DISPLAY students that failed to graduate (only if class is archived) *@
+            <div>
+                <h3>Failed Course</h3>
+                    <table class="table default-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Grade Received</th>
+                            <th>View</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (UserProgramModel programModel in session.FailedCourses.Select(x => x.StudentProgram)) {
+                            @if (programModel.User != null)
+                            {
+                                <tr>
+                                    <td>@programModel.User!.FirstName @programModel.User.LastName</td>
+                                    <td>
+                                        @* // Total Score Dividing by Total Points *@
+                                        @if ((programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100 != 0)
+                                        {
+                                            @Math.Round((programModel.User.MyProgram.Grade.Where(x => x.SessionId == session.Id).Sum(x => x.ScoredPoints) / programModel.Grade.Where(x => x.SessionId == session.Id && x.Submitted == true).Sum(y => y.Assignment.TotalPoints)) * 100, 2)
+                                        }
+                                        %
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-link" type="button" @onclick="() => OpenStudentDialog(programModel.User)">View</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     }
 

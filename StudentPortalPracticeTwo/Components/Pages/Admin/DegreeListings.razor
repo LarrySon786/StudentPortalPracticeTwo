@@ -5,19 +5,44 @@
 @using StudentPortalPracticeTwo.Components.Ui.Admin;
 @using StudentPortalPracticeTwo.Database.Models.Ui
 @using StudentPortalPracticeTwo.Components.Ui
-
-<h1>Degree Listings</h1>
 <div>
     <BreadCrumbs Crumbs="crumbs"/>
-    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
 </div>
+<h1>Degree Listings</h1>
+
 
 
 @* BUTTONS TO CREATE NEW OBJECTS + DIALOG MENUS *@
-<button class="btn btn-primary" @onclick="ToggleDegreeDialog">Create New Degree</button>
-<button class="btn btn-primary" @onclick="ToggleCourseDialog">Create New Course</button>
-<button class="btn btn-primary" @onclick="ToggleClassSessionDialog">Create New Class Session</button>
+<div class="button-nav-container">
+    <button class="btn btn-primary" @onclick="ToggleDegreeDialog">Create New Degree</button>
+    <button class="btn btn-primary" @onclick="ToggleCourseDialog">Create New Course</button>
+    <button class="btn btn-primary" @onclick="ToggleClassSessionDialog">Create New Class Session</button>
+</div>
 
+
+@* TABLE DATA AND SELECTION *@
+<div>
+    <div class="button-nav-container-right">
+        <button class="btn btn-link" @onclick="ToggleTableDegrees">All Degrees</button>
+        <button class="btn btn-link" @onclick="ToggleTableCourses">All Courses</button>
+        <button class="btn btn-link" @onclick="ToggleTableSessions">All Sessions</button>
+    </div>
+    
+
+    @if (tableDegrees == true) {
+        <TableDisplayDegrees @ref="degreeTable"/>
+    }
+    else if (tableCourses == true) {
+        <TableDisplayCourses @ref="courseTable" />
+    }
+    else if (tableSessions == true) {
+        <TableDisplaySessions @ref="sessionTable"/>
+    }
+</div>
+
+
+
+@* DIALOGS *@
 @if (createDegreeDialog == true) {
     <Dialog OnClose="ToggleDegreeDialog">
         <CreateDegree CloseDialog="ToggleDegreeDialog" OnDegreeCreated="HandleDegreeCreated" />
@@ -34,24 +59,6 @@ else if (createClassSession == true) {
     </Dialog>
 }
 
-
-
-@* TABLE DATA AND SELECTION *@
-<div>
-    <button class="btn btn-link" @onclick="ToggleTableDegrees">All Degrees</button>
-    <button class="btn btn-link" @onclick="ToggleTableCourses">All Courses</button>
-    <button class="btn btn-link" @onclick="ToggleTableSessions">All Sessions</button>
-
-    @if (tableDegrees == true) {
-        <TableDisplayDegrees @ref="degreeTable"/>
-    }
-    else if (tableCourses == true) {
-        <TableDisplayCourses @ref="courseTable" />
-    }
-    else if (tableSessions == true) {
-        <TableDisplaySessions @ref="sessionTable"/>
-    }
-</div>
 
 
 @code {

@@ -9,21 +9,23 @@
 @inject StudentPortalPracticeTwo.Components.Services.Admin.TermService termService
 
 
-<h1>Scheduled Terms</h1>
+
 <div>
     <BreadCrumbs Crumbs="crumbs" />
-    <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
 </div>
 
 @* Button to add new term *@
-<button class="btn btn-primary" @onclick="() => ToggleEditTermDialog(EditMode.Create)">Create New Term</button>
+<div class="heading-button-container">
+    <h1>Scheduled Terms</h1>
+    <button class="btn btn-primary mb-3" @onclick="() => ToggleEditTermDialog(EditMode.Create)">Create New Term</button>
+</div>
 
 @* SEARCH *@
 <div>
     <input type="text" @oninput="UpdateQuery" placeholder="Search..." class="form-control"/>
 </div>
 @* Display terms with options to edit *@
-<table class="table">
+<table class="table default-table">
     <thead>
         <th>Term</th>
         <th></th>
@@ -38,7 +40,7 @@
             {
                 <tr>
                     <td>@term.DisplayName</td>
-                    <td>
+                    <td class="action-buttons-container">
                        <button class="btn btn-primary" @onclick="() => ToggleEditTermDialog(EditMode.Edit, term)">Edit Term</button>
                     </td>
                 </tr>

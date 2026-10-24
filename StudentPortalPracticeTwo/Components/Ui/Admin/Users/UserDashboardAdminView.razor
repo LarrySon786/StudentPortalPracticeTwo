@@ -12,10 +12,10 @@
 <div class="tab-nav add-margin-bottom">
     <div>
         @if (User is Student) {
-            <a href="/admin/students" class="btn btn-link">⬅ Return</a>
+            <a href="/dashboard" class="btn btn-link">⬅ Return</a>
         }
         else if (User is Faculty) {
-            <a href="/admin/faculty" class="btn btn-link">⬅ Return</a>
+            <a href="/faculty" class="btn btn-link">⬅ Return</a>
         }
         else if (User is AdminModel){
             <a href="/admin/admins" class="btn btn-link">⬅ Return</a>

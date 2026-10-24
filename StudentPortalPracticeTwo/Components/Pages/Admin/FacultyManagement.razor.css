@@ -1,0 +1,13 @@
+h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.heading-container {
+    display: flex;
+    justify-content: space-between;
+}
+th,
+td {
+    text-align: center;
+}

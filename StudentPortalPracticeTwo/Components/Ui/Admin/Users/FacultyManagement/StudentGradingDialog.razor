@@ -6,46 +6,47 @@
 
 
 <Dialog OnClose="HandleClose">
-    
-    @* Student Details and options *@
-    <div>
-        <h3>@student.FirstName @student.LastName</h3>
-    </div>
+    <div class="set-width">
+        @* Student Details and options *@
+        <div>
+            <h3>@student.FirstName @student.LastName</h3>
+        </div>
 
 
-    @* Assignments *@
-    <div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Assignment</th>
-                    <th>Score</th>
-                    <th>Total Points</th>
-                    <th>Grade</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach(Grade grade in grades) {
+        @* Assignments *@
+        <div>
+            <table class="table">
+                <thead>
                     <tr>
-                        <td>@grade.Assignment.Name</td>
-                        <td>
-                            <InputNumber class="form-control" @bind-Value="grade.ScoredPoints"/>
-                        </td>
-                        <td>@grade.Assignment.TotalPoints</td>
-                        <td>@grade.PercentageGrade%</td>
+                        <th>Assignment</th>
+                        <th>Score</th>
+                        <th>Total Points</th>
+                        <th>Grade</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach(Grade grade in grades) {
+                        <tr>
+                            <td>@grade.Assignment.Name</td>
+                            <td>
+                                <InputNumber class="form-control" @bind-Value="grade.ScoredPoints"/>
+                            </td>
+                            <td>@grade.Assignment.TotalPoints</td>
+                            <td>@grade.PercentageGrade%</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-    
+        
 
-    @* Save + Close *@
-    <div>
-        <p class="text-muted">@message</p>
-        <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
-        <button class="btn btn-primary" type="button" @onclick="SaveChanges">Save Changes</button>
+        @* Save + Close *@
+        <div>
+            <p class="text-muted">@message</p>
+            <button class="btn btn-secondary" type="button" @onclick="HandleClose">Close</button>
+            <button class="btn btn-primary" type="button" @onclick="SaveChanges">Save Changes</button>
+        </div>
     </div>
 </Dialog>
 
@@ -86,3 +87,9 @@
         await OnClose.InvokeAsync();
     }
 }
+
+<style>
+    .set-width {
+        width: 100%;
+    }
+</style>

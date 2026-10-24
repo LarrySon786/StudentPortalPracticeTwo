@@ -7,12 +7,12 @@
     <input class="form-control" type="text" placeholder="Search sessions..." @oninput="UpdateQuery" />
 </div>
 
-<table class="table">
+<table class="table default-table">
     <thead>
         <th>Session Course</th>
         <th>Instructor</th>
-        <th>Start Date/Time</th>
-        <th>End Date/Time</th>
+        <th>Dates</th>
+        <th>Time</th>
         <th></th>
     </thead>
     <tbody>
@@ -21,12 +21,12 @@
             <tr>
                 <td>@session.Course.Name</td>
                 <td>@(session.Instructor is null ? "Unknown" : $"{session.Instructor.FirstName} {session.Instructor.LastName}")</td>
-                <td>@session.StartDate @session.StartTime</td>
-                <td>@session.EndDate @session.EndTime</td>
-                <div>
-                    <td><button class="btn btn-primary" type="button" @onclick="() => ToggleEditSessionDialog(session)">Edit/View Session</button></td>
-                    <td><button class="btn btn-danger" type="button" @onclick="() => HandleDelete(session.Id)">Delete</button></td>
-                </div>
+                <td>@session.StartDate - @session.EndDate</td>
+                <td>@session.StartTime - @session.EndTime</td>
+                <td class="degree-action-buttons-container">
+                    <button class="btn btn-primary" type="button" @onclick="() => ToggleEditSessionDialog(session)">Edit Session</button>
+                    <button class="btn btn-danger" type="button" @onclick="() => HandleDelete(session.Id)">Delete</button>
+                </td>
             </tr>
         }
     </tbody>

@@ -10,66 +10,70 @@
 @inject StudentPortalPracticeTwo.Components.Services.Admin.AssignmentService assignmentService
 
 
-<div>
-    <a href="/faculty/classes/class-details/@Id" class="btn btn-link">⬅️ Return</a>
-</div>
+
 
 @if (session == null) {
     <p>No session details found.</p>
+    <a href="/faculty/classes/class-details/@Id" class="btn btn-link">Return</a>
 }
 else {
-    <div>
-    <h1>@session.Course.Code | @session.Course.Name</h1>
-    @foreach (Student? student in session.StudentProgramModels.Select(x => x.User)) {
-        @if (student != null)
-        {
-            <div class="standard-card">
-                    <p>@student.FirstName @student.LastName</p>
-                    @{
-                        var scored = student.MyProgram.Grade.Sum(g => g.ScoredPoints);
-                        var possible = student.MyProgram.Grade.Sum(g => g.Assignment.TotalPoints);
-                        var percentage = possible == 0 ? 0 : scored / possible * 100;
-                    }
-                    @if (scored / possible < (decimal)0.7) {
-                        <p style="color:red;">Status: FAILING</p>
-                    }
-                    else {
-                        <p style="color:green;">Status: PASSING</p>
-                    }
-                    <p>Scored: @scored</p>
-                    <p>Total Possible Points: @possible</p>
-                    <p>Grade Percentage: @percentage.ToString("F2")%</p>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Assignment</th>
-                            <th>Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (Grade grade in student.MyProgram.Grade) {
-                            <tr>
-                                <td>@grade.Assignment.Name</td>
-                                <td>@grade.ScoredPoints / @grade.Assignment.TotalPoints</td>
-                            </tr>
+    <h1>@session.Course.Name</h1>
+    <h2>Submit Grades</h2>
+
+    @* STUDENT grade cards *@
+    <div class="mb-3 student-grade-cards-container">
+        @foreach (Student? student in session.StudentProgramModels.Select(x => x.User)) {
+            @if (student != null)
+            {
+                <div class="standard-card">
+                        <p class="student-name">@student.FirstName @student.LastName</p>
+                        @{
+                            var scored = student.MyProgram.Grade.Sum(g => g.ScoredPoints);
+                            var possible = student.MyProgram.Grade.Sum(g => g.Assignment.TotalPoints);
+                            var percentage = possible == 0 ? 0 : scored / possible * 100;
                         }
-                    </tbody>
-                </table>
-            </div>
+                        @if (scored / possible < (decimal)0.7) {
+                            <p style="color:red;">Status: FAILING</p>
+                        }
+                        else {
+                            <p style="color:green;">Status: PASSING</p>
+                        }
+                        <p>Scored: @scored</p>
+                        <p>Total Possible Points: @possible</p>
+                        <p>Grade Percentage: @percentage.ToString("F2")%</p>
+                    <table class="table default-table">
+                        <thead>
+                            <tr>
+                                <th>Assignment</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (Grade grade in student.MyProgram.Grade) {
+                                <tr>
+                                    <td>@grade.Assignment.Name</td>
+                                    <td>@grade.ScoredPoints / @grade.Assignment.TotalPoints</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         }
-    }
-</div>
-
-@* Pass class button *@
-<div>
-    <p>
-        Once grades are submited, instructors are unable to make changes 
-        to student scores. Please make sure to review each student's grade carefully.
-    </p>
-    <button class="btn btn-primary" type="button" @onclick="SubmitGrades">Submit Student Grades</button>
-</div>
+    </div>
 
 
+    @* SUBMIT GRADES BUTTON *@
+    <div>
+        <p class="alert">
+            Once grades are submited, instructors are unable to make changes 
+            to student scores. Please make sure to review each student's grade carefully.
+        </p>
+        <div class="button-container">
+            <a href="/faculty/classes/class-details/@Id" class="btn btn-secondary">Return</a>
+            <button class="btn btn-primary" type="button" @onclick="SubmitGrades">Submit Student Grades</button>
+        </div>
+    </div>
 }
 
 
