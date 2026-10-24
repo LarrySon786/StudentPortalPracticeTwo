@@ -1,0 +1,25 @@
+h1 {
+    font-weight: 700;
+    font-size:1.6rem;
+    text-align: center;
+}
+
+.nav-button-container {
+    display: flex;
+
+}
+
+.nav-button {
+    flex:1;
+    border-radius: 0;
+    border: (var(--color-primary));
+}
+
+.page-content {
+    margin-bottom: 64px;
+}
+
+.bottom-bar {
+    display: flex;
+    gap: 12px;
+}

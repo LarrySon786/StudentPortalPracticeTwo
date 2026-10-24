@@ -10,10 +10,9 @@
 <div class="standard-card">
     <div>
         <BreadCrumbs Crumbs="crumbs" />
-        <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
     </div>
-    <div>
-        <button class="btn btn-primary" type="button" @onclick="ToggleCreateAdminDialog">Create Admin</button>
+    <div class="action-buttons-container">
+        <button class="btn btn-primary mb-4" type="button" @onclick="ToggleCreateAdminDialog">Create Admin</button>
     </div>
     <div>
         <input class="form-control" placeholder="Search..." @oninput="UpdateQuery" />
@@ -25,7 +24,7 @@
     }
     else
     {
-        <table class="table">
+        <table class="table default-table">
             <thead>
                 <tr>
                     <th>Name</th>

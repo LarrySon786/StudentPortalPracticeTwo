@@ -3,7 +3,9 @@
 
 
 <div>
+    
     <EditForm Model="studentApplication" FormName="ApplicationOverview">
+        @* <legend>Demographics</legend> *@
 
         <label class="form-label">First Name</label>
         <InputText class="form-control" @bind-Value="studentApplication.StudentInfo.FirstName" disabled/>

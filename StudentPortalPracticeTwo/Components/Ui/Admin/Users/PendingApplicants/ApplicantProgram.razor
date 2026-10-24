@@ -2,27 +2,32 @@
 
 @* Students Requested Program *@
 
-<div>
-    <h3>Student Program</h3>
-    <p>Requested Program: @studentApplication.StudentProgram.SelectedProgram.Name</p>
-    <p>Requested Start Term: @studentApplication.StudentProgram.StartTerm.DisplayName</p>
+<div class="content-container">
+    <div class="standard-card">
+        <h3>Selected Program</h3>
+        <p><span class="emphasis">Requested Program:</span> @studentApplication.StudentProgram.SelectedProgram.Name</p>
+        <p><span class="emphasis">Requested Start Term:</span> @studentApplication.StudentProgram.StartTerm.DisplayName
+        </p>
+    </div>
 
-    <h3>Academic History</h3>
-    <p>Highschool Transcript: 
-        <a href="/final-application/transcripts/highschool/@studentApplication.AcademicHistory.Id">
-            Download Highschool Transcript
-        </a>
-    </p>
-    @if (studentApplication.AcademicHistory.CollegeTranscript != null) {
-        <p>College Transcript:
-            <a href="/final-application/transcripts/college/@studentApplication.AcademicHistory.Id">
-                Download College Transcript
+    <div class="standard-card">
+        <h3>Academic History</h3>
+        <p><span class="emphasis">Highschool Transcript:</span>
+            <a href="/final-application/transcripts/highschool/@studentApplication.AcademicHistory.Id">
+                Download Highschool Transcript
             </a>
         </p>
-    }
-    else {
-        <p>College Transcript: none</p>
-    }
+        @if (studentApplication.AcademicHistory.CollegeTranscript != null) {
+            <p><span class="emphasis">College Transcript:</span>
+                <a href="/final-application/transcripts/college/@studentApplication.AcademicHistory.Id">
+                    Download College Transcript
+                </a>
+            </p>
+        }
+        else {
+            <p><span class="emphasis">College Transcript:</span> none</p>
+        }
+    </div>
 </div>
 
 

@@ -12,16 +12,22 @@
 @if (studentApplication == null) { <p>Loading student details...</p> }
 else
 {
+    <BreadCrumbs Crumbs="crumbs" />
     <h1>@studentApplication!.StudentInfo.FirstName @studentApplication.StudentInfo.LastName</h1>
 
-    <div class="tab-nav add-margin-bottom">
-        <div>
-            <BreadCrumbs Crumbs="crumbs" />
-            <a href="@crumbs[^2].Link" class="btn btn-link">⬅ Back</a>
-        </div>
-        <button class="btn btn-link @(tab == StudentTab.Demographics ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.Demographics)">Demographics</button>
-        <button class="btn btn-link @(tab == StudentTab.Academics ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.Academics)">Academics</button>
-        <button class="btn btn-link @(tab == StudentTab.Essays ? "active" : "")" type="button" @onclick="() => TabSwitch(StudentTab.Essays)">Essays</button>
+    <div class="tab-nav mb-4">
+        <button class="btn btn-primary nav-button @(tab == StudentTab.Demographics ? "btn-secondary" : "")" 
+            type="button" @onclick="() => TabSwitch(StudentTab.Demographics)">
+            Demographics
+        </button>
+        <button class="btn btn-primary nav-button @(tab == StudentTab.Academics ? "btn-secondary" : "")" 
+            type="button" @onclick="() => TabSwitch(StudentTab.Academics)">
+            Academics
+        </button>
+        <button class="btn btn-primary nav-button @(tab == StudentTab.Essays ? "btn-secondary" : "")" 
+            type="button" @onclick="() => TabSwitch(StudentTab.Essays)">
+            Essays
+        </button>
     </div>
     
     <div class="page-content">
@@ -43,6 +49,7 @@ else
 
     <p>@message</p>
     <div class="bottom-bar">
+        <a href="@crumbs[^2].Link" class="btn btn-secondary">⬅ Back to Applicants</a>
         <button class="btn btn-secondary" type="button" @onclick="() => finalApplicationService.DownloadPdf(applicationId)">
             Download Application PDF
         </button>

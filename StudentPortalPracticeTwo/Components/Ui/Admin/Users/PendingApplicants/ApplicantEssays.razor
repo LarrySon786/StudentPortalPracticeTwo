@@ -4,15 +4,16 @@
 
 <div>
     <EditForm Model="studentApplication" FormName="ApplicationOverview">
+        @* <legend>Student Essays</legend> *@
 
         <label class="form-label">Essay One:</label>
-        <InputTextArea class="form-control" @bind-Value="studentApplication.Essays.ResponseOne" disabled />
+        <InputTextArea class="form-control" style="min-height:300px;"  @bind-Value="studentApplication.Essays.ResponseOne" disabled />
 
         <label class="form-label">Essay Two:</label>
-        <InputTextArea class="form-control" @bind-Value="studentApplication.Essays.ResponseTwo" disabled />
+        <InputTextArea class="form-control" style="min-height:300px;"  @bind-Value="studentApplication.Essays.ResponseTwo" disabled />
 
         <label class="form-label">Essay Two:</label>
-        <InputTextArea class="form-control" @bind-Value="studentApplication.Essays.ResponseThree" disabled />
+        <InputTextArea class="form-control" style="min-height:300px;" @bind-Value="studentApplication.Essays.ResponseThree" disabled />
 
     </EditForm>
 </div>
